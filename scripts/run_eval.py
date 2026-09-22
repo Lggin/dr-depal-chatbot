@@ -28,19 +28,29 @@ def main() -> int:
     ap.add_argument("--judge", action="store_true", help="full mode: also run the LLM judge (groundedness/completeness/over-citation)")
     ap.add_argument("--limit", type=int, default=None, help="evaluate only the first N cases")
     ap.add_argument("--show-ungrounded", action="store_true", help="print judge-flagged unsupported sentences")
+    ap.add_argument("--lora", default=None, help="full mode: GGUF LoRA adapter applied on the base model (A/B of Phase 6 training)")
+    ap.add_argument("--variant", default=None,
+                    help="label for an A/B variant (e.g. 'lora'): results are saved under <tag>+<variant> and gated against the plain <tag> baseline")
     args = ap.parse_args()
 
     logging.basicConfig(level=logging.WARNING)
     from app.config import settings
     if args.collection:
         settings.qdrant_collection = args.collection
+    if args.lora:
+        settings.llm_lora_path = args.lora
+        args.variant = args.variant or "lora"
     cases = load_cases(Path(args.dataset)) if args.dataset else load_cases()
     if args.limit:
         cases = cases[: args.limit]
     tag = Path(args.dataset).stem if args.dataset else "sample"
     if args.collection:
         tag = f"{tag}__{args.collection}"   # results/gates are per (dataset, collection)
-    print(f"dataset={tag} ({len(cases)} cases)  collection={settings.qdrant_collection}  mode={args.mode}")
+    baseline_tag = tag
+    if args.variant:
+        tag = f"{tag}+{args.variant}"
+    print(f"dataset={tag} ({len(cases)} cases)  collection={settings.qdrant_collection}  mode={args.mode}"
+          + (f"  lora={settings.llm_lora_path}" if settings.llm_lora_path else ""))
 
     if args.mode == "retrieval":
         from app.dependencies import resolve_aux_device
@@ -71,7 +81,8 @@ def main() -> int:
         finally:
             pipe.close()
 
-    latest, previous = report.save(args.mode, result, tag=tag, collection=settings.qdrant_collection)
+    latest, previous = report.save(args.mode, result, tag=tag, collection=settings.qdrant_collection,
+                                   baseline_tag=baseline_tag if args.variant else None)
     print(report.markdown(args.mode, result, previous))
     print(f"\nsaved: {latest}")
 

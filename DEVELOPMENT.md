@@ -507,10 +507,17 @@ grounding check ✅
 - 예시 = **서빙과 동일한 PromptBuilder 렌더**(system 19규칙 + `[DOCUMENTS]` 실제 검색 컨텍스트 + 질문) → target = reference_answer + 정규 `출처:` 줄(기대 청크 기준). 소스: knowhow held-out 40 + 생성 277 + 샘플 39(reference 있는 것)
 - **거절 예시**: 범위 밖 질문 12개 + 샘플 범위밖 4개 → 무관한 top 검색 컨텍스트와 함께 고정 거절 문장 target — "문서가 있어도 답이 없으면 거절"을 학습
 - 컨텍스트 2200토큰 캡, train/val 9:1, JSONL `{"messages": [...], "meta": {...}}`
+- **1차 생성(09-22) 후 hold-out 정정**: 첫 실행은 knowhow held-out 40 + 샘플 범위밖 3건까지 학습셋에 넣음(positive 317/refusal 15) — 이건 **A/B 평가셋 누수**. → 학습 소스는 **생성 277 + 범위밖 12만**, `knowhow_questions`(40)·샘플(39)은 평가 전용으로 제외(기본값·docstring에 명시). 샘플셋은 reference_answer가 없어 positive 0이었음
+- 예시 길이 p50 6,920자 / max 9,370자(system 프롬프트+컨텍스트 포함)
 
 ### 🔄 6.3 학습 (`training/train_lora.py`)
 - QLoRA: NF4 4bit + LoRA r=8/α=16 **all-linear**(이전 프로젝트 재스윕: all-linear ≫ attention-only, r 무관), vision 모듈 제외(`exclude_modules`), assistant 토큰만 loss(프롬프트·문서 마스킹 — 문서 암기 방지), gradient checkpointing, paged AdamW 8bit, bf16. `--smoke`(10 step)로 환경 검증 후 본 학습
-- 이후: 어댑터 적용 모델을 `LLMClient` 프로토콜의 HF 백엔드로 감싸 **같은 judge 평가로 A/B**(groundedness·completeness·과잉 인용·거절). GGUF 변환은 A/B가 이득을 보일 때만
+- **스모크 3연속 실패 → 통과(09-22)**: ①하네스가 호스트 RAM 워치독으로 프로세스 kill(19GB 샤드 로드 스파이크; 62GB 머신인데도) → 학습은 `setsid nohup`로 하네스 밖에서 실행, PID 폴링 ②transformers 5는 `warmup_ratio` 삭제 → `warmup_steps` ③**CUDA OOM(13.4GB에서 +2.4GB)** — 원인 2개: `prepare_model_for_kbit_training()`이 embed_tokens·lm_head(248k×4096, untied)를 fp32로 올려 **랩 직후 11.2GB**(제거 후 7.4GB) + 전체 시퀀스 로짓 4096×248,320 fp32≈4GB(+grad). → `AnswerOnlyTrainer.compute_loss`: 답변 토큰을 예측하는 위치(~100–200개)만 `logits_to_keep` 인덱스로 넘겨 CE 직접 계산. **피크 10.6GB, 10스텝(80예시) 588s ≈ 7.4s/예시**, loss 0.53→0.13, eval_loss 0.376. 토큰 길이 실측(Qwen 토크나이저): p50 2,362/p90 3,396/max 3,617 → `max_len` 3072(37% 탈락)→**4096(탈락 0)**
+- **모델 구조 확인(meta device)**: Qwen3.5-9B는 32층 중 **24층이 Gated DeltaNet(`linear_attn`: in_proj_qkv/in_proj_z/out_proj + in_proj_a/b)**, 8층만 full attention(q/k/v/o). q/k/v/o만 타겟하면 3/4 층에 어댑터가 안 붙음 → 두 계열 모두 타겟. 채팅 템플릿은 `<think>\n\n</think>\n\n`이 프롬프트 쪽에 들어가 prompt가 full의 접두사임을 확인(assistant-only 라벨 정합)
+
+### 🔄 6.4 A/B 경로 — HF 백엔드 대신 **GGUF 어댑터**
+- 서빙 venv(transformers 4.36)는 Qwen3.5 HF 모델을 못 올리고, venv-train에 서빙 스택을 다시 깔면 A/B가 환경 차이까지 섞임. 대신 **PEFT 어댑터 → GGUF 어댑터**(`third_party/llama.cpp/convert_lora_to_gguf.py`, `Qwen3_5ForConditionalGeneration` 지원 확인)를 **서빙 중인 Q4_K_M 베이스에 `lora_path`로 적용**. merge·재양자화 없음 → 비교 대상이 정확히 "베이스 vs 베이스+어댑터"
+- 배선: `settings.llm_lora_path/llm_lora_scale` → `LlamaCppClient(lora_path=…)`; `scripts/run_eval.py --lora <gguf>`는 결과를 `<tag>+lora`로 저장하고 **plain `<tag>` 베이스라인과 gate 비교**(`report.save(baseline_tag=…)`). `training/convert_adapter.sh` 헬퍼. `llama-quantize`도 빌드(merge 폴백용). `third_party/` gitignore
 
 ---
 

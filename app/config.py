@@ -29,6 +29,9 @@ class Settings(BaseSettings):
     llm_temperature: float = 0.1  # spec range 0.1-0.3; lower end reduces run-to-run variance
     llm_top_p: float = 0.9
     llm_enable_thinking: bool = False
+    # Optional QLoRA adapter (Phase 6) as GGUF, applied on the same quantized base — "" = base model only.
+    llm_lora_path: str = ""
+    llm_lora_scale: float = 1.0
 
     # Prompt / context budget (spec §13: 3-5 chunks, ~2-4k tokens)
     context_max_tokens: int = 3000

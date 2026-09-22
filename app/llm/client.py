@@ -46,8 +46,12 @@ class LlamaCppClient:
         top_p: float = 0.9,
         enable_thinking: bool = False,
         n_threads: Optional[int] = None,
+        lora_path: Optional[str] = None,
+        lora_scale: float = 1.0,
     ):
         self.model_path = model_path
+        self.lora_path = lora_path or None      # GGUF adapter (convert_lora_to_gguf.py); applied on top of the base
+        self.lora_scale = lora_scale
         self.n_ctx = n_ctx
         self.n_gpu_layers = n_gpu_layers
         self.max_tokens = max_tokens
@@ -69,6 +73,8 @@ class LlamaCppClient:
             n_ctx=self.n_ctx,
             n_gpu_layers=self.n_gpu_layers,
             n_threads=self.n_threads,
+            lora_path=self.lora_path,
+            lora_scale=self.lora_scale,
             verbose=False,
         )
         meta = self.llm.metadata
@@ -83,6 +89,7 @@ class LlamaCppClient:
         logger.info(
             f"✅ LLM loaded in {time.perf_counter()-t0:.1f}s: {meta.get('general.name')} "
             f"arch={meta.get('general.architecture')} n_ctx={self.n_ctx} gpu_layers={self.n_gpu_layers}"
+            + (f" lora={self.lora_path} scale={self.lora_scale}" if self.lora_path else "")
         )
         return self
 

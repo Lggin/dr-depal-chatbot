@@ -42,6 +42,7 @@ def build_chat_pipeline():
         settings.llm_model_path, n_ctx=settings.llm_context_length, n_gpu_layers=settings.llm_n_gpu_layers,
         max_tokens=settings.llm_max_tokens, temperature=settings.llm_temperature, top_p=settings.llm_top_p,
         enable_thinking=settings.llm_enable_thinking,
+        lora_path=settings.llm_lora_path or None, lora_scale=settings.llm_lora_scale,
     ).load()
     prompt_builder = PromptBuilder(
         ContextBuilder(llm.count_tokens, settings.context_max_tokens, settings.context_max_docs),

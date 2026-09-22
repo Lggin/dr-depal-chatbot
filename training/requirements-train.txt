@@ -1,0 +1,16 @@
+# Separate training environment (venv-train). The serving venv pins transformers 4.36 for the
+# reranker and llama.cpp for the LLM; Qwen3.5 (model_type qwen3_5) needs transformers >= 4.57.
+#   python3.10 -m venv venv-train && source venv-train/bin/activate
+#   pip install --index-url https://download.pytorch.org/whl/cu124 torch==2.6.0
+#   pip install --index-url https://pypi.org/simple/ -r training/requirements-train.txt
+transformers>=4.57,<6
+peft>=0.17
+bitsandbytes>=0.45
+trl>=0.20
+datasets>=3.0
+accelerate>=1.0
+safetensors>=0.5
+sentencepiece
+huggingface-hub>=0.34
+pyyaml
+tqdm
