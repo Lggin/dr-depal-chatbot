@@ -1,13 +1,14 @@
 """End-to-end answer evaluation through ChatPipeline.
 
 Per case: must_include / must_not_include, refusal correctness, citation hit
-(expected chunk in `sources`), validator flags, latency. Follow-up cases replay
-their history questions in the same session first.
+(expected chunk in `sources`), route and tool-selection checks, validator flags,
+latency — and, with a judge, groundedness / completeness / over-citation.
+Follow-up cases replay their history questions in the same session first.
 """
 
 import re
 from collections import defaultdict
-from typing import Dict, List
+from typing import Any, Dict, List, Optional
 
 from evaluation.dataset import EvalCase
 from evaluation.metrics import mean
@@ -23,8 +24,22 @@ def _contains(text: str, needle: str) -> bool:
 
 
 class AnswerEvaluator:
-    def __init__(self, chat_pipeline):
+    def __init__(self, chat_pipeline, judge=None):
         self.pipe = chat_pipeline
+        self.judge = judge
+
+    # ---------- per case ----------
+
+    def _contexts_for(self, r) -> List[Dict[str, Any]]:
+        """The chunks the answer was allowed to use, in context order (from the vector store)."""
+        ids = [s.chunk_id for s in r.retrieval.sources]
+        store = getattr(getattr(getattr(self.pipe, "retrieval", None), "hybrid", None), "store", None)
+        if not ids or store is None or not hasattr(store, "get_by_ids"):
+            return []
+        try:
+            return store.get_by_ids(ids)
+        except Exception:
+            return []
 
     def run_case(self, case: EvalCase) -> dict:
         sid = f"eval-{case.id}"
@@ -38,20 +53,27 @@ class AnswerEvaluator:
         refusal_ok = r.validation.is_refusal == case.expect_refusal
         source_ids = [s.chunk_id for s in r.sources]
         if case.expected_source is None:
-            citation_ok = None                       # unknown ground truth — excluded from the metric
+            citation_ok = None
         elif case.expected_source:
             citation_ok = any(c in source_ids for c in case.expected_source)
         else:
             citation_ok = not source_ids
         route_ok = (r.route == case.expected_route) if case.expected_route else None
-        correct = not missing and not forbidden and refusal_ok and route_ok is not False
+        if case.expected_tools is None:
+            tools_ok = None
+        elif case.expected_tools:
+            tools_ok = all(t in r.tools_used for t in case.expected_tools)
+        else:
+            tools_ok = not r.tools_used
+        correct = not missing and not forbidden and refusal_ok and route_ok is not False and tools_ok is not False
 
-        return {
-            "route": r.route, "expected_route": case.expected_route, "route_ok": route_ok,
+        row = {
             "id": case.id, "category": case.category, "question": case.question,
             "answer": r.answer, "is_refusal": r.validation.is_refusal, "expect_refusal": case.expect_refusal,
             "missing": missing, "forbidden": forbidden, "refusal_ok": refusal_ok,
             "sources": source_ids, "expected": case.expected_source, "citation_ok": citation_ok,
+            "route": r.route, "expected_route": case.expected_route, "route_ok": route_ok,
+            "tools_used": r.tools_used, "expected_tools": case.expected_tools, "tools_ok": tools_ok,
             "validation_ok": r.validation.ok, "unsupported_numbers": r.validation.unsupported_numbers,
             "unsupported_codes": r.validation.unsupported_codes, "invalid_citations": r.validation.invalid_citations,
             "foreign_script": r.validation.foreign_script, "fabricated_source_types": r.validation.fabricated_source_types,
@@ -59,6 +81,19 @@ class AnswerEvaluator:
             "intent": str(r.intent.value if hasattr(r.intent, "value") else r.intent), "expected_intent": case.expected_intent,
             "correct": correct, "latency_ms": r.latency_ms, "timing_ms": r.timing_ms,
         }
+
+        if self.judge is not None and not r.validation.is_refusal and r.route not in ("general", "live.no_tools", "troubleshooting.ask",
+                                                                                      "troubleshooting.resolved", "troubleshooting.escalate"):
+            contexts = self._contexts_for(r)
+            j = self.judge.judge(case.question, r.answer, contexts, reference=case.reference_answer,
+                                 machine_state=r.machine_state, cited_source_count=len(source_ids))
+            n_ctx = len(contexts)
+            cited_idx = {i + 1 for i, c in enumerate(contexts) if c["chunk_id"] in source_ids}
+            over = sorted(cited_idx - set(j.used_sources)) if j.ok and cited_idx else []
+            row["judge"] = j.to_dict() | {"contexts": n_ctx, "cited": sorted(cited_idx), "overcited": over}
+        return row
+
+    # ---------- aggregate ----------
 
     def run(self, cases: List[EvalCase]) -> dict:
         rows = [self.run_case(c) for c in cases]
@@ -70,18 +105,30 @@ class AnswerEvaluator:
             "must_include_pass": mean([1.0 if not r["missing"] else 0.0 for r in answered]),
             "must_not_include_pass": mean([1.0 if not r["forbidden"] else 0.0 for r in rows]),
             "citation_accuracy": mean([1.0 if r["citation_ok"] else 0.0 for r in rows if r["citation_ok"] is not None]),
-            "refusal_recall": mean([1.0 if r["is_refusal"] else 0.0 for r in refusals]),        # should refuse → did
-            "false_refusal_rate": mean([1.0 if r["is_refusal"] else 0.0 for r in answered]),     # shouldn't → did
+            "refusal_recall": mean([1.0 if r["is_refusal"] else 0.0 for r in refusals]),
+            "false_refusal_rate": mean([1.0 if r["is_refusal"] else 0.0 for r in answered]),
             "unsupported_claim_rate": mean([0.0 if r["validation_ok"] else 1.0 for r in answered]),
             "danger_flag_rate": mean([1.0 if r["danger_flags"] else 0.0 for r in rows]),
             "intent_accuracy": mean([1.0 if r["intent"] == r["expected_intent"] else 0.0 for r in rows]),
             "route_accuracy": mean([1.0 if r["route_ok"] else 0.0 for r in rows if r["route_ok"] is not None]),
+            "tool_selection_accuracy": mean([1.0 if r["tools_ok"] else 0.0 for r in rows if r["tools_ok"] is not None]),
             "latency_ms_median": sorted(r["latency_ms"] for r in rows)[len(rows) // 2] if rows else None,
             "latency_ms_p95": sorted(r["latency_ms"] for r in rows)[int(len(rows) * 0.95) - 1] if rows else None,
         }
+        judged = [r["judge"] for r in rows if r.get("judge") and r["judge"]["ok"]]
+        if any(r.get("judge") for r in rows):
+            summary["judge_coverage"] = len(judged) / max(1, sum(1 for r in rows if r.get("judge")))
+            summary["groundedness_mean"] = mean([j["groundedness"] for j in judged if j["groundedness"] is not None])
+            summary["fully_grounded_rate"] = mean([1.0 if j["groundedness"] == 1.0 else 0.0 for j in judged if j["groundedness"] is not None])
+            summary["unsupported_sentence_rate"] = 1 - summary["groundedness_mean"] if summary["groundedness_mean"] == summary["groundedness_mean"] else float("nan")
+            summary["completeness_mean"] = mean([j["completeness"] for j in judged if j["completeness"] is not None])
+            summary["contradiction_rate"] = mean([1.0 if j["contradicts_reference"] else 0.0 for j in judged if j["contradicts_reference"] is not None])
+            summary["overcitation_rate"] = mean([1.0 if j["overcited"] else 0.0 for j in judged if j["cited"]])
         by_cat: Dict[str, List[float]] = defaultdict(list)
         for r in rows:
             by_cat[r["category"]].append(1.0 if r["correct"] else 0.0)
         summary["answer_correct_by_category"] = {c: mean(v) for c, v in sorted(by_cat.items())}
         summary["failures"] = [r["id"] for r in rows if not r["correct"]]
+        if judged:
+            summary["ungrounded_cases"] = [r["id"] for r in rows if r.get("judge") and r["judge"]["ok"] and r["judge"]["groundedness"] is not None and r["judge"]["groundedness"] < 1.0]
         return {"summary": summary, "rows": rows}

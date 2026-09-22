@@ -450,7 +450,25 @@ grounding check ✅
 
 **Phase 4 완료.** 명세 §16 도구 11종(Mock), §17 원칙(현재값→Tool, 기준값→RAG, 둘 다→Tool+RAG) 라우팅으로 구현, §18 예시 재현, §22 READ ONLY는 레지스트리 수준에서 강제. 실기기 연결 = `BaseTool` 서브클래스 교체.
 
-### 📋 다음: Phase 5 Evaluation 확장 — LLM judge(groundedness·completeness), 300문항 목표(knowhow 실질 문항 확대), 과잉 인용·파생 계산 판정, 도구 선택/인자 정확도(§27), 로그(§25) 기반 실사용 질문 회수
+---
+
+## Phase 5: Evaluation 확장 (2026-09-22 ~)
+
+### ✅ 5.1 LLM judge (`evaluation/judge.py`)
+- 챗봇과 같은 로컬 Qwen, temperature 0, JSON 강제(`parse_json_block`: 펜스·잡문·trailing comma 허용). 입력 = 질문 + **답변이 실제로 받은 컨텍스트**(`store.get_by_ids`로 청크 원문 복원) + `[MACHINE STATE]` + reference_answer(있을 때)
+- 출력: 문장별 supported/evidence → **groundedness**(지원 문장 비율), `unsupported` 목록; `used_sources` → **과잉 인용**(인용했지만 미사용); `contradicts_reference`; `missing_from_reference` → **completeness**
+- `출처:` 줄은 우리 코드가 메타데이터로 생성한 것이라 판정 대상이 아님 → **사전 제거 + 사후 필터**(프롬프트의 "무시하라"만으론 모델이 사실 문장으로 취급함 — 캘리브레이션 1차에서 발견)
+- **캘리브레이션**(`evaluation/judge_calibration.py`, 7방향 필수 통과): 완전 근거 ✓ / 숫자 조작(-50) ✗판정 ✓ / **파생 계산**("15 kPa 부족") ✗판정 ✓ / 누락(정상범위·원인) completeness 0.33 ✓ / 정직한 "문서에 없음" 근거 인정 ✓ / 원인 날조(PLC 펌웨어) ✗+contradiction ✓ / 과잉 인용(Maintenance Log 미사용) used=[1] ✓. **7/7 통과** — 이전 프로젝트 교훈(거짓양성·거짓음성 양방향 실측)대로 지표 채택 전 검증
+- 게이트에 `groundedness_mean` 추가(허용 하락 0.03 — judge는 temp 0이지만 비트 단위 안정은 아님), `tool_selection_accuracy` 하락 0
+
+### ✅ 5.2 도구 선택 정확도 (명세 §27)
+- `EvalCase.expected_tools`: `[...]`=포함 필수, `[]`=어떤 도구도 쓰면 안 됨, 미설정=미채점. 샘플 10건에 부여(LIVE 3, HISTORY 2, KNOWLEDGE/범위밖/후속 5 = `[]`)
+
+### ✅ 5.3 질문 반자동 생성 (`evaluation/generate_questions.py`) + 로그 회수 (`scripts/harvest_logs.py`)
+- 청크 선정: ≥120토큰, 표 위주 제외, 소스당 최대 40개, 큰 청크 우선 → LLM이 청크당 질문 1개 + reference_answer + key_facts(JSON) → must_include 자동 시드(버전·백틱 코드·단위 수치·key_facts). `auto_generated: true, reviewed: false` — **코퍼스 문장에서 만든 질문이라 40 legacy held-out과 독립적이지 않음**(검색 recall·groundedness 측정용, 정답률의 절대 지표로 쓰지 말 것)
+- 로그 회수: `ChatLog` → 후보 케이스(답변·출처·검증 플래그·피드백 동봉, reviewer가 must_include/expected_source 채우고 `reviewed=true`)
+
+### 🔄 5.4 측정 (진행 중)
 - BM25 인덱싱
 - 키워드 기반 검색
 

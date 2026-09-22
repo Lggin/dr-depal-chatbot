@@ -173,7 +173,30 @@ curl -s -X POST "localhost:8000/api/admin/mock/scenario?name=camera_timeout"   #
 ./run.sh python3 scripts/test_chat.py                # 검색→프롬프트→LLM→검증 E2E + 2턴 세션
 ```
 
-Evaluation 스크립트(`scripts/run_eval.py`, Recall@5·MRR·Intent 정확도)는 Step 9에서 추가됩니다.
+### 평가 (`scripts/run_eval.py`)
+
+```bash
+# 검색만 (LLM 없음, 초 단위): Hit@k / Recall@k / MRR / nDCG / 알람 파싱 정확도
+./run.sh python3 scripts/run_eval.py --mode retrieval --dataset evaluation/datasets/knowhow_questions.json --collection knowhow_docs
+
+# 전체 (LLM): must_include·거절·인용·라우트·도구 선택 정확도 + 검증기 플래그 + 지연
+./run.sh python3 scripts/run_eval.py --mode full --collection depalletizer_docs --show-failures
+
+# + LLM judge: 문장별 groundedness, reference 대비 completeness/contradiction, 과잉 인용
+./run.sh python3 scripts/run_eval.py --mode full --collection knowhow_docs --dataset evaluation/datasets/knowhow_questions.json --judge --show-ungrounded
+```
+
+결과는 `evaluation/results/latest_<mode>_<dataset>__<collection>.json`에 저장되고, 이전 실행 대비 하락(answer_correct·citation·refusal_recall·tool_selection 0 허용, groundedness 0.03, MRR 0.02)이 있으면 **종료코드 1**(회귀 게이트).
+
+| 데이터셋 | 문항 | 성격 |
+|---|---|---|
+| `test_questions.json` | 39 | 샘플 알람 코퍼스용. 의도·라우트·도구·후속질문·범위밖·LIVE 포함 |
+| `knowhow_questions.json` | 40 | 이전 프로젝트 held-out(dev 25·operator 15). **코퍼스 문장과 독립적인 유일한 세트** |
+| `knowhow_generated.json` | ~300 | `evaluation/generate_questions.py`로 청크당 생성(`reviewed: false`). 검색 recall·groundedness용 — 정답률의 절대 지표로 쓰지 말 것 |
+
+**Judge 신뢰성**: `./run.sh python3 evaluation/judge_calibration.py` — 숫자 조작·파생 계산·원인 날조·누락·정직한 "문서에 없음"·과잉 인용 7방향을 모두 맞혀야 통과(현재 7/7). judge 프롬프트를 바꾸면 반드시 재실행.
+
+**실사용 질문 회수**: `./run.sh python3 scripts/harvest_logs.py --since-days 7 --feedback down` → `/api/chat` 로그(§25)를 평가 후보 JSON으로. reviewer가 `must_include`·`expected_source`를 채우고 `reviewed: true`로 바꾸면 데이터셋에 편입.
 
 ## 7. 설정
 
@@ -225,5 +248,5 @@ DEVELOPMENT.md   단계별 실측 기록·결정 근거
 - ✅ Phase 2 — Corpus Pipeline: `dr-depal-knowhow` 마크다운 → 621청크, `scripts/ingest.py` / `POST /api/admin/reindex` (검색 Hit@1 0.821, 답변 0.975 on 40 held-out)
 - ✅ Phase 3 — Intent Router, Troubleshooting 결정트리, 세션 진단 상태 (intent/route 정확도 1.0 on 샘플)
 - ✅ Phase 4 — Machine Tools: Mock 11종(READ ONLY), LIVE 라우트·트리 facts·이력에 도구 결과 주입, 시나리오 전환
-- Phase 5 — Evaluation 자동화 (300+ 문항)
+- ✅ Phase 5 — LLM judge(캘리브레이션 7/7), 도구 선택 정확도, 300문항 반자동 생성, 로그 회수
 - Phase 6 — LoRA/SFT (답변 형식·용어, 지식은 계속 RAG)

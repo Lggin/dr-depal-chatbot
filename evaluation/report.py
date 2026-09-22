@@ -10,7 +10,8 @@ RESULTS_DIR = Path(__file__).parent / "results"
 # metric name -> max allowed drop before the gate fails
 GATES = {
     "retrieval": {"final_hit@5": 0.0, "final_recall@5": 0.0, "final_mrr": 0.02},
-    "full": {"answer_correct": 0.0, "citation_accuracy": 0.0, "refusal_recall": 0.0},
+    "full": {"answer_correct": 0.0, "citation_accuracy": 0.0, "refusal_recall": 0.0, "tool_selection_accuracy": 0.0,
+             "groundedness_mean": 0.03},   # judge metrics carry a little tolerance: the judge itself is sampled at temp 0 but not bit-stable
 }
 
 
@@ -49,7 +50,7 @@ def markdown(mode: str, result: dict, previous: Optional[dict]) -> str:
     for k in ("final_hit@5_by_category", "answer_correct_by_category"):
         if k in s:
             lines += ["", f"**{k}**", ""] + [f"- {c}: {_fmt(v)}" for c, v in s[k].items()]
-    for k in ("misses_at_5", "failures"):
+    for k in ("misses_at_5", "failures", "ungrounded_cases"):
         if s.get(k):
             lines += ["", f"**{k}:** {', '.join(s[k])}"]
     return "\n".join(lines)

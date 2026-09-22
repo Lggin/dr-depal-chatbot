@@ -225,6 +225,24 @@ class QdrantClient:
             for p in points
         ]
 
+    def get_by_ids(self, chunk_ids: List[str]) -> List[dict]:
+        """Fetch chunks by chunk_id (point id = uuid5(chunk_id)); order follows the input."""
+        if self.client is None:
+            raise RuntimeError("Not connected. Call connect() first.")
+        if not chunk_ids:
+            return []
+        points = self.client.retrieve(
+            collection_name=self.collection_name,
+            ids=[str(uuid.uuid5(uuid.NAMESPACE_URL, cid)) for cid in chunk_ids],
+            with_payload=True, with_vectors=False,
+        )
+        by_id = {p.payload.get("chunk_id"): p for p in points}
+        return [
+            {"chunk_id": cid, "text": by_id[cid].payload.get("text"),
+             "metadata": {k: v for k, v in by_id[cid].payload.items() if k not in ("text", "chunk_id")}}
+            for cid in chunk_ids if cid in by_id
+        ]
+
     def scroll_all(self, page_size: int = 256) -> List[dict]:
         """Every point's chunk_id/text/metadata (no vectors) — feeds the BM25 index."""
         if self.client is None:

@@ -25,6 +25,9 @@ def main() -> int:
     ap.add_argument("--collection", default=None, help="Qdrant collection to evaluate against (default: settings)")
     ap.add_argument("--show-failures", action="store_true")
     ap.add_argument("--no-gate", action="store_true")
+    ap.add_argument("--judge", action="store_true", help="full mode: also run the LLM judge (groundedness/completeness/over-citation)")
+    ap.add_argument("--limit", type=int, default=None, help="evaluate only the first N cases")
+    ap.add_argument("--show-ungrounded", action="store_true", help="print judge-flagged unsupported sentences")
     args = ap.parse_args()
 
     logging.basicConfig(level=logging.WARNING)
@@ -32,6 +35,8 @@ def main() -> int:
     if args.collection:
         settings.qdrant_collection = args.collection
     cases = load_cases(Path(args.dataset)) if args.dataset else load_cases()
+    if args.limit:
+        cases = cases[: args.limit]
     tag = Path(args.dataset).stem if args.dataset else "sample"
     if args.collection:
         tag = f"{tag}__{args.collection}"   # results/gates are per (dataset, collection)
@@ -57,8 +62,12 @@ def main() -> int:
         from app.dependencies import build_chat_pipeline
         from evaluation.answer_eval import AnswerEvaluator
         pipe = build_chat_pipeline()
+        judge = None
+        if args.judge:
+            from evaluation.judge import AnswerJudge
+            judge = AnswerJudge(pipe.llm)
         try:
-            result = AnswerEvaluator(pipe).run(cases)
+            result = AnswerEvaluator(pipe, judge=judge).run(cases)
         finally:
             pipe.close()
 
@@ -77,6 +86,16 @@ def main() -> int:
                     print(r["answer"][:600])
                 else:
                     print(f"expected={r['expected']} final={r['final']} fused_top={r['fused_top']}")
+
+    if args.show_ungrounded and args.mode == "full":
+        for r in result["rows"]:
+            j = r.get("judge")
+            if j and j["ok"] and (j["unsupported"] or j["missing_from_reference"] or j["overcited"]):
+                print(f"\n--- {r['id']} groundedness={j['groundedness']} completeness={j['completeness']} overcited={j['overcited']}")
+                for s in j["unsupported"]:
+                    print(f"   ✗ {s[:160]}")
+                for m in j["missing_from_reference"]:
+                    print(f"   ⊘ missing: {m[:160]}")
 
     ok, problems = (True, []) if args.no_gate else report.gate(args.mode, result, previous)
     if not ok:

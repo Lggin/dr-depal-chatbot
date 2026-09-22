@@ -22,6 +22,8 @@ class EvalCase(BaseModel):
     must_not_include: List[str] = []
     expect_refusal: bool = False
     expected_route: Optional[str] = None    # e.g. "troubleshooting.ask", "live.no_tools"; scored when set
+    expected_tools: Optional[List[str]] = None   # tools that must appear in tools_used ([] = none may be used); scored when set
+    reference_answer: Optional[str] = None  # ground truth for the judge's completeness/contradiction checks
     filters: Optional[dict] = None
     note: Optional[str] = None
 
