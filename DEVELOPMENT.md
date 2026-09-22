@@ -517,6 +517,26 @@ grounding check ✅
 
 ### 🔄 6.4 A/B 경로 — HF 백엔드 대신 **GGUF 어댑터**
 - 서빙 venv(transformers 4.36)는 Qwen3.5 HF 모델을 못 올리고, venv-train에 서빙 스택을 다시 깔면 A/B가 환경 차이까지 섞임. 대신 **PEFT 어댑터 → GGUF 어댑터**(`third_party/llama.cpp/convert_lora_to_gguf.py`, `Qwen3_5ForConditionalGeneration` 지원 확인)를 **서빙 중인 Q4_K_M 베이스에 `lora_path`로 적용**. merge·재양자화 없음 → 비교 대상이 정확히 "베이스 vs 베이스+어댑터"
+- **본 학습(09-22)**: 261예시 × 2에폭 = 66스텝(accum 8), **55분**, 피크 VRAM 10.6GB. train loss 0.55 → 0.08, **eval_loss 0.376(스모크) → 0.152(33) → 0.122(48) → 0.1145(66)**. 어댑터 80MB(`training/output/qwen35-9b-depal-lora`), 하네스 RAM 워치독을 피해 `setsid nohup`으로 실행
+- **GGUF 변환 실패 → 패치**: `convert_lora_to_gguf.py`가 Gated DeltaNet `out_proj`에서 `NotImplementedError` — llama.cpp는 V헤드 순서를 tiled로 바꾸기 위해 `out_proj`의 **입력(열) 차원**을 재배열하는데, LoRA 텐서(W=B·A 지연 표현)는 마지막 차원 reshape 불가. 열 순열은 A의 열 순열, 행 순열은 B의 행 순열과 동치이므로 `_reorder_v_heads`에 LoRA 분기 추가(`training/patches/llama.cpp-convert_lora_qwen35_linear_attn.patch`, upstream 기여 후보). 변환 결과 400텐서·f16 40MB, 베이스 Q4_K_M에 `lora_path`로 로드·생성 정상(0.4s)
+- **A/B 1차 실행 → judge 오염 발견**: `--lora`를 걸면 judge도 `pipe.llm`(어댑터 적용 모델)로 판정 → 파인튜닝 모델이 `used_sources`를 **0-기준**으로 반환해 과잉인용 0.974(38/40)로 왜곡. 수정: `LlamaCppClient.set_lora_enabled()`(`llama_set_adapters_lora` scale 0/원값 + KV 프리픽스 캐시 reset) — 판정 중엔 어댑터 OFF, 끝나면 ON. **검증: OFF 출력 == 별도 로드한 베이스 출력(바이트 동일), 재ON == 원 출력**. 결과 행에 `context_ids` 저장(재판정용). 오염 결과는 `training/output/ab_contaminated/`
+- 1차 실행의 **결정론 지표**(유효): 샘플 39 answer 1.000→0.974(Q041: "Sensor"를 원문 영어 그대로 써 must_include "센서" 실패), citation/refusal/tool/route 1.0 유지, 중위 지연 1,770→**970ms**; knowhow 40 answer 0.975→0.925(KD003 `v0.0.51` 누락, KO003 문구 누락, **KO012 거짓 거절**), citation 0.974→0.949, 지연 2,941→2,046ms. 답변이 reference 스타일(간결·직답)로 바뀜 — 학습 목표대로지만 세부 값 누락 경향
+- **✅ A/B 최종(베이스 judge, 09-22)** — 베이스 Q4_K_M vs 베이스+어댑터(r=8, 261예시×2에폭):
+
+| 지표 | knowhow 40 base | knowhow 40 +lora | 샘플 39 base | 샘플 39 +lora |
+|---|---|---|---|---|
+| answer_correct | 0.975 | **0.925** ↓ | 1.000 | **0.974** ↓ |
+| citation_accuracy | 0.974 | 0.949 ↓ | 1.000 | 1.000 |
+| 거짓 거절 | 0.000 | **0.025** ↓ | 0.000 | 0.000 |
+| refusal_recall / tool / route | – | – | 1.0 / 1.0 / 1.0 | 1.0 / 1.0 / 1.0 |
+| groundedness(judge) | 0.964 | **1.000** ↑ | 1.000 | 0.968 ↓ |
+| completeness(judge) | 0.947 | **0.872** ↓ | – | – |
+| contradiction | 0 | 0 | 0 | 0 |
+| 과잉 인용(judge) | 0.400 | 0.436 ↓ | 0.094 | 0.194 ↓ |
+| 중위 지연 | 2,941ms | **2,065ms** ↑ | 1,771ms | **977ms** ↑ |
+
+  **판정: 채택 보류(베이스 유지).** 어댑터는 학습 목표(직답·간결·형식)는 확실히 배웠고(지연 30~45%↓, knowhow에서 근거 없는 문장 0), 하지만 대가로 **reference의 세부 값을 빼먹음**(completeness −0.075: KD005 angle_max 3/5 비율, KD016 원인·조치, KD007 12.6ms 비용…), 정답률 −0.05/−0.026, 거짓 거절 1건(KO012), **과잉 인용은 개선 없음**(SFT target의 `출처:` 줄이 기대 청크 기준이라 "실제 사용 문서만"을 가르치지 못함 — 데이터 문제). §29 원칙("파인튜닝은 형식만, 지식은 RAG")은 재확인됐지만 현 데이터로는 순이득이 아님
+  다음 시도 후보(우선순위): ① SFT target을 reference 원문이 아닌 **베이스 모델의 검증 통과 답변**(harvest_logs 방식)으로 → 상세도 유지 ② 거절 예시 비율 12/289 → 축소 또는 "약한 컨텍스트에서도 답하는" 예시 추가 ③ 과잉 인용은 target `출처:`를 `select_used_sources` 결과로 재생성. 그 전까지 `llm_lora_path=""`(베이스)
 - 배선: `settings.llm_lora_path/llm_lora_scale` → `LlamaCppClient(lora_path=…)`; `scripts/run_eval.py --lora <gguf>`는 결과를 `<tag>+lora`로 저장하고 **plain `<tag>` 베이스라인과 gate 비교**(`report.save(baseline_tag=…)`). `training/convert_adapter.sh` 헬퍼. `llama-quantize`도 빌드(merge 폴백용). `third_party/` gitignore
 
 ---

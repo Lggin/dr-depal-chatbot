@@ -1,0 +1,29 @@
+diff --git a/convert_lora_to_gguf.py b/convert_lora_to_gguf.py
+index 47c09af..d506f73 100755
+--- a/convert_lora_to_gguf.py
++++ b/convert_lora_to_gguf.py
+@@ -498,6 +498,24 @@ if __name__ == '__main__':
+                     assert tensor.B is not None
+                     yield (name, cast(torch.Tensor, LoraTorchTensor(tensor.A, tensor.B)))
+ 
++            # LoRA-aware V-head reorder (Qwen3.5 / Qwen3-Next Gated DeltaNet layers). The base converter
++            # permutes rows (output dim) or columns (input dim) of the dense weight; for W = B·A a row
++            # permutation is a row permutation of B, a column permutation is a column permutation of A.
++            # LoraTorchTensor.reshape() cannot change the last (input) dim, so route the two cases explicitly.
++            if hasattr(model_class, "_reorder_v_heads"):
++                @staticmethod
++                def _reorder_v_heads_lora(tensor: Tensor, dim: int, num_k_heads: int, num_v_per_k: int, head_dim: int) -> Tensor:
++                    orig = model_class._reorder_v_heads   # class-body names are not visible here; model_class is a closure
++                    if isinstance(tensor, LoraTorchTensor):
++                        nd = len(tensor.shape)
++                        d = dim + nd if dim < 0 else dim
++                        if d == nd - 1:   # input/column permutation → A's columns
++                            return LoraTorchTensor(orig(tensor._lora_A, -1, num_k_heads, num_v_per_k, head_dim), tensor._lora_B)
++                        return LoraTorchTensor(tensor._lora_A, orig(tensor._lora_B, d, num_k_heads, num_v_per_k, head_dim))
++                    return orig(tensor, dim, num_k_heads, num_v_per_k, head_dim)
++
++                _reorder_v_heads = _reorder_v_heads_lora
++
+             def modify_tensors(self, data_torch: Tensor, name: str, bid: int | None) -> Iterable[tuple[str, Tensor]]:
+                 dest = list(super().modify_tensors(data_torch, name, bid))
+                 # some archs may have the same tensor for lm_head and output (tie word embeddings)

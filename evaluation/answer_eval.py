@@ -80,6 +80,7 @@ class AnswerEvaluator:
             "danger_flags": r.validation.danger_flags, "alarm_codes": r.alarm_codes,
             "intent": str(r.intent.value if hasattr(r.intent, "value") else r.intent), "expected_intent": case.expected_intent,
             "correct": correct, "latency_ms": r.latency_ms, "timing_ms": r.timing_ms,
+            "context_ids": [s.chunk_id for s in r.retrieval.sources],   # everything the answer was allowed to use
         }
 
         if self.judge is not None and not r.validation.is_refusal and r.route not in ("general", "live.no_tools", "troubleshooting.ask",

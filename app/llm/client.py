@@ -159,6 +159,24 @@ class LlamaCppClient:
                 return s[end + len("</think>"):].lstrip()
         return text.strip()
 
+    def set_lora_enabled(self, enabled: bool) -> bool:
+        """Switch the loaded GGUF adapter on/off at runtime (scale = lora_scale or 0).
+
+        Needed so the LLM judge always runs on the BASE model even when the answering model carries
+        the adapter — otherwise the fine-tuned model judges its own outputs (observed: it returned
+        0-based `used_sources`, flagging every answer as over-cited). Clears the KV prefix cache,
+        since cached states were computed with the other weights. Returns False if no adapter."""
+        if self.llm is None or getattr(self.llm, "_lora_adapter", None) is None:
+            return False
+        import ctypes
+        from llama_cpp import llama_cpp as C
+        adapters = (C.llama_adapter_lora_p_ctypes * 1)(self.llm._lora_adapter)
+        scales = (ctypes.c_float * 1)(self.lora_scale if enabled else 0.0)
+        if C.llama_set_adapters_lora(self.llm._ctx.ctx, adapters, 1, scales):
+            raise RuntimeError("llama_set_adapters_lora failed")
+        self.llm.reset()
+        return True
+
     def unload(self):
         if self.llm is not None:
             try:

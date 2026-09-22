@@ -106,11 +106,18 @@ class AnswerJudge:
             user += f"\nREFERENCE (ground-truth answer):\n{reference}\n"
         user += f"\nANSWER TO JUDGE:\n{answer}\n\nJSON:"
         messages = [{"role": "system", "content": JUDGE_SYSTEM}, {"role": "user", "content": user}]
+        # The judge must be the BASE model: if the answering LLM carries a LoRA adapter (A/B runs),
+        # switch it off for the judgement and back on afterwards.
+        toggle = getattr(self.llm, "set_lora_enabled", None)
+        had_lora = bool(toggle and toggle(False))
         try:
             gen = self.llm.generate(messages, temperature=0.0, max_tokens=self.max_tokens, top_p=1.0)
         except Exception as e:
             logger.warning(f"judge generation failed: {e}")
             return JudgeResult(ok=False, notes=f"generation failed: {e}")
+        finally:
+            if had_lora:
+                toggle(True)
         data = parse_json_block(gen.text)
         if not data or not isinstance(data.get("sentences"), list):
             return JudgeResult(ok=False, notes="unparseable", raw=gen.text)

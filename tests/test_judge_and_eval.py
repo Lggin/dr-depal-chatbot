@@ -39,6 +39,22 @@ def test_judge_groundedness_completeness_and_used_sources():
     assert llm.calls[0][1]["temperature"] == 0.0
 
 
+def test_judge_runs_on_base_model_when_answering_llm_has_lora():
+    """A/B runs: the adapter is switched off for the judgement and back on afterwards (order matters)."""
+    class _LoraLLM(_LLM):
+        def __init__(self, text): super().__init__(text); self.events = []
+        def set_lora_enabled(self, enabled):
+            self.events.append(("lora", enabled)); return True
+        def generate(self, messages, **kw):
+            self.events.append(("generate",)); return super().generate(messages, **kw)
+    llm = _LoraLLM(json.dumps({"sentences": [{"text": "x", "supported": True}], "used_sources": [1]}))
+    assert AnswerJudge(llm).judge("q", "a", CTX).ok
+    assert llm.events == [("lora", False), ("generate",), ("lora", True)]
+    # an LLM without an adapter is left alone
+    plain = _LLM(json.dumps({"sentences": [], "used_sources": []}))
+    assert AnswerJudge(plain).judge("q", "a", CTX).ok and len(plain.calls) == 1
+
+
 def test_judge_strips_citation_line_before_and_after():
     verdict = {"sentences": [{"text": "정상 범위는 -60 ~ -80 kPa", "supported": True},
                              {"text": "출처: Vacuum System Manual §6.3", "supported": False}], "used_sources": [1]}
