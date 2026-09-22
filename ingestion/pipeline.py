@@ -106,16 +106,33 @@ class IngestionPipeline:
     # ---------- index ----------
 
     @staticmethod
-    def index(texts, metas, ids, embedder, store, batch_size: int = 16) -> None:
-        """Embed search_text, store body text; recreate the collection.
+    def token_batches(lengths: List[int], max_items: int = 16, token_budget: int = 6000) -> List[slice]:
+        """Contiguous batches capped by item count AND summed tokens.
 
-        batch_size stays small: attention memory grows with (batch × longest sequence²),
-        and legacy chunks can run to ~2k tokens — 64 × 2k OOMed a 16GB GPU.
+        Attention memory scales with batch × longest² — a fixed batch of 16 still OOMed
+        a 16GB GPU on ~2k-token legacy chunks, so long items get batches of 1-3.
         """
+        out, start, total = [], 0, 0
+        for i, n in enumerate(lengths):
+            if i > start and (total + n > token_budget or i - start >= max_items):
+                out.append(slice(start, i)); start, total = i, 0
+            total += n
+        if start < len(lengths):
+            out.append(slice(start, len(lengths)))
+        return out
+
+    @staticmethod
+    def index(texts, metas, ids, embedder, store, max_items: int = 16, token_budget: int = 6000) -> int:
+        """Embed search_text, store body text; recreate the collection; verify the count."""
         store.create_collection(force=True)
         search_texts = [m["search_text"] for m in metas]
-        for i in range(0, len(ids), batch_size):
-            sl = slice(i, i + batch_size)
-            vecs = embedder.embed(search_texts[sl], batch_size=batch_size)
+        lengths = [m.get("tokens") or embedder.count_tokens(s) for m, s in zip(metas, search_texts)]
+        batches = IngestionPipeline.token_batches(lengths, max_items, token_budget)
+        for sl in batches:
+            vecs = embedder.embed(search_texts[sl], batch_size=sl.stop - sl.start)
             store.upsert_documents(texts=texts[sl], embeddings=vecs, metadata=metas[sl], chunk_ids=ids[sl])
-        logger.info(f"indexed {len(ids)} chunks into {store.collection_name}")
+        count = store.count()
+        if count != len(ids):
+            raise RuntimeError(f"index verification failed: {count} points in {store.collection_name}, expected {len(ids)}")
+        logger.info(f"indexed {len(ids)} chunks into {store.collection_name} in {len(batches)} batches (verified)")
+        return count

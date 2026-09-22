@@ -5,6 +5,7 @@ Per case: must_include / must_not_include, refusal correctness, citation hit
 their history questions in the same session first.
 """
 
+import re
 from collections import defaultdict
 from typing import Dict, List
 
@@ -12,8 +13,13 @@ from evaluation.dataset import EvalCase
 from evaluation.metrics import mean
 
 
+def _norm(s: str) -> str:
+    # Qwen writes "2,000 줄" / "12 회" for "2,000줄" / "12회"; compare without whitespace or markdown.
+    return re.sub(r"[\s*`_]+", "", s).lower()
+
+
 def _contains(text: str, needle: str) -> bool:
-    return needle.lower() in text.lower()
+    return _norm(needle) in _norm(text)
 
 
 class AnswerEvaluator:

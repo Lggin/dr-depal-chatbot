@@ -67,7 +67,13 @@ def seed_must_include(answer: str) -> List[str]:
 
 
 def main() -> int:
-    chunks = json.loads(CHUNKS.read_text(encoding="utf-8"))
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--chunks", default=str(CHUNKS), help="processed chunks JSON to resolve expected_source against")
+    ap.add_argument("--out", default=str(OUT))
+    args = ap.parse_args()
+    chunks = json.loads(Path(args.chunks).read_text(encoding="utf-8"))
+    out_path = Path(args.out)
     cases, unresolved = [], []
     for path, audience in LEGACY:
         rows = [json.loads(l) for l in path.read_text(encoding="utf-8").splitlines() if l.strip()]
@@ -89,9 +95,9 @@ def main() -> int:
                 "legacy_source": r.get("source"),
                 "auto_generated": True,
             })
-    OUT.write_text(json.dumps(cases, ensure_ascii=False, indent=1), encoding="utf-8")
+    out_path.write_text(json.dumps(cases, ensure_ascii=False, indent=1), encoding="utf-8")
     resolved = sum(1 for c in cases if c["expected_source"])
-    print(f"wrote {OUT}: {len(cases)} cases, {resolved} with resolved expected_source, "
+    print(f"wrote {out_path}: {len(cases)} cases, {resolved} with resolved expected_source, "
           f"{sum(1 for c in cases if c['must_include'])} with seeded must_include")
     for src, q in unresolved:
         print(f"  unresolved: {src}  ← {q}")

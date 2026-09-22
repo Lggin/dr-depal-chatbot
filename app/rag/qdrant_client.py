@@ -249,6 +249,12 @@ class QdrantClient:
             if offset is None:
                 return out
 
+    def count(self) -> int:
+        """Exact point count (points_count in collection info can lag during indexing)."""
+        if self.client is None:
+            raise RuntimeError("Not connected. Call connect() first.")
+        return self.client.count(self.collection_name, exact=True).count
+
     def get_collection_info(self) -> dict:
         """Get collection statistics."""
         if self.client is None:

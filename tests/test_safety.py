@@ -53,6 +53,16 @@ def test_validator_flags_alarm_code_not_in_evidence():
     assert v.unsupported_codes == ["ROB-999"]
 
 
+def test_citation_names_with_commas_dashes_and_parentheses_are_not_fragmented():
+    tl = doc("t", "8월 한 달 릴리즈 12회.", document_name="02. 타임라인 — 2026년 3월 ~ 8월",
+             section="8월 — 정밀도 추격 (406 커밋, v0.0.46 → v0.0.57)", document_type="manual")
+    ans = ("8월에 12회 릴리즈.\n출처: 02. 타임라인 — 2026년 3월 ~ 8월 §8월 — 정밀도 추격 (406 커밋, v0.0.46 → v0.0.57); "
+           "[SOURCE 2] 02. 타임라인 — 2026년 3월 ~ 8월 §활동량 요약 (커밋 수)")
+    v = AnswerValidator().validate(ans, [tl], "8월 릴리즈 몇 번?")
+    assert v.cited_documents == ["02. 타임라인 — 2026년 3월 ~ 8월"] * 2
+    assert v.invalid_citations == [] and v.ok
+
+
 def test_validator_flags_citation_of_unprovided_document():
     v = AnswerValidator().validate("답변.\n출처: Robot Manual §1.2; Vacuum System Manual §6.3", [MANUAL], "q")
     assert v.invalid_citations == ["Robot Manual"] and not v.ok

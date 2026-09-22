@@ -45,10 +45,16 @@ def extract_numbers(text: str) -> Set[str]:
 
 
 def _parse_citations(text: str) -> List[str]:
+    """Document names from '출처:' lines. Entries are ';'-separated; a document name ends at '§'.
+    Commas and parentheses are legal inside names/sections ("02. 타임라인 — 2026년 3월 ~ 8월",
+    "(2026-08-21, v0.0.59 #470)"), so we never split on them."""
     names: List[str] = []
     for m in _CITATION_LINE.finditer(text):
-        for part in re.split(r"[;,]", m.group(1)):
-            name = re.split(r"§|\(", part)[0].strip(" *[]")
+        for part in m.group(1).split(";"):
+            part = re.sub(r"\[?SOURCE\s*\d+\]?", " ", part, flags=re.IGNORECASE)
+            name = part.split("§")[0]
+            name = re.sub(r"\s*\([^()]*\)\s*$", "", name)      # trailing parenthetical (alarm code, date)
+            name = name.strip(" *[]-–—:")
             if name:
                 names.append(name)
     return names
