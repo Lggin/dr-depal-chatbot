@@ -40,6 +40,7 @@ class ValidationInfo(BaseModel):
     unsupported_codes: List[str] = []
     invalid_citations: List[str] = []
     foreign_script: bool = False
+    fabricated_source_types: List[str] = []
     danger_flags: List[str] = []
 
 
@@ -64,6 +65,8 @@ class ChatResponse(BaseModel):
     validation: Optional[ValidationInfo] = None
     alarm_codes: List[str] = []
     retrieval_query: Optional[str] = None  # query actually sent to retrieval (after contextualization)
+    route: Optional[str] = None            # which pipeline path produced the answer, e.g. "troubleshooting.ask"
+    troubleshooting: Optional[dict] = None # diagnosis state snapshot when a tree is active
     timing_ms: dict = {}
     latency_ms: float
     log_id: Optional[int] = None

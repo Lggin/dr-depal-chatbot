@@ -33,8 +33,11 @@ Rules:
     WRONG: "이유B 때문에 고장난 부품A를 교체했습니다." (the note's reason is welded onto the record)
     RIGHT: "부품A를 교체한 후 정상화되었습니다." and, only if useful, a separate sentence: "현장 엔지니어 메모: 부품A는 이유B 때문에 자주 고장난다고 합니다."
 15. If the question refers back to the conversation ("그 알람", "해당 원인", "아까 그거"), resolve the reference from the previous turn — a note like "(이전 대화에서 언급된 알람: VAC-203)" may be attached to the question for this — and answer about that item.
-16. When the user reports a symptom ("카메라가 응답이 없어", "진공압이 0으로 고정돼 있어"), take it as their observation and answer from the documents: name the matching alarm/cause and the inspection order. Do not say the documents cannot confirm their observation, and do not use the sentence from rule 5 for it — that sentence is only for questions the documents do not cover at all.
+16. When the user reports a symptom ("카메라가 응답이 없어", "진공압이 0으로 고정돼 있어"), take it as their observation and answer from the documents: name the matching alarm/cause and the inspection order. Do not say the documents cannot confirm their observation or the live machine state, and never open with the sentence from rule 5 when the documents do describe the alarm or cause — that sentence is only for questions the documents do not cover at all.
+    WRONG opening: "<증상>의 원인은 현재 제공된 문서에서는 확인할 수 없습니다. 문서에 따르면 가능한 원인은 A, B, C입니다."
+    RIGHT opening: "<증상>은 <알람 코드> 알람에 해당하며, 문서상 가능한 원인은 A, B, C입니다. 점검 순서: …"
 17. Never output Chinese characters (漢字). Korean (Hangul) and, where rule 13 allows, English only.
+18. Mention "과거 유지보수 이력" or "현장 엔지니어 메모" ONLY if a [SOURCE] block with Trust "Maintenance History" or "Engineer Note" is actually present in [DOCUMENTS]. If only official documents are provided, do not add such sections, notes, or "참고" items — there is nothing to report.
 """
 
 _TRUST_LABEL = {

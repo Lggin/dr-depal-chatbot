@@ -1,0 +1,1421 @@
+{
+ "mode": "full",
+ "dataset": "sample__depalletizer_docs",
+ "collection": "depalletizer_docs",
+ "timestamp": "20260922_112445",
+ "summary": {
+  "cases": 37,
+  "answer_correct": 1.0,
+  "must_include_pass": 1.0,
+  "must_not_include_pass": 1.0,
+  "citation_accuracy": 1.0,
+  "refusal_recall": 1.0,
+  "false_refusal_rate": 0.0,
+  "unsupported_claim_rate": 0.0,
+  "danger_flag_rate": 0.0,
+  "intent_accuracy": 1.0,
+  "route_accuracy": 1.0,
+  "latency_ms_median": 1389.0,
+  "latency_ms_p95": 3039.7,
+  "answer_correct_by_category": {
+   "alarm_definition": 1.0,
+   "colloquial": 1.0,
+   "faq": 1.0,
+   "follow_up": 1.0,
+   "history": 1.0,
+   "normal_value": 1.0,
+   "out_of_scope": 1.0,
+   "procedure": 1.0,
+   "symptom_to_alarm": 1.0
+  },
+  "failures": []
+ },
+ "rows": [
+  {
+   "route": "knowledge",
+   "expected_route": null,
+   "route_ok": null,
+   "id": "Q001",
+   "category": "alarm_definition",
+   "question": "VAC-203이 뭐야?",
+   "answer": "VAC-203은 진공압이 정상 범위에 도달하지 못함을 의미하는 'Vacuum Pressure Low' 알람입니다.\n\n*   **알람 코드**: VAC-203\n*   **제목**: Vacuum Pressure Low\n*   **정상 범위**: -60 ~ -80 kPa\n*   **주요 원인**:\n    1.  진공 호스 누설 (Vacuum hose leakage)\n    2.  흡착 패드 손상 (Suction cup damage)\n    3.  진공 발생기 고장 (Vacuum generator malfunction)\n*   **점검 순서**:\n    1.  진공압 확인\n    2.  호스 누설 확인\n    3.  흡착 패드 상태 확인\n\n출처: Vacuum System Manual §6.3 (VAC-203)",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [
+    "VAC_203_001"
+   ],
+   "expected": [
+    "VAC_203_001"
+   ],
+   "citation_ok": true,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [
+    "VAC-203"
+   ],
+   "intent": "knowledge",
+   "expected_intent": "knowledge",
+   "correct": true,
+   "latency_ms": 3039.7,
+   "timing_ms": {
+    "retrieval": 293.0,
+    "generation": 2746.0,
+    "validation": 0.6
+   }
+  },
+  {
+   "route": "knowledge",
+   "expected_route": null,
+   "route_ok": null,
+   "id": "Q002",
+   "category": "alarm_definition",
+   "question": "VAC203 알람 설명해줘",
+   "answer": "VAC-203 알람은 진공압이 정상 범위에 도달하지 못해 박스 픽업 실패가 발생할 수 있음을 의미합니다.\n\n*   **알람 코드**: VAC-203\n*   **제목**: Vacuum Pressure Low (진공압 저하)\n*   **증상**: 진공압이 정상 범위에 도달하지 못함. 박스 Pickup 실패 가능.\n*   **정상 범위**: -60 ~ -80 kPa\n*   **원인**:\n    1.  Vacuum hose leakage (진공 호스 누수)\n    2.  Suction cup damage (흡착 컵 손상)\n    3.  Vacuum generator malfunction (진공 발생기 고장)\n*   **점검 순서**:\n    1.  Vacuum pressure 확인\n    2.  Hose leakage 확인\n    3.  Suction cup 상태 확인\n\n출처: Vacuum System Manual §6.3 (VAC-203)",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [
+    "VAC_203_001"
+   ],
+   "expected": [
+    "VAC_203_001"
+   ],
+   "citation_ok": true,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [
+    "VAC-203"
+   ],
+   "intent": "knowledge",
+   "expected_intent": "knowledge",
+   "correct": true,
+   "latency_ms": 3055.4,
+   "timing_ms": {
+    "retrieval": 41.6,
+    "generation": 3013.2,
+    "validation": 0.5
+   }
+  },
+  {
+   "route": "knowledge",
+   "expected_route": null,
+   "route_ok": null,
+   "id": "Q003",
+   "category": "alarm_definition",
+   "question": "vac_203 뜻이 뭔지 알려줘",
+   "answer": "VAC-203은 진공압이 정상 범위에 도달하지 못함을 의미하며, 이로 인해 박스 픽업 실패가 발생할 수 있습니다.\n\n*   **알람 코드**: VAC-203\n*   **제목**: Vacuum Pressure Low (진공압 저하)\n*   **정상 범위**: -60 ~ -80 kPa\n*   **주요 원인**:\n    1.  진공 호스 누설 (Vacuum hose leakage)\n    2.  흡착 패드 손상 (Suction cup damage)\n    3.  진공 발생기 고장 (Vacuum generator malfunction)\n\n출처: Vacuum System Manual §6.3 (VAC-203)",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [
+    "VAC_203_001"
+   ],
+   "expected": [
+    "VAC_203_001"
+   ],
+   "citation_ok": true,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [
+    "VAC-203"
+   ],
+   "intent": "knowledge",
+   "expected_intent": "knowledge",
+   "correct": true,
+   "latency_ms": 2404.3,
+   "timing_ms": {
+    "retrieval": 41.6,
+    "generation": 2362.3,
+    "validation": 0.4
+   }
+  },
+  {
+   "route": "knowledge",
+   "expected_route": null,
+   "route_ok": null,
+   "id": "Q004",
+   "category": "alarm_definition",
+   "question": "VAC-201은 어떤 알람이야?",
+   "answer": "VAC-201은 진공 센서 신호 이상으로 압력값이 0 또는 고정값으로 표시될 때 발생하는 'Vacuum Sensor Fault' 알람입니다.\n\n*   **알람 코드**: VAC-201\n*   **제목**: Vacuum Sensor Fault\n*   **증상**: 진공 센서 신호 이상. 압력값이 0 또는 고정값으로 표시됨.\n*   **정상 범위**: 센서 출력 1 ~ 5 V\n*   **원인**:\n    1.  Sensor cable disconnection\n    2.  Sensor failure\n    3.  Analog input module fault\n*   **점검 순서**:\n    1.  Sensor 커넥터 체결 확인\n    2.  PLC AI 채널 값 확인\n    3.  Sensor 교체 테스트\n\n출처: Vacuum System Manual §6.1 (VAC-201)",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [
+    "VAC_201_001"
+   ],
+   "expected": [
+    "VAC_201_001"
+   ],
+   "citation_ok": true,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [
+    "VAC-201"
+   ],
+   "intent": "knowledge",
+   "expected_intent": "knowledge",
+   "correct": true,
+   "latency_ms": 2768.4,
+   "timing_ms": {
+    "retrieval": 41.2,
+    "generation": 2726.7,
+    "validation": 0.4
+   }
+  },
+  {
+   "route": "knowledge",
+   "expected_route": null,
+   "route_ok": null,
+   "id": "Q005",
+   "category": "alarm_definition",
+   "question": "ROB-105 알람 원인이 뭐야?",
+   "answer": "ROB-105 알람의 원인은 로봇 동작 중 서보 과부하이며, 구체적인 원인은 1. Payload 초과, 2. 축 기계적 간섭, 3. 감속기 이상입니다.\n\n*   **알람 코드**: ROB-105\n*   **알람 제목**: Servo Overload (서보 과부하)\n*   **증상**: 로봇 동작 중 정지, 서보 과부하 알람 발생\n*   **가능 원인**:\n    1.  Payload 초과\n    2.  축 기계적 간섭\n    3.  감속기 이상\n*   **점검 순서**:\n    1.  현재 payload 설정과 실제 박스 무게 비교\n    2.  축 수동 회전 확인\n    3.  감속기 소음/발열 확인\n*   **정상 범위**: Payload 30 kg 이하\n\n출처: Robot Controller Manual §8.5 (ROB-105)",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [
+    "ROB_105_001"
+   ],
+   "expected": [
+    "ROB_105_001"
+   ],
+   "citation_ok": true,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [
+    "ROB-105"
+   ],
+   "intent": "knowledge",
+   "expected_intent": "knowledge",
+   "correct": true,
+   "latency_ms": 3025.1,
+   "timing_ms": {
+    "retrieval": 45.9,
+    "generation": 2978.8,
+    "validation": 0.4
+   }
+  },
+  {
+   "route": "troubleshooting",
+   "expected_route": "troubleshooting",
+   "route_ok": true,
+   "id": "Q006",
+   "category": "alarm_definition",
+   "question": "VIS-301 알람이 떴어. 뭘 확인해?",
+   "answer": "VIS-301 알람은 카메라 통신 시간 초과 (Camera Communication Timeout) 에 해당하며, 점검 순서는 카메라 LED 상태 확인, ping 응답 확인, 케이블 교체 테스트입니다.\n\n**알람 정보:**\n*   **알람 코드:** VIS-301\n*   **제목:** Camera Communication Timeout\n*   **증상:** 비전 검출 결과 없음. 카메라 응답 시간 초과.\n*   **원인:**\n    1.  GigE 케이블 불량\n    2.  카메라 전원 이상\n    3.  네트워크 스위치 포트 불량\n*   **점검 순서:**\n    1.  카메라 LED 상태 확인\n    2.  ping 응답 확인\n    3.  케이블 교체 테스트\n\n출처: Vision System Manual §5.1 (VIS-301)",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [
+    "VIS_301_001"
+   ],
+   "expected": [
+    "VIS_301_001"
+   ],
+   "citation_ok": true,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [
+    "VIS-301"
+   ],
+   "intent": "troubleshooting",
+   "expected_intent": "troubleshooting",
+   "correct": true,
+   "latency_ms": 2502.7,
+   "timing_ms": {
+    "retrieval": 42.9,
+    "generation": 2459.3,
+    "validation": 0.5
+   }
+  },
+  {
+   "route": "knowledge",
+   "expected_route": null,
+   "route_ok": null,
+   "id": "Q007",
+   "category": "alarm_definition",
+   "question": "VIS302 원인",
+   "answer": "VIS-302 알람은 'Detection Confidence Low'이며, 원인은 조명 변화 (역광, 그늘), 박스 표면 반사, 검출 임계값 과다입니다.\n\n*   **알람 코드**: VIS-302\n*   **제목**: Detection Confidence Low\n*   **증상**: 박스가 있으나 검출되지 않음 또는 검출 신뢰도가 임계값 미달\n*   **원인**:\n    1.  조명 변화 (역광, 그늘)\n    2.  박스 표면 반사\n    3.  검출 임계값 과다\n*   **점검 순서**:\n    1.  조명 상태 확인\n    2.  라이브 영상에서 박스 윤곽 확인\n    3.  detection_threshold 값 확인 (기본값: 0.5)\n\n출처: Vision System Manual §5.2 (VIS-302)",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [
+    "VIS_302_001"
+   ],
+   "expected": [
+    "VIS_302_001"
+   ],
+   "citation_ok": true,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [
+    "VIS-302"
+   ],
+   "intent": "knowledge",
+   "expected_intent": "knowledge",
+   "correct": true,
+   "latency_ms": 2852.8,
+   "timing_ms": {
+    "retrieval": 40.4,
+    "generation": 2812.0,
+    "validation": 0.4
+   }
+  },
+  {
+   "route": "knowledge",
+   "expected_route": null,
+   "route_ok": null,
+   "id": "Q010",
+   "category": "normal_value",
+   "question": "진공압 정상 범위 알려줘",
+   "answer": "진공압의 정상 범위는 -60 ~ -80 kPa 입니다.\n\n제공된 문서에 따르면, 진공 발생기 공급 공기압은 0.5 ~ 0.6 MPa 이며, 진공 그리퍼가 정상적으로 작동하기 위한 진공압 범위는 -60 ~ -80 kPa 입니다.\n\n출처: Vacuum System Manual §6.3 (VAC-203); Vacuum System Manual §3.2; Vacuum System Manual §6.1 (VAC-201)",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [
+    "VAC_203_001",
+    "VAC_MANUAL_SPEC_001",
+    "VAC_201_001"
+   ],
+   "expected": [
+    "VAC_203_001",
+    "VAC_MANUAL_SPEC_001"
+   ],
+   "citation_ok": true,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [],
+   "intent": "knowledge",
+   "expected_intent": "knowledge",
+   "correct": true,
+   "latency_ms": 1658.8,
+   "timing_ms": {
+    "retrieval": 39.6,
+    "generation": 1618.8,
+    "validation": 0.4
+   }
+  },
+  {
+   "route": "knowledge",
+   "expected_route": null,
+   "route_ok": null,
+   "id": "Q011",
+   "category": "normal_value",
+   "question": "진공 발생기 공급 공기압은 얼마여야 해?",
+   "answer": "진공 발생기 공급 공기압은 0.5 ~ 0.6 MPa 여야 합니다.\n\n출처: Vacuum System Manual §3.2",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [
+    "VAC_MANUAL_SPEC_001"
+   ],
+   "expected": [
+    "VAC_MANUAL_SPEC_001"
+   ],
+   "citation_ok": true,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [],
+   "intent": "knowledge",
+   "expected_intent": "knowledge",
+   "correct": true,
+   "latency_ms": 782.0,
+   "timing_ms": {
+    "retrieval": 40.4,
+    "generation": 741.4,
+    "validation": 0.1
+   }
+  },
+  {
+   "route": "knowledge",
+   "expected_route": null,
+   "route_ok": null,
+   "id": "Q012",
+   "category": "normal_value",
+   "question": "로봇 payload 한계가 얼마야?",
+   "answer": "로봇의 payload 한계는 30 kg 이하입니다.\n\n이는 'Servo Overload' (ROB-105) 알람 설명서에 명시된 정상 범위 (Normal Range) 입니다.\n\n출처: Robot Controller Manual §8.5 (ROB-105)",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [
+    "ROB_105_001"
+   ],
+   "expected": [
+    "ROB_105_001"
+   ],
+   "citation_ok": true,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [],
+   "intent": "knowledge",
+   "expected_intent": "knowledge",
+   "correct": true,
+   "latency_ms": 1055.7,
+   "timing_ms": {
+    "retrieval": 40.1,
+    "generation": 1015.3,
+    "validation": 0.2
+   }
+  },
+  {
+   "route": "knowledge",
+   "expected_route": null,
+   "route_ok": null,
+   "id": "Q013",
+   "category": "normal_value",
+   "question": "진공 센서 출력 정상 범위는?",
+   "answer": "진공 센서 출력 정상 범위는 1 ~ 5 V 입니다.\n\n출처: Vacuum System Manual §6.1 (VAC-201)",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [
+    "VAC_201_001"
+   ],
+   "expected": [
+    "VAC_201_001"
+   ],
+   "citation_ok": true,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [],
+   "intent": "knowledge",
+   "expected_intent": "knowledge",
+   "correct": true,
+   "latency_ms": 698.7,
+   "timing_ms": {
+    "retrieval": 39.9,
+    "generation": 658.6,
+    "validation": 0.2
+   }
+  },
+  {
+   "route": "knowledge",
+   "expected_route": null,
+   "route_ok": null,
+   "id": "Q014",
+   "category": "normal_value",
+   "question": "흡착 확인 시간은 보통 얼마 안에 도달해야 정상이야?",
+   "answer": "흡착 확인 시간은 진공 ON 후 압력 도달까지 정상적으로 0.3 초 이내여야 합니다.\n\n출처: Vacuum System Manual §3.2",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [
+    "VAC_MANUAL_SPEC_001"
+   ],
+   "expected": [
+    "VAC_MANUAL_SPEC_001"
+   ],
+   "citation_ok": true,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [],
+   "intent": "knowledge",
+   "expected_intent": "knowledge",
+   "correct": true,
+   "latency_ms": 801.5,
+   "timing_ms": {
+    "retrieval": 41.5,
+    "generation": 759.8,
+    "validation": 0.2
+   }
+  },
+  {
+   "route": "knowledge",
+   "expected_route": null,
+   "route_ok": null,
+   "id": "Q015",
+   "category": "normal_value",
+   "question": "detection_threshold 기본값이 뭐야?",
+   "answer": "detection_threshold 기본값은 0.5 입니다.\n\n출처: Vision System Manual §5.2 (VIS-302)",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [
+    "VIS_302_001"
+   ],
+   "expected": [
+    "VIS_302_001"
+   ],
+   "citation_ok": true,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [],
+   "intent": "knowledge",
+   "expected_intent": "knowledge",
+   "correct": true,
+   "latency_ms": 651.1,
+   "timing_ms": {
+    "retrieval": 39.2,
+    "generation": 611.6,
+    "validation": 0.2
+   }
+  },
+  {
+   "route": "knowledge",
+   "expected_route": null,
+   "route_ok": null,
+   "id": "Q016",
+   "category": "normal_value",
+   "question": "캘리브레이션 재투영 오차는 얼마 이하여야 저장할 수 있어?",
+   "answer": "캘리브레이션 재투영 오차는 1.0 mm 이하이어야 저장할 수 있습니다.\n\n재투영 오차(reprojection error)가 1.0 mm 이하일 때만 캘리브레이션 결과를 저장할 수 있으며, 이는 카메라-로봇 캘리브레이션 절차의 필수 조건입니다.\n\n출처: Camera-Robot Calibration SOP §2",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [
+    "SOP_CALIB_001"
+   ],
+   "expected": [
+    "SOP_CALIB_001"
+   ],
+   "citation_ok": true,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [],
+   "intent": "knowledge",
+   "expected_intent": "knowledge",
+   "correct": true,
+   "latency_ms": 1352.9,
+   "timing_ms": {
+    "retrieval": 41.5,
+    "generation": 1311.1,
+    "validation": 0.3
+   }
+  },
+  {
+   "route": "knowledge",
+   "expected_route": null,
+   "route_ok": null,
+   "id": "Q020",
+   "category": "procedure",
+   "question": "캘리브레이션 방법 알려줘",
+   "answer": "캘리브레이션 방법은 카메라-로봇 캘리브레이션 SOP §2 에 명시된 절차에 따라 수행합니다.\n\n1. 캘리브레이션 보드를 팔레트 중앙에 놓습니다.\n2. HMI > 설정 > 캘리브레이션 메뉴로 진입합니다.\n3. 로봇을 9 개 티칭 포인트로 순서대로 이동시키며 각 포인트에서 캡처합니다.\n4. 재투영 오차 (reprojection error) 가 1.0 mm 이하인지 확인하고, 조건이 충족되면 저장합니다.\n5. 테스트 픽으로 위치 오차가 ±3 mm 이내인지 확인합니다.\n\n이 절차는 로봇이 박스 위치에서 일정하게 어긋났을 때 수행합니다.\n\n출처: Camera-Robot Calibration SOP §2",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [
+    "SOP_CALIB_001"
+   ],
+   "expected": [
+    "SOP_CALIB_001"
+   ],
+   "citation_ok": true,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [],
+   "intent": "knowledge",
+   "expected_intent": "knowledge",
+   "correct": true,
+   "latency_ms": 2448.5,
+   "timing_ms": {
+    "retrieval": 39.4,
+    "generation": 2408.7,
+    "validation": 0.4
+   }
+  },
+  {
+   "route": "knowledge",
+   "expected_route": null,
+   "route_ok": null,
+   "id": "Q021",
+   "category": "procedure",
+   "question": "로봇 티칭은 어떻게 해?",
+   "answer": "로봇 티칭은 티치 펜던트에서 수동 모드로 전환한 후 Place 포지션과 Home 포지션을 등록하고, Pick 포지션은 비전 결과로 자동 생성되므로 별도로 티칭하지 않습니다.\n\n등록 완료 후 저속 (10%) 으로 1 사이클 시운전을 수행합니다.\n\n출처: Robot Teaching SOP §3",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [
+    "SOP_TEACH_001"
+   ],
+   "expected": [
+    "SOP_TEACH_001"
+   ],
+   "citation_ok": true,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [],
+   "intent": "knowledge",
+   "expected_intent": "knowledge",
+   "correct": true,
+   "latency_ms": 1389.0,
+   "timing_ms": {
+    "retrieval": 39.2,
+    "generation": 1349.4,
+    "validation": 0.2
+   }
+  },
+  {
+   "route": "knowledge",
+   "expected_route": null,
+   "route_ok": null,
+   "id": "Q022",
+   "category": "procedure",
+   "question": "Pick 포지션도 티칭해야 해?",
+   "answer": "아니요, Pick 포지션은 티칭할 필요가 없습니다.\n\nPick 포지션은 비전 결과로 자동 생성되므로 수동으로 등록하지 않아도 됩니다. 티치 펜던트에서 수동 모드로 전환하여 Place 포지션과 Home 포지션을 등록한 후, 저속 (10%) 으로 1 사이클 시운전을 수행하면 됩니다.\n\n출처: Robot Teaching SOP §3",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [
+    "SOP_TEACH_001"
+   ],
+   "expected": [
+    "SOP_TEACH_001"
+   ],
+   "citation_ok": true,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [],
+   "intent": "knowledge",
+   "expected_intent": "knowledge",
+   "correct": true,
+   "latency_ms": 1476.4,
+   "timing_ms": {
+    "retrieval": 40.6,
+    "generation": 1435.4,
+    "validation": 0.3
+   }
+  },
+  {
+   "route": "troubleshooting",
+   "expected_route": "troubleshooting",
+   "route_ok": true,
+   "id": "Q023",
+   "category": "procedure",
+   "question": "박스 흡착 실패 원인이 뭐야?",
+   "answer": "박스 흡착 실패의 주요 원인은 비전 미검출, 로봇 위치 오차, 진공압 미달성, 박스 상태 불량이며, 진공압 관련 원인으로는 호스 누설, 패드 손상, 발생기 고장이 있습니다.\n\n박스 흡착 실패 (Pickup Failure) 에 대한 점검 순서와 원인은 다음과 같습니다.\n1. **비전 미검출**: 비전에서 박스가 검출되지 않는 경우 VIS-30x 항목과 관련이 있습니다.\n2. **로봇 위치 오차**: 로봇이 박스 상면 중앙에 정확히 내려오지 않고 어긋난 경우 캘리브레이션 SOP 가 필요합니다.\n3. **진공압 미달성**: 진공압이 -60 kPa 이상 도달하지 않을 때 발생합니다. 이는 호스 누설, 패드 손상, 발생기 점검 (VAC-203 항목) 이 필요한 원인입니다. 정상 범위는 -60 ~ -80 kPa 입니다.\n4. **박스 상태 불량**: 박스 상면이 찢어졌거나 테이프가 들떠 있으면 패드 밀착 불량이므로 박스 상태를 확인해야 합니다.\n\n진공압 관련 구체적인 원인 (VAC-203) 은 다음과 같습니다.\n*   Vacuum hose leakage (호스 누설)\n*   Suction cup damage (패드 손상)\n*   Vacuum generator malfunction (발생기 고장)\n\n출처: Troubleshooting Guide §4.1",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [
+    "TS_PICKUP_FAIL_001"
+   ],
+   "expected": [
+    "TS_PICKUP_FAIL_001"
+   ],
+   "citation_ok": true,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [],
+   "intent": "troubleshooting",
+   "expected_intent": "troubleshooting",
+   "correct": true,
+   "latency_ms": 4550.5,
+   "timing_ms": {
+    "retrieval": 40.4,
+    "generation": 4509.3,
+    "validation": 0.7
+   }
+  },
+  {
+   "route": "troubleshooting.ask",
+   "expected_route": "troubleshooting.ask",
+   "route_ok": true,
+   "id": "Q030",
+   "category": "colloquial",
+   "question": "빨판이 박스를 못 잡아",
+   "answer": "'박스 흡착/픽업 실패' 증상을 단계적으로 확인하겠습니다.\n\n비전 화면에서 박스가 정상적으로 검출되고 있나요?",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [],
+   "expected": null,
+   "citation_ok": null,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [],
+   "intent": "troubleshooting",
+   "expected_intent": "troubleshooting",
+   "correct": true,
+   "latency_ms": 0.1,
+   "timing_ms": {}
+  },
+  {
+   "route": "troubleshooting.ask",
+   "expected_route": "troubleshooting.ask",
+   "route_ok": true,
+   "id": "Q031",
+   "category": "colloquial",
+   "question": "박스를 못 집는데 뭘 봐야 해?",
+   "answer": "'박스 흡착/픽업 실패' 증상을 단계적으로 확인하겠습니다.\n\n비전 화면에서 박스가 정상적으로 검출되고 있나요?",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [],
+   "expected": null,
+   "citation_ok": null,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [],
+   "intent": "troubleshooting",
+   "expected_intent": "troubleshooting",
+   "correct": true,
+   "latency_ms": 0.0,
+   "timing_ms": {}
+  },
+  {
+   "route": "troubleshooting",
+   "expected_route": null,
+   "route_ok": null,
+   "id": "Q032",
+   "category": "colloquial",
+   "question": "카메라가 응답이 없어",
+   "answer": "카메라가 응답이 없어 VIS-301 알람에 해당하며, 가능한 원인은 GigE 케이블 불량, 카메라 전원 이상, 네트워크 스위치 포트 불량입니다.\n\n점검 순서는 다음과 같습니다:\n1. 카메라 LED 상태 확인\n2. ping 응답 확인\n3. 케이블 교체 테스트\n\n출처: Vision System Manual §5.1 (VIS-301)",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [
+    "VIS_301_001"
+   ],
+   "expected": [
+    "VIS_301_001"
+   ],
+   "citation_ok": true,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [],
+   "intent": "troubleshooting",
+   "expected_intent": "troubleshooting",
+   "correct": true,
+   "latency_ms": 1279.9,
+   "timing_ms": {
+    "retrieval": 40.0,
+    "generation": 1239.6,
+    "validation": 0.3
+   }
+  },
+  {
+   "route": "troubleshooting",
+   "expected_route": "troubleshooting",
+   "route_ok": true,
+   "id": "Q033",
+   "category": "colloquial",
+   "question": "로봇이 자꾸 멈추고 서보 과부하래",
+   "answer": "로봇이 자꾸 멈추고 서보 과부하 알람은 ROB-105 'Servo Overload'에 해당하며, 가능한 원인은 1. Payload 초과 2. 축 기계적 간섭 3. 감속기 이상입니다.\n\n점검 순서는 다음과 같습니다:\n1. 현재 payload 설정과 실제 박스 무게를 비교합니다 (정상 범위: 30 kg 이하).\n2. 축 수동 회전을 확인하여 기계적 간섭이 있는지 점검합니다.\n3. 감속기의 소음 및 발열 상태를 확인합니다.\n\n출처: Robot Controller Manual §8.5 (ROB-105)",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [
+    "ROB_105_001"
+   ],
+   "expected": [
+    "ROB_105_001"
+   ],
+   "citation_ok": true,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [],
+   "intent": "troubleshooting",
+   "expected_intent": "troubleshooting",
+   "correct": true,
+   "latency_ms": 2044.3,
+   "timing_ms": {
+    "retrieval": 41.3,
+    "generation": 2002.6,
+    "validation": 0.4
+   }
+  },
+  {
+   "route": "troubleshooting.ask",
+   "expected_route": "troubleshooting.ask",
+   "route_ok": true,
+   "id": "Q040",
+   "category": "symptom_to_alarm",
+   "question": "박스가 있는데 비전에서 검출이 안 돼",
+   "answer": "'박스 검출/인식 안 됨' 증상을 단계적으로 확인하겠습니다.\n\n카메라 영상이 화면에 정상적으로 나오나요? (검은 화면·멈춤이 아닌가요)",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [],
+   "expected": null,
+   "citation_ok": null,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [],
+   "intent": "troubleshooting",
+   "expected_intent": "troubleshooting",
+   "correct": true,
+   "latency_ms": 0.1,
+   "timing_ms": {}
+  },
+  {
+   "route": "troubleshooting",
+   "expected_route": "troubleshooting",
+   "route_ok": true,
+   "id": "Q041",
+   "category": "symptom_to_alarm",
+   "question": "진공압 표시가 0으로 고정돼 있어",
+   "answer": "진공압 표시가 0 으로 고정되는 증상은 VAC-201 진공 센서 신호 이상 알람에 해당하며, 가능한 원인은 센서 케이블 연결 단락, 센서 고장, 또는 아날로그 입력 모듈 고장입니다.\n\n점검 순서는 다음과 같습니다:\n1. 센서 커넥터 체결 확인\n2. PLC AI 채널 값 확인\n3. 센서 교체 테스트\n\n출처: Vacuum System Manual §6.1 (VAC-201)",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [
+    "VAC_201_001"
+   ],
+   "expected": [
+    "VAC_201_001"
+   ],
+   "citation_ok": true,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [],
+   "intent": "troubleshooting",
+   "expected_intent": "troubleshooting",
+   "correct": true,
+   "latency_ms": 1605.1,
+   "timing_ms": {
+    "retrieval": 39.1,
+    "generation": 1565.6,
+    "validation": 0.3
+   }
+  },
+  {
+   "route": "troubleshooting.ask",
+   "expected_route": "troubleshooting.ask",
+   "route_ok": true,
+   "id": "Q042",
+   "category": "symptom_to_alarm",
+   "question": "로봇이 박스 위치에서 항상 조금씩 어긋나",
+   "answer": "'로봇 픽 위치 어긋남' 증상을 단계적으로 확인하겠습니다.\n\n어긋나는 방향과 크기가 매번 비슷한가요? (일정하게 어긋남 = 예, 매번 다름 = 아니오)",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [],
+   "expected": null,
+   "citation_ok": null,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [],
+   "intent": "troubleshooting",
+   "expected_intent": "troubleshooting",
+   "correct": true,
+   "latency_ms": 0.1,
+   "timing_ms": {}
+  },
+  {
+   "route": "history.filtered",
+   "expected_route": "history.filtered",
+   "route_ok": true,
+   "id": "Q050",
+   "category": "history",
+   "question": "VAC-203 지난번에도 있었어?",
+   "answer": "네, VAC-203 알람은 과거에도 발생했던 기록이 있습니다.\n\n과거 유지보수 이력에 따르면 2026 년 9 월 10 일 DP-01 에서 VAC-203 알람이 발생했습니다. 당시 진공압이 -45 kPa 에서 정체되었으며, 3 번 suction cup 측 vacuum hose 에 균열이 발견되어 호스를 교체한 결과 진공압이 -72 kPa 로 복귀하고 정상 가동이 이루어졌습니다.\n\n출처: Maintenance Log (VAC-203)",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [
+    "MAINT_20260910_001"
+   ],
+   "expected": [
+    "MAINT_20260910_001"
+   ],
+   "citation_ok": true,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [
+    "VAC-203"
+   ],
+   "intent": "history",
+   "expected_intent": "history",
+   "correct": true,
+   "latency_ms": 1811.1,
+   "timing_ms": {
+    "retrieval": 17.8,
+    "generation": 1792.9,
+    "validation": 0.4
+   }
+  },
+  {
+   "route": "history.filtered",
+   "expected_route": "history.filtered",
+   "route_ok": true,
+   "id": "Q051",
+   "category": "history",
+   "question": "9월 10일에 VAC-203 어떻게 조치했어?",
+   "answer": "2026 년 9 월 10 일 VAC-203 알람 발생 시, 3 번 suction cup 측 vacuum hose 에 균열이 발견되어 해당 호스를 교체하는 조치를 취했습니다.\n\n구체적인 조치 내용은 다음과 같습니다:\n*   **발생 일시**: 2026-09-10\n*   **발생 원인**: 3 번 suction cup 측 vacuum hose 에 균열 발견\n*   **조치 내용**: 균열이 발생한 호스 교체\n*   **결과**: 진공압이 -45 kPa 에서 정체하던 것이 -72 kPa 로 복귀하여 정상 가동됨\n\n출처: Maintenance Log (VAC-203)",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [
+    "MAINT_20260910_001"
+   ],
+   "expected": [
+    "MAINT_20260910_001"
+   ],
+   "citation_ok": true,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [
+    "VAC-203"
+   ],
+   "intent": "history",
+   "expected_intent": "history",
+   "correct": true,
+   "latency_ms": 2209.2,
+   "timing_ms": {
+    "retrieval": 18.9,
+    "generation": 2189.7,
+    "validation": 0.5
+   }
+  },
+  {
+   "route": "troubleshooting",
+   "expected_route": null,
+   "route_ok": null,
+   "id": "Q052",
+   "category": "history",
+   "question": "VAC-203이 며칠에 걸쳐 서서히 나빠지면 어디부터 봐?",
+   "answer": "VAC-203이 며칠에 걸쳐 서서히 나빠지면 진공 호스 (Vacuum hose) 를 먼저 점검해야 합니다.\n\n문서에 따르면, 진공압이 정상 범위 (-60 ~ -80 kPa) 에 도달하지 못하는 VAC-203 알람의 공식적인 점검 순서는 다음과 같습니다:\n1. 진공압 확인\n2. 호스 누수 (Hose leakage) 확인\n3. 서셉션 컵 (Suction cup) 상태 확인\n\n현장 엔지니어 메모에 따르면, 이 라인의 진공 호스는 로봇 3축 케이블 덕트와 함께 지나가 반복 굽힘으로 균열이 잘 생기며, VAC-203이 며칠에 걸쳐 서서히 나빠지는 패턴은 십중팔구 호스 문제라고 합니다.\n\n출처: Vacuum System Manual §6.3 (VAC-203); Engineer Notes (VAC-203)",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [
+    "VAC_203_001",
+    "ENG_NOTE_HOSE_001"
+   ],
+   "expected": [
+    "ENG_NOTE_HOSE_001",
+    "VAC_203_001"
+   ],
+   "citation_ok": true,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [
+    "VAC-203"
+   ],
+   "intent": "troubleshooting",
+   "expected_intent": "troubleshooting",
+   "correct": true,
+   "latency_ms": 2861.6,
+   "timing_ms": {
+    "retrieval": 43.6,
+    "generation": 2817.4,
+    "validation": 0.6
+   }
+  },
+  {
+   "route": "knowledge",
+   "expected_route": null,
+   "route_ok": null,
+   "id": "Q060",
+   "category": "faq",
+   "question": "처리할 수 있는 박스 최대 크기가 얼마야?",
+   "answer": "처리할 수 있는 박스 최대 크기는 600×400×400 mm 입니다.\n\n골판지 박스 기준 최대 치수는 가로 600 mm, 세로 400 mm, 높이 400 mm이며, 무게는 30 kg 이하여야 합니다. 또한 상면이 평평하고 개봉되지 않은 상태여야 하며, 비닐 랩으로 감싼 박스는 별도 설정이 필요합니다.\n\n출처: Operator FAQ",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [
+    "FAQ_BOX_TYPES_001"
+   ],
+   "expected": [
+    "FAQ_BOX_TYPES_001"
+   ],
+   "citation_ok": true,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [],
+   "intent": "knowledge",
+   "expected_intent": "knowledge",
+   "correct": true,
+   "latency_ms": 1656.3,
+   "timing_ms": {
+    "retrieval": 39.7,
+    "generation": 1616.2,
+    "validation": 0.3
+   }
+  },
+  {
+   "route": "knowledge",
+   "expected_route": null,
+   "route_ok": null,
+   "id": "Q061",
+   "category": "faq",
+   "question": "비닐 랩으로 감싼 박스도 처리돼?",
+   "answer": "네, 비닐 랩으로 감싼 박스는 처리가 가능하지만 패드 밀착이 불안정해 별도 설정이 필요합니다.\n\n출처: Operator FAQ",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [
+    "FAQ_BOX_TYPES_001"
+   ],
+   "expected": [
+    "FAQ_BOX_TYPES_001"
+   ],
+   "citation_ok": true,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [],
+   "intent": "knowledge",
+   "expected_intent": "knowledge",
+   "correct": true,
+   "latency_ms": 787.1,
+   "timing_ms": {
+    "retrieval": 41.9,
+    "generation": 744.9,
+    "validation": 0.2
+   }
+  },
+  {
+   "route": "knowledge",
+   "expected_route": null,
+   "route_ok": null,
+   "id": "Q070",
+   "category": "out_of_scope",
+   "question": "로봇 컨트롤러 IP 주소가 뭐야?",
+   "answer": "현재 제공된 문서에서는 로봇 컨트롤러 IP 주소를 확인할 수 없습니다.\n\n제공된 문서에는 알람 코드, 캘리브레이션 절차, 흡착 실패 점검 순서, 및 엔지니어 메모가 포함되어 있으나, 네트워크 설정이나 IP 주소와 관련된 정보는 없습니다.",
+   "is_refusal": true,
+   "expect_refusal": true,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [],
+   "expected": [],
+   "citation_ok": true,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [],
+   "intent": "knowledge",
+   "expected_intent": "knowledge",
+   "correct": true,
+   "latency_ms": 1201.7,
+   "timing_ms": {
+    "retrieval": 39.3,
+    "generation": 1162.1,
+    "validation": 0.3
+   }
+  },
+  {
+   "route": "knowledge",
+   "expected_route": null,
+   "route_ok": null,
+   "id": "Q071",
+   "category": "out_of_scope",
+   "question": "감속기 윤활유 교체 주기가 얼마야?",
+   "answer": "현재 제공된 문서에서는 감속기 윤활유 교체 주기에 대한 정보를 확인할 수 없습니다.\n\n제공된 문서에는 감속기 점검 항목 (소음/발열 확인) 이 포함되어 있으나, 구체적인 윤활유 교체 주기나 권장 주기는 명시되어 있지 않습니다.",
+   "is_refusal": true,
+   "expect_refusal": true,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [],
+   "expected": [],
+   "citation_ok": true,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [],
+   "intent": "knowledge",
+   "expected_intent": "knowledge",
+   "correct": true,
+   "latency_ms": 1333.0,
+   "timing_ms": {
+    "retrieval": 40.5,
+    "generation": 1292.2,
+    "validation": 0.3
+   }
+  },
+  {
+   "route": "knowledge",
+   "expected_route": null,
+   "route_ok": null,
+   "id": "Q072",
+   "category": "out_of_scope",
+   "question": "설비 담당자 연락처 알려줘",
+   "answer": "현재 제공된 문서에서는 설비 담당자 연락처를 확인할 수 없습니다.\n\n제공된 [Maintenance Log]에는 담당자가 \"김엔지니어\"로 명시되어 있으나, 구체적인 전화번호나 이메일 주소는 포함되어 있지 않습니다.",
+   "is_refusal": true,
+   "expect_refusal": true,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [],
+   "expected": [],
+   "citation_ok": true,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [],
+   "intent": "knowledge",
+   "expected_intent": "knowledge",
+   "correct": true,
+   "latency_ms": 923.8,
+   "timing_ms": {
+    "retrieval": 39.9,
+    "generation": 883.6,
+    "validation": 0.2
+   }
+  },
+  {
+   "route": "live.no_tools",
+   "expected_route": "live.no_tools",
+   "route_ok": true,
+   "id": "Q073",
+   "category": "out_of_scope",
+   "question": "지금 진공압 얼마야?",
+   "answer": "현재 설비 값(알람·진공압·로봇 상태 등)은 설비 조회 도구가 아직 연결되어 있지 않아 확인할 수 없습니다. 정상 범위나 점검 절차가 필요하시면 그렇게 질문해 주세요.",
+   "is_refusal": true,
+   "expect_refusal": true,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [],
+   "expected": [],
+   "citation_ok": true,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [],
+   "intent": "live_status",
+   "expected_intent": "live_status",
+   "correct": true,
+   "latency_ms": 0.0,
+   "timing_ms": {}
+  },
+  {
+   "route": "knowledge",
+   "expected_route": null,
+   "route_ok": null,
+   "id": "Q080",
+   "category": "follow_up",
+   "question": "그 알람 원인이 뭐야?",
+   "answer": "VAC-203 알람의 원인은 진공 호스 누설, 흡착 패드 손상, 진공 발생기 고장입니다.\n\n*   **진공 호스 누설 (Vacuum hose leakage)**\n*   **흡착 패드 손상 (Suction cup damage)**\n*   **진공 발생기 고장 (Vacuum generator malfunction)**\n\n출처: Vacuum System Manual §6.3 (VAC-203)",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [
+    "VAC_203_001"
+   ],
+   "expected": [
+    "VAC_203_001"
+   ],
+   "citation_ok": true,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [
+    "VAC-203"
+   ],
+   "intent": "knowledge",
+   "expected_intent": "knowledge",
+   "correct": true,
+   "latency_ms": 1558.9,
+   "timing_ms": {
+    "retrieval": 40.5,
+    "generation": 1517.9,
+    "validation": 0.4
+   }
+  },
+  {
+   "route": "knowledge",
+   "expected_route": null,
+   "route_ok": null,
+   "id": "Q081",
+   "category": "follow_up",
+   "question": "그거 정상 범위가 얼마야?",
+   "answer": "ROB-105 알람의 정상 범위는 Payload 가 30 kg 이하인 것입니다.\n\n출처: Robot Controller Manual §8.5 (ROB-105)",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [
+    "ROB_105_001"
+   ],
+   "expected": [
+    "ROB_105_001"
+   ],
+   "citation_ok": true,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [
+    "ROB-105"
+   ],
+   "intent": "knowledge",
+   "expected_intent": "knowledge",
+   "correct": true,
+   "latency_ms": 823.8,
+   "timing_ms": {
+    "retrieval": 51.7,
+    "generation": 771.7,
+    "validation": 0.2
+   }
+  },
+  {
+   "route": "troubleshooting",
+   "expected_route": null,
+   "route_ok": null,
+   "id": "Q082",
+   "category": "follow_up",
+   "question": "해당 알람 점검 순서 알려줘",
+   "answer": "VIS-301 알람의 점검 순서는 다음과 같습니다:\n1. 카메라 LED 상태 확인\n2. ping 응답 확인\n3. 케이블 교체 테스트\n\n출처: Vision System Manual §5.1 (VIS-301); Vision System Manual §5.2 (VIS-302)",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [
+    "VIS_301_001",
+    "VIS_302_001"
+   ],
+   "expected": [
+    "VIS_301_001"
+   ],
+   "citation_ok": true,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [
+    "VIS-301"
+   ],
+   "intent": "troubleshooting",
+   "expected_intent": "troubleshooting",
+   "correct": true,
+   "latency_ms": 1034.8,
+   "timing_ms": {
+    "retrieval": 40.9,
+    "generation": 993.6,
+    "validation": 0.3
+   }
+  }
+ ]
+}

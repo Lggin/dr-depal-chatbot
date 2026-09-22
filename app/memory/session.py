@@ -3,7 +3,7 @@
 import threading
 import time
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 Message = Dict[str, str]
 
@@ -15,6 +15,7 @@ class Session:
     updated_at: float = field(default_factory=time.time)
     history: List[Message] = field(default_factory=list)
     turns: int = 0
+    troubleshooting: Optional[Any] = None   # TroubleshootingState while a diagnosis tree is active
 
     def append(self, user: str, assistant: str, max_turns: int) -> None:
         self.history.extend([{"role": "user", "content": user}, {"role": "assistant", "content": assistant}])

@@ -16,21 +16,50 @@ from app.router.alarm_parser import extract_alarm_codes
 from app.schemas.retrieval import RetrievedDoc
 
 REFUSAL_PHRASE = "현재 제공된 문서에서는"
-# A real refusal *opens* with the phrase (first sentence). The same words later in
-# an answer ("…문서에서는 현재 상태를 확인할 수 없으므로 다음을 점검…") are a caveat.
+# A real refusal *opens* with the phrase (first sentence) and then has nothing grounded to
+# offer. The same words later in an answer are a caveat; and an answer that opens with the
+# phrase but goes on to cite a section and list causes is a hedged answer, not a refusal.
 _FIRST_SENTENCE_END = re.compile(r"[.!?\n]")
+_SECTION_REF = re.compile(r"§|\[SOURCE|Manual|매뉴얼|Log|Guide|SOP|Notes?\b|문서에\s*따르면|에\s*따르면", re.IGNORECASE)
+REFUSAL_MAX_BODY_CHARS = 220   # real refusals run ~100-150 chars; hedged-but-grounded answers run 300+
 
 
 def is_refusal_text(answer: str) -> bool:
-    first = _FIRST_SENTENCE_END.split(answer.strip(), maxsplit=1)[0]
-    return REFUSAL_PHRASE in first
+    text = answer.strip()
+    first = _FIRST_SENTENCE_END.split(text, maxsplit=1)[0]
+    if REFUSAL_PHRASE not in first:
+        return False
+    body = _CITATION_LINE.sub("", text)
+    return len(body) <= REFUSAL_MAX_BODY_CHARS or not _SECTION_REF.search(body[len(first):])
 
 # Numbers incl. sign and decimals. List markers ("1.", "2)") are small ints and get
 # filtered later — don't exclude ')' or '.' here or "(기본 0.5)" / "v2.3." are lost.
 # Lookbehind allows a letter prefix so "v2.3" / "F3" still yield their numbers.
 _NUM = re.compile(r"(?<![0-9_.])[-−–]?\d+(?:[.,]\d+)*(?![A-Za-z0-9_])")
 _HAN = re.compile(r"[一-鿿]")  # Chinese characters — never legitimate in a Korean answer
+# Answer phrases that assert a non-official source exists -> the context must actually contain one.
+_SOURCE_TYPE_CLAIMS = {
+    "maintenance": re.compile(r"(유지\s*보수\s*(이력|기록|로그)|정비\s*(이력|기록)|maintenance\s*(log|history|record))", re.IGNORECASE),
+    "engineer_note": re.compile(r"(엔지니어\s*(메모|노트|경험)|현장\s*(메모|노트)|engineer\s*note)", re.IGNORECASE),
+}
 _CITATION_LINE = re.compile(r"^\W*출처\W*[:：](.*)$", re.MULTILINE)
+
+
+_NEGATED = re.compile(r"(없|않|못|불가|미포함|제공되지|확인할\s*수\s*없)")
+_SENTENCE_SPLIT = re.compile(r"(?<=[.!?])\s+|\n+")
+
+
+def _squash(s: str) -> str:
+    return re.sub(r"\s+", "", s).lower()
+
+
+def _asserts_source(body: str, rx: "re.Pattern[str]") -> bool:
+    """True if some sentence mentions the source type WITHOUT negating it
+    ("유지보수 기록은 없습니다" is honest; "유지보수 이력에 따르면 …" fabricates)."""
+    for sentence in _SENTENCE_SPLIT.split(body):
+        if rx.search(sentence) and not _NEGATED.search(sentence):
+            return True
+    return False
 
 
 def _norm_num(s: str) -> str:
@@ -69,6 +98,7 @@ class ValidationResult:
     invalid_citations: List[str] = field(default_factory=list)
     cited_documents: List[str] = field(default_factory=list)
     foreign_script: bool = False
+    fabricated_source_types: List[str] = field(default_factory=list)   # e.g. ["maintenance"] claimed but not provided
 
     def to_dict(self) -> dict:
         return {
@@ -78,6 +108,7 @@ class ValidationResult:
             "unsupported_codes": self.unsupported_codes,
             "invalid_citations": self.invalid_citations,
             "foreign_script": self.foreign_script,
+            "fabricated_source_types": self.fabricated_source_types,
         }
 
 
@@ -114,8 +145,12 @@ class AnswerValidator:
         provided = {str(d.metadata.get("document_name") or "") for d in docs} | {str(d.metadata.get("source") or "") for d in docs}
         provided.discard("")
         cited = _parse_citations(answer)
-        invalid = [c for c in cited if not any(c in p or p in c for p in provided)]
+        # the model sometimes spaces out names ("2026 년 3 월" for "2026년 3월") — compare without whitespace
+        provided_n = {_squash(p) for p in provided}
+        invalid = [c for c in cited if not any(_squash(c) in p or p in _squash(c) for p in provided_n)]
 
         foreign = bool(_HAN.search(answer))
-        ok = not unsupported_numbers and not unsupported_codes and not invalid and not foreign
-        return ValidationResult(ok, is_refusal, unsupported_numbers, unsupported_codes, invalid, cited, foreign)
+        provided_types = {str(d.metadata.get("document_type") or "") for d in docs}
+        fabricated = [t for t, rx in _SOURCE_TYPE_CLAIMS.items() if t not in provided_types and _asserts_source(body, rx)]
+        ok = not unsupported_numbers and not unsupported_codes and not invalid and not foreign and not fabricated
+        return ValidationResult(ok, is_refusal, unsupported_numbers, unsupported_codes, invalid, cited, foreign, fabricated)

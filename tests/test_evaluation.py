@@ -36,9 +36,12 @@ def test_dataset_loads_and_expected_sources_exist_in_sample_corpus():
     assert len(cases) >= 30
     chunk_ids = {c["chunk_id"] for c in json.loads((ROOT / "corpus/processed/sample_chunks.json").read_text(encoding="utf-8"))}
     for c in cases:
-        for src in c.expected_source:
+        for src in c.expected_source or []:
             assert src in chunk_ids, f"{c.id}: unknown chunk {src}"
-        assert c.expect_refusal == (not c.expected_source) or c.id == "Q073", c.id
+        if c.expected_source is not None:                       # None = scored on route/first question only
+            assert c.expect_refusal == (c.expected_source == []) or c.id == "Q073", c.id
+        else:
+            assert c.expected_route, f"{c.id}: unknown source needs an expected_route"
     assert {c.category for c in cases} >= {"alarm_definition", "normal_value", "out_of_scope", "follow_up", "history"}
 
 

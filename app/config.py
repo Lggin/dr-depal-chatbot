@@ -69,6 +69,7 @@ class Settings(BaseSettings):
     rerank_max_length: int = 1024  # model supports 8192; 1024 keeps CPU latency sane
     glossary_path: str = "corpus/glossary/glossary.json"
     corpus_config: str = "configs/corpus.yaml"
+    troubleshooting_config: str = "configs/troubleshooting.yaml"
 
     # Database
     database_url: str = "sqlite:///./data/chatbot.db"

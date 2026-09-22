@@ -85,6 +85,40 @@ def test_chinese_characters_flagged_as_foreign_script():
     assert not AnswerValidator().validate("정상 가동을 회복했습니다.", [MANUAL], "q").foreign_script
 
 
+def test_negated_mention_of_missing_source_type_is_not_fabrication():
+    v = AnswerValidator().validate("정상 범위는 -60 ~ -80 kPa 입니다. 과거 유지보수 기록은 제공된 문서에 없습니다.", [MANUAL], "q")
+    assert v.fabricated_source_types == [] and v.ok
+
+
+def test_spaced_out_citation_name_still_matches_document():
+    tl = doc("t", "8월 릴리즈 12회.", document_name="02. 타임라인 — 2026년 3월 ~ 8월", section="8월", document_type="manual")
+    v = AnswerValidator().validate("8월에 12회 릴리즈.\n출처: 02. 타임라인 — 2026 년 3 월 ~ 8 월 §8월", [tl], "q")
+    assert v.invalid_citations == [] and v.ok
+    assert [s.chunk_id for s in build_sources([tl, MANUAL], cited_names=["02. 타임라인 — 2026 년 3 월 ~ 8 월"])] == ["t"]
+
+
+def test_claimed_maintenance_or_engineer_note_without_such_source_is_flagged():
+    ans = "확인 순서: LED, ping, 케이블.\n참고: 과거 유지보수 이력에 따르면 LED가 꺼져 있었고, 현장 엔지니어 메모에 따르면 케이블 마모가 잦습니다."
+    v = AnswerValidator().validate(ans, [MANUAL], "VIS-301?")          # MANUAL is an official alarm manual only
+    assert v.fabricated_source_types == ["maintenance", "engineer_note"] and not v.ok
+    ok = AnswerValidator().validate("과거 유지보수 이력: 2026-09-10 호스 교체.", [MANUAL, LOG], "이력?")
+    assert ok.fabricated_source_types == []
+
+
+def test_hedged_opening_followed_by_grounded_answer_is_not_a_refusal():
+    text = ("서보 과부하 알람 (ROB-105) 이 발생하는 원인은 현재 제공된 문서에서는 확인할 수 없습니다.\n\n"
+            "제공된 [Robot Controller Manual] §8.5 에 따르면 ROB-105 의 가능한 원인은 다음과 같습니다: "
+            "1. Payload 초과: 현재 설정된 payload 가 30 kg 을 초과하는지 확인해야 합니다. 2. 축 기계적 간섭: 축을 수동으로 회전하여 확인. "
+            "3. 감속기 이상: 소음이나 발열 확인.\n\n현재 문서에는 실제 로봇 상태가 포함되어 있지 않으므로 구체적인 상태는 판단할 수 없습니다.")
+    v = AnswerValidator().validate(text, [MANUAL], "서보 과부하래")
+    assert not v.is_refusal
+
+
+def test_true_refusal_is_short_and_uncited():
+    assert AnswerValidator().validate("현재 제공된 문서에서는 로봇 컨트롤러 IP 주소를 확인할 수 없습니다.\n\n"
+                                      "제공된 문서에는 알람 코드와 절차만 있고 네트워크 설정은 없습니다.", [MANUAL], "IP?").is_refusal
+
+
 def test_refusal_phrase_mid_answer_is_a_caveat_not_a_refusal():
     text = ("카메라 응답이 없어 VIS-301 알람 가능성이 높습니다.\n\n현재 제공된 문서에서는 카메라의 실제 상태를 확인할 수 없으므로 "
             "다음 순서로 점검합니다: 1. LED 2. ping 3. 케이블")
@@ -129,6 +163,12 @@ def test_canonicalize_replaces_model_citation_line():
     answer = "네, 이력이 있습니다.\n\n출처: Maintenance Log §2026-09-10 DP-01 VAC-203 발생"
     out = canonicalize_citations(answer, build_sources([LOG]), is_refusal=False)
     assert out == "네, 이력이 있습니다.\n\n출처: Maintenance Log"
+
+
+def test_canonicalize_drops_orphan_reference_heading():
+    answer = "확인 순서: LED, ping, 케이블.\n\n**참고:**\n*   출처: Vision System Manual §5.1"
+    out = canonicalize_citations(answer, build_sources([MANUAL]), is_refusal=False)
+    assert "참고" not in out and out.startswith("확인 순서: LED, ping, 케이블.") and out.endswith("출처: Vacuum System Manual §6.3 (VAC-203)")
 
 
 def test_canonicalize_removes_citation_on_refusal():

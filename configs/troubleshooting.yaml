@@ -1,0 +1,95 @@
+# Troubleshooting decision trees (spec §19). Deterministic — evaluated in Python, not by the LLM.
+#
+# issue:
+#   triggers: substrings that map a user message to this issue
+#   facts:    yes/no observations; `question` is asked when unknown, `tool` (Phase 4) can pre-fill it
+#   order:    which unknown fact to ask about first
+#   steps:    first step whose `when` conditions are all satisfied by known facts is recommended;
+#             `doc_query` drives retrieval for the grounded inspection procedure
+#   escalate: message when facts are known but no step matches
+
+issues:
+  pickup_failure:
+    label: 박스 흡착/픽업 실패
+    triggers: [못 집, 못 잡, 안 집, 안 잡, 흡착 실패, 흡착이 안, 픽업 실패, pickup, 빨판, 집지 못, 잡지 못, 놓쳐, 떨어져]
+    facts:
+      vision_detection:
+        question: 비전 화면에서 박스가 정상적으로 검출되고 있나요?
+        tool: vision_detection
+      robot_position_ok:
+        question: 로봇이 박스 상면 중앙까지 정상적으로 내려오나요? (위치가 어긋나지 않나요?)
+      vacuum_ok:
+        question: 흡착 시 진공압이 정상 범위(-60 kPa 이상)에 도달하나요?
+        tool: vacuum_pressure
+      box_surface_ok:
+        question: 박스 상면이 찢어지거나 테이프가 들떠 있지는 않나요?
+    order: [vision_detection, robot_position_ok, vacuum_ok, box_surface_ok]
+    steps:
+      - id: check_vision
+        when: {vision_detection: false}
+        actions: [카메라 연결·전원 확인, 조명(역광·그늘) 확인, detection_threshold 값 확인]
+        doc_query: 비전에서 박스 검출 안 될 때 확인 VIS-301 VIS-302 조명 임계값
+      - id: check_robot_pose
+        when: {vision_detection: true, robot_position_ok: false}
+        actions: [카메라-로봇 캘리브레이션 확인, 좌표 변환 확인, 로봇 티칭 확인]
+        doc_query: 캘리브레이션 절차 로봇 위치 오차 재투영 오차
+      - id: check_vacuum
+        when: {vision_detection: true, robot_position_ok: true, vacuum_ok: false}
+        actions: [vacuum hose 누설 확인, suction cup 손상 확인, vacuum generator 상태 확인]
+        doc_query: VAC-203 진공압 저하 원인 점검 순서 호스 누설 패드 손상
+      - id: check_box
+        when: {vision_detection: true, robot_position_ok: true, vacuum_ok: true, box_surface_ok: false}
+        actions: [박스 상면 상태 확인(찢어짐·테이프 들뜸), 패드 밀착 불량 여부 확인]
+        doc_query: 박스 상면 테이프 들뜸 패드 밀착 불량 흡착 실패
+    escalate: 비전·로봇 위치·진공·박스 상태가 모두 정상인데도 흡착에 실패한다면 현장에서 더 좁히기 어렵습니다. 개발팀에 로그와 함께 알려 주세요.
+
+  detection_failure:
+    label: 박스 검출/인식 안 됨
+    triggers: [검출이 안, 검출 안, 인식이 안, 인식 안, 못 찾, 안 찾, 검출되지 않, 인식되지 않, 안 잡혀, 박스가 안 보]
+    facts:
+      camera_connected:
+        question: 카메라 영상이 화면에 정상적으로 나오나요? (검은 화면·멈춤이 아닌가요)
+        tool: camera_state
+      lighting_ok:
+        question: 조명이 평소와 같나요? (역광, 그늘, 반사가 심하지 않나요)
+      realtime_mode_on:
+        question: 실시간 검출 모드가 켜져 있나요? (`l` 키)
+    order: [camera_connected, realtime_mode_on, lighting_ok]
+    steps:
+      - id: check_camera
+        when: {camera_connected: false}
+        actions: [카메라 케이블·전원 확인, 네트워크(ping) 확인, 카메라 재연결]
+        doc_query: 카메라 응답 없음 VIS-301 GigE 케이블 ping
+      - id: enable_realtime
+        when: {camera_connected: true, realtime_mode_on: false}
+        actions: [실시간 검출 모드 켜기]
+        doc_query: 실시간 검출 ON/OFF l 키 라이브 앱 조작
+      - id: check_lighting
+        when: {camera_connected: true, realtime_mode_on: true, lighting_ok: false}
+        actions: [조명 상태 복구, 역광·반사 제거, 라이브 영상에서 박스 윤곽 확인]
+        doc_query: 검출 신뢰도 낮음 조명 변화 반사 VIS-302 detection_threshold
+      - id: check_threshold
+        when: {camera_connected: true, realtime_mode_on: true, lighting_ok: true}
+        actions: [detection_threshold 설정값 확인(기본 0.5), 박스 종류·표면 확인, 개발팀에 이미지 전달]
+        doc_query: 검출 임계값 기본값 신뢰도 미달 박스 표면 반사
+    escalate: 카메라·모드·조명이 정상인데도 검출이 안 되면 모델/설정 문제일 수 있습니다. 라이브 화면 캡처와 함께 개발팀에 알려 주세요.
+
+  position_offset:
+    label: 로봇 픽 위치 어긋남
+    triggers: [위치가 어긋, 어긋나, 조금씩 틀어, 옆으로 집, 중심을 못, 치우쳐, 위치 오차, 좌표가 틀]
+    facts:
+      offset_consistent:
+        question: 어긋나는 방향과 크기가 매번 비슷한가요? (일정하게 어긋남 = 예, 매번 다름 = 아니오)
+      recently_moved:
+        question: 최근에 카메라나 로봇 베이스를 옮기거나 부딪힌 적이 있나요?
+    order: [offset_consistent, recently_moved]
+    steps:
+      - id: recalibrate
+        when: {offset_consistent: true}
+        actions: [카메라-로봇 캘리브레이션 재수행, 재투영 오차 확인, 테스트 픽으로 위치 오차 확인]
+        doc_query: 캘리브레이션 절차 재투영 오차 위치 오차 일정하게 어긋남
+      - id: check_detection_quality
+        when: {offset_consistent: false}
+        actions: [검출 마스크 품질 확인, 박스 상면 평면 적합 확인, depth 품질 확인]
+        doc_query: 파지 자세 추정 상면 중심 오차 평면 적합 depth
+    escalate: 위치 어긋남 패턴을 특정하기 어렵습니다. 어긋난 픽의 영상과 좌표 로그를 개발팀에 전달해 주세요.

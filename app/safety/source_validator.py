@@ -32,7 +32,8 @@ def build_sources(included: List[RetrievedDoc], cited_names: Optional[List[str]]
     """Sources actually provided; narrowed to those the model cited when that resolves to ≥1 doc."""
     all_sources = [to_source(d) for d in included]
     if cited_names:
-        picked = [s for s in all_sources if any(c in s.document or s.document in c for c in cited_names)]
+        sq = lambda s: re.sub(r"\s+", "", s).lower()
+        picked = [s for s in all_sources if any(sq(c) in sq(s.document) or sq(s.document) in sq(c) for c in cited_names)]
         if picked:
             return picked
     return all_sources
@@ -50,8 +51,12 @@ def format_citation(sources: List[DocumentSource]) -> str:
     return "출처: " + "; ".join(dict.fromkeys(parts))  # de-dup, keep order
 
 
+_ORPHAN_HEADING = re.compile(r"(?:\n\s*[*#]*\s*(?:참고|참고\s*사항|출처|Sources?|References?)\s*[:：]?\s*[*]*\s*)+$", re.IGNORECASE)
+
+
 def canonicalize_citations(answer: str, sources: List[DocumentSource], is_refusal: bool) -> str:
     body = _CITATION_LINE.sub("", answer).rstrip()
+    body = _ORPHAN_HEADING.sub("", body).rstrip()      # e.g. a "**참고:**" heading whose only item was the citation
     if is_refusal or not sources:
         return body
     return f"{body}\n\n{format_citation(sources)}"

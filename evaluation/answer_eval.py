@@ -43,15 +43,18 @@ class AnswerEvaluator:
             citation_ok = any(c in source_ids for c in case.expected_source)
         else:
             citation_ok = not source_ids
-        correct = not missing and not forbidden and refusal_ok
+        route_ok = (r.route == case.expected_route) if case.expected_route else None
+        correct = not missing and not forbidden and refusal_ok and route_ok is not False
 
         return {
+            "route": r.route, "expected_route": case.expected_route, "route_ok": route_ok,
             "id": case.id, "category": case.category, "question": case.question,
             "answer": r.answer, "is_refusal": r.validation.is_refusal, "expect_refusal": case.expect_refusal,
             "missing": missing, "forbidden": forbidden, "refusal_ok": refusal_ok,
             "sources": source_ids, "expected": case.expected_source, "citation_ok": citation_ok,
             "validation_ok": r.validation.ok, "unsupported_numbers": r.validation.unsupported_numbers,
             "unsupported_codes": r.validation.unsupported_codes, "invalid_citations": r.validation.invalid_citations,
+            "foreign_script": r.validation.foreign_script, "fabricated_source_types": r.validation.fabricated_source_types,
             "danger_flags": r.validation.danger_flags, "alarm_codes": r.alarm_codes,
             "intent": str(r.intent.value if hasattr(r.intent, "value") else r.intent), "expected_intent": case.expected_intent,
             "correct": correct, "latency_ms": r.latency_ms, "timing_ms": r.timing_ms,
@@ -72,6 +75,7 @@ class AnswerEvaluator:
             "unsupported_claim_rate": mean([0.0 if r["validation_ok"] else 1.0 for r in answered]),
             "danger_flag_rate": mean([1.0 if r["danger_flags"] else 0.0 for r in rows]),
             "intent_accuracy": mean([1.0 if r["intent"] == r["expected_intent"] else 0.0 for r in rows]),
+            "route_accuracy": mean([1.0 if r["route_ok"] else 0.0 for r in rows if r["route_ok"] is not None]),
             "latency_ms_median": sorted(r["latency_ms"] for r in rows)[len(rows) // 2] if rows else None,
             "latency_ms_p95": sorted(r["latency_ms"] for r in rows)[int(len(rows) * 0.95) - 1] if rows else None,
         }

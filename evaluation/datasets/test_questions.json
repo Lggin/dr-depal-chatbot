@@ -1,47 +1,607 @@
 [
-  {"id": "Q001", "category": "alarm_definition", "question": "VAC-203이 뭐야?", "expected_intent": "knowledge", "expected_alarm_code": "VAC-203", "expected_source": ["VAC_203_001"], "must_include": ["진공"], "must_not_include": ["servo", "서보"], "expect_refusal": false},
-  {"id": "Q002", "category": "alarm_definition", "question": "VAC203 알람 설명해줘", "expected_intent": "knowledge", "expected_alarm_code": "VAC-203", "expected_source": ["VAC_203_001"], "must_include": ["진공"], "must_not_include": ["서보"], "expect_refusal": false},
-  {"id": "Q003", "category": "alarm_definition", "question": "vac_203 뜻이 뭔지 알려줘", "expected_intent": "knowledge", "expected_alarm_code": "VAC-203", "expected_source": ["VAC_203_001"], "must_include": ["진공"], "must_not_include": [], "expect_refusal": false},
-  {"id": "Q004", "category": "alarm_definition", "question": "VAC-201은 어떤 알람이야?", "expected_intent": "knowledge", "expected_alarm_code": "VAC-201", "expected_source": ["VAC_201_001"], "must_include": ["센서"], "must_not_include": ["호스 누설"], "expect_refusal": false},
-  {"id": "Q005", "category": "alarm_definition", "question": "ROB-105 알람 원인이 뭐야?", "expected_intent": "knowledge", "expected_alarm_code": "ROB-105", "expected_source": ["ROB_105_001"], "must_include": ["payload"], "must_not_include": ["진공"], "expect_refusal": false},
-  {"id": "Q006", "category": "alarm_definition", "question": "VIS-301 알람이 떴어. 뭘 확인해?", "expected_intent": "troubleshooting", "expected_alarm_code": "VIS-301", "expected_source": ["VIS_301_001"], "must_include": ["케이블"], "must_not_include": ["진공"], "expect_refusal": false},
-  {"id": "Q007", "category": "alarm_definition", "question": "VIS302 원인", "expected_intent": "knowledge", "expected_alarm_code": "VIS-302", "expected_source": ["VIS_302_001"], "must_include": ["조명"], "must_not_include": ["케이블 불량"], "expect_refusal": false},
-
-  {"id": "Q010", "category": "normal_value", "question": "진공압 정상 범위 알려줘", "expected_intent": "knowledge", "expected_alarm_code": null, "expected_source": ["VAC_203_001", "VAC_MANUAL_SPEC_001"], "must_include": ["-60", "-80"], "must_not_include": ["-50"], "expect_refusal": false},
-  {"id": "Q011", "category": "normal_value", "question": "진공 발생기 공급 공기압은 얼마여야 해?", "expected_intent": "knowledge", "expected_alarm_code": null, "expected_source": ["VAC_MANUAL_SPEC_001"], "must_include": ["0.5", "0.6"], "must_not_include": [], "expect_refusal": false},
-  {"id": "Q012", "category": "normal_value", "question": "로봇 payload 한계가 얼마야?", "expected_intent": "knowledge", "expected_alarm_code": null, "expected_source": ["ROB_105_001"], "must_include": ["30"], "must_not_include": [], "expect_refusal": false},
-  {"id": "Q013", "category": "normal_value", "question": "진공 센서 출력 정상 범위는?", "expected_intent": "knowledge", "expected_alarm_code": null, "expected_source": ["VAC_201_001"], "must_include": ["1", "5", "V"], "must_not_include": [], "expect_refusal": false},
-  {"id": "Q014", "category": "normal_value", "question": "흡착 확인 시간은 보통 얼마 안에 도달해야 정상이야?", "expected_intent": "knowledge", "expected_alarm_code": null, "expected_source": ["VAC_MANUAL_SPEC_001"], "must_include": ["0.3"], "must_not_include": [], "expect_refusal": false},
-  {"id": "Q015", "category": "normal_value", "question": "detection_threshold 기본값이 뭐야?", "expected_intent": "knowledge", "expected_alarm_code": null, "expected_source": ["VIS_302_001"], "must_include": ["0.5"], "must_not_include": [], "expect_refusal": false},
-  {"id": "Q016", "category": "normal_value", "question": "캘리브레이션 재투영 오차는 얼마 이하여야 저장할 수 있어?", "expected_intent": "knowledge", "expected_alarm_code": null, "expected_source": ["SOP_CALIB_001"], "must_include": ["1.0"], "must_not_include": [], "expect_refusal": false},
-
-  {"id": "Q020", "category": "procedure", "question": "캘리브레이션 방법 알려줘", "expected_intent": "knowledge", "expected_alarm_code": null, "expected_source": ["SOP_CALIB_001"], "must_include": ["캘리브레이션"], "must_not_include": [], "expect_refusal": false},
-  {"id": "Q021", "category": "procedure", "question": "로봇 티칭은 어떻게 해?", "expected_intent": "knowledge", "expected_alarm_code": null, "expected_source": ["SOP_TEACH_001"], "must_include": ["Place", "Home"], "must_not_include": [], "expect_refusal": false},
-  {"id": "Q022", "category": "procedure", "question": "Pick 포지션도 티칭해야 해?", "expected_intent": "knowledge", "expected_alarm_code": null, "expected_source": ["SOP_TEACH_001"], "must_include": ["비전"], "must_not_include": [], "expect_refusal": false},
-  {"id": "Q023", "category": "procedure", "question": "박스 흡착 실패 원인이 뭐야?", "expected_intent": "troubleshooting", "expected_alarm_code": null, "expected_source": ["TS_PICKUP_FAIL_001"], "must_include": ["비전", "진공"], "must_not_include": [], "expect_refusal": false},
-
-  {"id": "Q030", "category": "colloquial", "question": "빨판이 박스를 못 잡아", "expected_intent": "troubleshooting", "expected_alarm_code": null, "expected_source": ["TS_PICKUP_FAIL_001"], "must_include": ["진공"], "must_not_include": [], "expect_refusal": false},
-  {"id": "Q031", "category": "colloquial", "question": "박스를 못 집는데 뭘 봐야 해?", "expected_intent": "troubleshooting", "expected_alarm_code": null, "expected_source": ["TS_PICKUP_FAIL_001"], "must_include": ["비전"], "must_not_include": [], "expect_refusal": false},
-  {"id": "Q032", "category": "colloquial", "question": "카메라가 응답이 없어", "expected_intent": "troubleshooting", "expected_alarm_code": null, "expected_source": ["VIS_301_001"], "must_include": ["케이블"], "must_not_include": [], "expect_refusal": false},
-  {"id": "Q033", "category": "colloquial", "question": "로봇이 자꾸 멈추고 서보 과부하래", "expected_intent": "troubleshooting", "expected_alarm_code": null, "expected_source": ["ROB_105_001"], "must_include": ["payload"], "must_not_include": [], "expect_refusal": false},
-
-  {"id": "Q040", "category": "symptom_to_alarm", "question": "박스가 있는데 비전에서 검출이 안 돼", "expected_intent": "troubleshooting", "expected_alarm_code": null, "expected_source": ["VIS_302_001"], "must_include": ["조명"], "must_not_include": [], "expect_refusal": false},
-  {"id": "Q041", "category": "symptom_to_alarm", "question": "진공압 표시가 0으로 고정돼 있어", "expected_intent": "troubleshooting", "expected_alarm_code": null, "expected_source": ["VAC_201_001"], "must_include": ["센서"], "must_not_include": [], "expect_refusal": false},
-  {"id": "Q042", "category": "symptom_to_alarm", "question": "로봇이 박스 위치에서 항상 조금씩 어긋나", "expected_intent": "troubleshooting", "expected_alarm_code": null, "expected_source": ["SOP_CALIB_001"], "must_include": ["캘리브레이션"], "must_not_include": [], "expect_refusal": false},
-
-  {"id": "Q050", "category": "history", "question": "VAC-203 지난번에도 있었어?", "expected_intent": "history", "expected_alarm_code": "VAC-203", "expected_source": ["MAINT_20260910_001"], "must_include": ["2026"], "must_not_include": [], "expect_refusal": false},
-  {"id": "Q051", "category": "history", "question": "9월 10일에 VAC-203 어떻게 조치했어?", "expected_intent": "history", "expected_alarm_code": "VAC-203", "expected_source": ["MAINT_20260910_001"], "must_include": ["호스"], "must_not_include": [], "expect_refusal": false},
-  {"id": "Q052", "category": "history", "question": "VAC-203이 며칠에 걸쳐 서서히 나빠지면 어디부터 봐?", "expected_intent": "troubleshooting", "expected_alarm_code": "VAC-203", "expected_source": ["ENG_NOTE_HOSE_001", "VAC_203_001"], "must_include": ["호스"], "must_not_include": [], "expect_refusal": false},
-
-  {"id": "Q060", "category": "faq", "question": "처리할 수 있는 박스 최대 크기가 얼마야?", "expected_intent": "knowledge", "expected_alarm_code": null, "expected_source": ["FAQ_BOX_TYPES_001"], "must_include": ["600"], "must_not_include": [], "expect_refusal": false},
-  {"id": "Q061", "category": "faq", "question": "비닐 랩으로 감싼 박스도 처리돼?", "expected_intent": "knowledge", "expected_alarm_code": null, "expected_source": ["FAQ_BOX_TYPES_001"], "must_include": ["설정"], "must_not_include": [], "expect_refusal": false},
-
-  {"id": "Q070", "category": "out_of_scope", "question": "로봇 컨트롤러 IP 주소가 뭐야?", "expected_intent": "general", "expected_alarm_code": null, "expected_source": [], "must_include": ["확인할 수 없습니다"], "must_not_include": ["192.168"], "expect_refusal": true},
-  {"id": "Q071", "category": "out_of_scope", "question": "감속기 윤활유 교체 주기가 얼마야?", "expected_intent": "general", "expected_alarm_code": null, "expected_source": [], "must_include": ["확인할 수 없습니다"], "must_not_include": ["개월", "시간마다"], "expect_refusal": true},
-  {"id": "Q072", "category": "out_of_scope", "question": "설비 담당자 연락처 알려줘", "expected_intent": "general", "expected_alarm_code": null, "expected_source": [], "must_include": ["확인할 수 없습니다"], "must_not_include": ["010"], "expect_refusal": true},
-  {"id": "Q073", "category": "out_of_scope", "question": "지금 진공압 얼마야?", "expected_intent": "live_status", "expected_alarm_code": null, "expected_source": [], "must_include": [], "must_not_include": ["-43"], "expect_refusal": true, "note": "Phase 1 has no tools; the assistant must not claim a live value"},
-
-  {"id": "Q080", "category": "follow_up", "history": ["VAC-203이 뭐야?"], "question": "그 알람 원인이 뭐야?", "expected_intent": "knowledge", "expected_alarm_code": "VAC-203", "expected_source": ["VAC_203_001"], "must_include": ["호스"], "must_not_include": ["확인할 수 없습니다"], "expect_refusal": false},
-  {"id": "Q081", "category": "follow_up", "history": ["ROB-105가 뭐야?"], "question": "그거 정상 범위가 얼마야?", "expected_intent": "knowledge", "expected_alarm_code": "ROB-105", "expected_source": ["ROB_105_001"], "must_include": ["30"], "must_not_include": ["확인할 수 없습니다"], "expect_refusal": false},
-  {"id": "Q082", "category": "follow_up", "history": ["VIS-301이 뭐야?"], "question": "해당 알람 점검 순서 알려줘", "expected_intent": "troubleshooting", "expected_alarm_code": "VIS-301", "expected_source": ["VIS_301_001"], "must_include": ["ping"], "must_not_include": [], "expect_refusal": false}
+ {
+  "id": "Q001",
+  "category": "alarm_definition",
+  "question": "VAC-203이 뭐야?",
+  "expected_intent": "knowledge",
+  "expected_alarm_code": "VAC-203",
+  "expected_source": [
+   "VAC_203_001"
+  ],
+  "must_include": [
+   "진공"
+  ],
+  "must_not_include": [
+   "servo",
+   "서보"
+  ],
+  "expect_refusal": false
+ },
+ {
+  "id": "Q002",
+  "category": "alarm_definition",
+  "question": "VAC203 알람 설명해줘",
+  "expected_intent": "knowledge",
+  "expected_alarm_code": "VAC-203",
+  "expected_source": [
+   "VAC_203_001"
+  ],
+  "must_include": [
+   "진공"
+  ],
+  "must_not_include": [
+   "서보"
+  ],
+  "expect_refusal": false
+ },
+ {
+  "id": "Q003",
+  "category": "alarm_definition",
+  "question": "vac_203 뜻이 뭔지 알려줘",
+  "expected_intent": "knowledge",
+  "expected_alarm_code": "VAC-203",
+  "expected_source": [
+   "VAC_203_001"
+  ],
+  "must_include": [
+   "진공"
+  ],
+  "must_not_include": [],
+  "expect_refusal": false
+ },
+ {
+  "id": "Q004",
+  "category": "alarm_definition",
+  "question": "VAC-201은 어떤 알람이야?",
+  "expected_intent": "knowledge",
+  "expected_alarm_code": "VAC-201",
+  "expected_source": [
+   "VAC_201_001"
+  ],
+  "must_include": [
+   "센서"
+  ],
+  "must_not_include": [
+   "호스 누설"
+  ],
+  "expect_refusal": false
+ },
+ {
+  "id": "Q005",
+  "category": "alarm_definition",
+  "question": "ROB-105 알람 원인이 뭐야?",
+  "expected_intent": "knowledge",
+  "expected_alarm_code": "ROB-105",
+  "expected_source": [
+   "ROB_105_001"
+  ],
+  "must_include": [
+   "payload"
+  ],
+  "must_not_include": [
+   "진공"
+  ],
+  "expect_refusal": false
+ },
+ {
+  "id": "Q006",
+  "category": "alarm_definition",
+  "question": "VIS-301 알람이 떴어. 뭘 확인해?",
+  "expected_intent": "troubleshooting",
+  "expected_alarm_code": "VIS-301",
+  "expected_source": [
+   "VIS_301_001"
+  ],
+  "must_include": [
+   "케이블"
+  ],
+  "must_not_include": [
+   "진공"
+  ],
+  "expect_refusal": false,
+  "expected_route": "troubleshooting"
+ },
+ {
+  "id": "Q007",
+  "category": "alarm_definition",
+  "question": "VIS302 원인",
+  "expected_intent": "knowledge",
+  "expected_alarm_code": "VIS-302",
+  "expected_source": [
+   "VIS_302_001"
+  ],
+  "must_include": [
+   "조명"
+  ],
+  "must_not_include": [
+   "케이블 불량"
+  ],
+  "expect_refusal": false
+ },
+ {
+  "id": "Q010",
+  "category": "normal_value",
+  "question": "진공압 정상 범위 알려줘",
+  "expected_intent": "knowledge",
+  "expected_alarm_code": null,
+  "expected_source": [
+   "VAC_203_001",
+   "VAC_MANUAL_SPEC_001"
+  ],
+  "must_include": [
+   "-60",
+   "-80"
+  ],
+  "must_not_include": [
+   "-50"
+  ],
+  "expect_refusal": false
+ },
+ {
+  "id": "Q011",
+  "category": "normal_value",
+  "question": "진공 발생기 공급 공기압은 얼마여야 해?",
+  "expected_intent": "knowledge",
+  "expected_alarm_code": null,
+  "expected_source": [
+   "VAC_MANUAL_SPEC_001"
+  ],
+  "must_include": [
+   "0.5",
+   "0.6"
+  ],
+  "must_not_include": [],
+  "expect_refusal": false
+ },
+ {
+  "id": "Q012",
+  "category": "normal_value",
+  "question": "로봇 payload 한계가 얼마야?",
+  "expected_intent": "knowledge",
+  "expected_alarm_code": null,
+  "expected_source": [
+   "ROB_105_001"
+  ],
+  "must_include": [
+   "30"
+  ],
+  "must_not_include": [],
+  "expect_refusal": false
+ },
+ {
+  "id": "Q013",
+  "category": "normal_value",
+  "question": "진공 센서 출력 정상 범위는?",
+  "expected_intent": "knowledge",
+  "expected_alarm_code": null,
+  "expected_source": [
+   "VAC_201_001"
+  ],
+  "must_include": [
+   "1",
+   "5",
+   "V"
+  ],
+  "must_not_include": [],
+  "expect_refusal": false
+ },
+ {
+  "id": "Q014",
+  "category": "normal_value",
+  "question": "흡착 확인 시간은 보통 얼마 안에 도달해야 정상이야?",
+  "expected_intent": "knowledge",
+  "expected_alarm_code": null,
+  "expected_source": [
+   "VAC_MANUAL_SPEC_001"
+  ],
+  "must_include": [
+   "0.3"
+  ],
+  "must_not_include": [],
+  "expect_refusal": false
+ },
+ {
+  "id": "Q015",
+  "category": "normal_value",
+  "question": "detection_threshold 기본값이 뭐야?",
+  "expected_intent": "knowledge",
+  "expected_alarm_code": null,
+  "expected_source": [
+   "VIS_302_001"
+  ],
+  "must_include": [
+   "0.5"
+  ],
+  "must_not_include": [],
+  "expect_refusal": false
+ },
+ {
+  "id": "Q016",
+  "category": "normal_value",
+  "question": "캘리브레이션 재투영 오차는 얼마 이하여야 저장할 수 있어?",
+  "expected_intent": "knowledge",
+  "expected_alarm_code": null,
+  "expected_source": [
+   "SOP_CALIB_001"
+  ],
+  "must_include": [
+   "1.0"
+  ],
+  "must_not_include": [],
+  "expect_refusal": false
+ },
+ {
+  "id": "Q020",
+  "category": "procedure",
+  "question": "캘리브레이션 방법 알려줘",
+  "expected_intent": "knowledge",
+  "expected_alarm_code": null,
+  "expected_source": [
+   "SOP_CALIB_001"
+  ],
+  "must_include": [
+   "캘리브레이션"
+  ],
+  "must_not_include": [],
+  "expect_refusal": false
+ },
+ {
+  "id": "Q021",
+  "category": "procedure",
+  "question": "로봇 티칭은 어떻게 해?",
+  "expected_intent": "knowledge",
+  "expected_alarm_code": null,
+  "expected_source": [
+   "SOP_TEACH_001"
+  ],
+  "must_include": [
+   "Place",
+   "Home"
+  ],
+  "must_not_include": [],
+  "expect_refusal": false
+ },
+ {
+  "id": "Q022",
+  "category": "procedure",
+  "question": "Pick 포지션도 티칭해야 해?",
+  "expected_intent": "knowledge",
+  "expected_alarm_code": null,
+  "expected_source": [
+   "SOP_TEACH_001"
+  ],
+  "must_include": [
+   "비전"
+  ],
+  "must_not_include": [],
+  "expect_refusal": false
+ },
+ {
+  "id": "Q023",
+  "category": "procedure",
+  "question": "박스 흡착 실패 원인이 뭐야?",
+  "expected_intent": "troubleshooting",
+  "expected_alarm_code": null,
+  "expected_source": [
+   "TS_PICKUP_FAIL_001"
+  ],
+  "must_include": [
+   "비전",
+   "진공"
+  ],
+  "must_not_include": [],
+  "expect_refusal": false,
+  "expected_route": "troubleshooting"
+ },
+ {
+  "id": "Q030",
+  "category": "colloquial",
+  "question": "빨판이 박스를 못 잡아",
+  "expected_intent": "troubleshooting",
+  "expected_alarm_code": null,
+  "expected_source": null,
+  "must_include": [
+   "비전",
+   "검출"
+  ],
+  "must_not_include": [],
+  "expect_refusal": false,
+  "expected_route": "troubleshooting.ask",
+  "note": "Phase 3: starts the decision tree; scored on the first diagnostic question"
+ },
+ {
+  "id": "Q031",
+  "category": "colloquial",
+  "question": "박스를 못 집는데 뭘 봐야 해?",
+  "expected_intent": "troubleshooting",
+  "expected_alarm_code": null,
+  "expected_source": null,
+  "must_include": [
+   "비전",
+   "검출"
+  ],
+  "must_not_include": [],
+  "expect_refusal": false,
+  "expected_route": "troubleshooting.ask",
+  "note": "Phase 3: starts the decision tree; scored on the first diagnostic question"
+ },
+ {
+  "id": "Q032",
+  "category": "colloquial",
+  "question": "카메라가 응답이 없어",
+  "expected_intent": "troubleshooting",
+  "expected_alarm_code": null,
+  "expected_source": [
+   "VIS_301_001"
+  ],
+  "must_include": [
+   "케이블"
+  ],
+  "must_not_include": [],
+  "expect_refusal": false
+ },
+ {
+  "id": "Q033",
+  "category": "colloquial",
+  "question": "로봇이 자꾸 멈추고 서보 과부하래",
+  "expected_intent": "troubleshooting",
+  "expected_alarm_code": null,
+  "expected_source": [
+   "ROB_105_001"
+  ],
+  "must_include": [
+   "payload"
+  ],
+  "must_not_include": [],
+  "expect_refusal": false,
+  "expected_route": "troubleshooting"
+ },
+ {
+  "id": "Q040",
+  "category": "symptom_to_alarm",
+  "question": "박스가 있는데 비전에서 검출이 안 돼",
+  "expected_intent": "troubleshooting",
+  "expected_alarm_code": null,
+  "expected_source": null,
+  "must_include": [
+   "카메라 영상"
+  ],
+  "must_not_include": [],
+  "expect_refusal": false,
+  "expected_route": "troubleshooting.ask",
+  "note": "Phase 3: starts the decision tree; scored on the first diagnostic question"
+ },
+ {
+  "id": "Q041",
+  "category": "symptom_to_alarm",
+  "question": "진공압 표시가 0으로 고정돼 있어",
+  "expected_intent": "troubleshooting",
+  "expected_alarm_code": null,
+  "expected_source": [
+   "VAC_201_001"
+  ],
+  "must_include": [
+   "센서"
+  ],
+  "must_not_include": [],
+  "expect_refusal": false,
+  "expected_route": "troubleshooting"
+ },
+ {
+  "id": "Q042",
+  "category": "symptom_to_alarm",
+  "question": "로봇이 박스 위치에서 항상 조금씩 어긋나",
+  "expected_intent": "troubleshooting",
+  "expected_alarm_code": null,
+  "expected_source": null,
+  "must_include": [
+   "어긋나는 방향"
+  ],
+  "must_not_include": [],
+  "expect_refusal": false,
+  "expected_route": "troubleshooting.ask",
+  "note": "Phase 3: starts the decision tree; scored on the first diagnostic question"
+ },
+ {
+  "id": "Q050",
+  "category": "history",
+  "question": "VAC-203 지난번에도 있었어?",
+  "expected_intent": "history",
+  "expected_alarm_code": "VAC-203",
+  "expected_source": [
+   "MAINT_20260910_001"
+  ],
+  "must_include": [
+   "2026"
+  ],
+  "must_not_include": [],
+  "expect_refusal": false,
+  "expected_route": "history.filtered"
+ },
+ {
+  "id": "Q051",
+  "category": "history",
+  "question": "9월 10일에 VAC-203 어떻게 조치했어?",
+  "expected_intent": "history",
+  "expected_alarm_code": "VAC-203",
+  "expected_source": [
+   "MAINT_20260910_001"
+  ],
+  "must_include": [
+   "호스"
+  ],
+  "must_not_include": [],
+  "expect_refusal": false,
+  "expected_route": "history.filtered"
+ },
+ {
+  "id": "Q052",
+  "category": "history",
+  "question": "VAC-203이 며칠에 걸쳐 서서히 나빠지면 어디부터 봐?",
+  "expected_intent": "troubleshooting",
+  "expected_alarm_code": "VAC-203",
+  "expected_source": [
+   "ENG_NOTE_HOSE_001",
+   "VAC_203_001"
+  ],
+  "must_include": [
+   "호스"
+  ],
+  "must_not_include": [],
+  "expect_refusal": false
+ },
+ {
+  "id": "Q060",
+  "category": "faq",
+  "question": "처리할 수 있는 박스 최대 크기가 얼마야?",
+  "expected_intent": "knowledge",
+  "expected_alarm_code": null,
+  "expected_source": [
+   "FAQ_BOX_TYPES_001"
+  ],
+  "must_include": [
+   "600"
+  ],
+  "must_not_include": [],
+  "expect_refusal": false
+ },
+ {
+  "id": "Q061",
+  "category": "faq",
+  "question": "비닐 랩으로 감싼 박스도 처리돼?",
+  "expected_intent": "knowledge",
+  "expected_alarm_code": null,
+  "expected_source": [
+   "FAQ_BOX_TYPES_001"
+  ],
+  "must_include": [
+   "설정"
+  ],
+  "must_not_include": [],
+  "expect_refusal": false
+ },
+ {
+  "id": "Q070",
+  "category": "out_of_scope",
+  "question": "로봇 컨트롤러 IP 주소가 뭐야?",
+  "expected_intent": "knowledge",
+  "expected_alarm_code": null,
+  "expected_source": [],
+  "must_include": [
+   "확인할 수 없습니다"
+  ],
+  "must_not_include": [
+   "192.168"
+  ],
+  "expect_refusal": true,
+  "note": "out-of-scope domain question: KNOWLEDGE intent, retrieval-driven refusal (GENERAL is small talk only)"
+ },
+ {
+  "id": "Q071",
+  "category": "out_of_scope",
+  "question": "감속기 윤활유 교체 주기가 얼마야?",
+  "expected_intent": "knowledge",
+  "expected_alarm_code": null,
+  "expected_source": [],
+  "must_include": [
+   "확인할 수 없습니다"
+  ],
+  "must_not_include": [
+   "개월",
+   "시간마다"
+  ],
+  "expect_refusal": true,
+  "note": "out-of-scope domain question: KNOWLEDGE intent, retrieval-driven refusal (GENERAL is small talk only)"
+ },
+ {
+  "id": "Q072",
+  "category": "out_of_scope",
+  "question": "설비 담당자 연락처 알려줘",
+  "expected_intent": "knowledge",
+  "expected_alarm_code": null,
+  "expected_source": [],
+  "must_include": [
+   "확인할 수 없습니다"
+  ],
+  "must_not_include": [
+   "010"
+  ],
+  "expect_refusal": true,
+  "note": "out-of-scope domain question: KNOWLEDGE intent, retrieval-driven refusal (GENERAL is small talk only)"
+ },
+ {
+  "id": "Q073",
+  "category": "out_of_scope",
+  "question": "지금 진공압 얼마야?",
+  "expected_intent": "live_status",
+  "expected_alarm_code": null,
+  "expected_source": [],
+  "must_include": [
+   "확인할 수 없습니다"
+  ],
+  "must_not_include": [
+   "-43"
+  ],
+  "expect_refusal": true,
+  "note": "Phase 1 has no tools; the assistant must not claim a live value",
+  "expected_route": "live.no_tools"
+ },
+ {
+  "id": "Q080",
+  "category": "follow_up",
+  "history": [
+   "VAC-203이 뭐야?"
+  ],
+  "question": "그 알람 원인이 뭐야?",
+  "expected_intent": "knowledge",
+  "expected_alarm_code": "VAC-203",
+  "expected_source": [
+   "VAC_203_001"
+  ],
+  "must_include": [
+   "호스"
+  ],
+  "must_not_include": [
+   "확인할 수 없습니다"
+  ],
+  "expect_refusal": false
+ },
+ {
+  "id": "Q081",
+  "category": "follow_up",
+  "history": [
+   "ROB-105가 뭐야?"
+  ],
+  "question": "그거 정상 범위가 얼마야?",
+  "expected_intent": "knowledge",
+  "expected_alarm_code": "ROB-105",
+  "expected_source": [
+   "ROB_105_001"
+  ],
+  "must_include": [
+   "30"
+  ],
+  "must_not_include": [
+   "확인할 수 없습니다"
+  ],
+  "expect_refusal": false
+ },
+ {
+  "id": "Q082",
+  "category": "follow_up",
+  "history": [
+   "VIS-301이 뭐야?"
+  ],
+  "question": "해당 알람 점검 순서 알려줘",
+  "expected_intent": "troubleshooting",
+  "expected_alarm_code": "VIS-301",
+  "expected_source": [
+   "VIS_301_001"
+  ],
+  "must_include": [
+   "ping"
+  ],
+  "must_not_include": [],
+  "expect_refusal": false
+ }
 ]

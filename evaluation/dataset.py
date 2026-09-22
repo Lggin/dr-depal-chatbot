@@ -21,6 +21,7 @@ class EvalCase(BaseModel):
     must_include: List[str] = []
     must_not_include: List[str] = []
     expect_refusal: bool = False
+    expected_route: Optional[str] = None    # e.g. "troubleshooting.ask", "live.no_tools"; scored when set
     filters: Optional[dict] = None
     note: Optional[str] = None
 

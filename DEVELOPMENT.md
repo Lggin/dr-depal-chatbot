@@ -366,7 +366,55 @@ grounding check ✅
 
 ## Phase 3: Intent Router · Troubleshooting Engine · Multi-turn (2026-09-22 ~)
 
-### 🔄 3.1 Intent Router (진행 중)
+### ✅ 3.1 Intent Router
+- `app/router/intent_router.py` — 규칙 기반, LLM 미사용. 신호: `_NOW`(지금·현재), `_REFERENCE`(정상 범위·기준·정상인지), `_WHY_NOW`, `_HISTORY`, `_TROUBLE`(증상·점검 어휘), `_KNOWLEDGE`, `_SMALLTALK`, `_MACHINE_NOUN`. 우선순위 **LIVE_DIAGNOSIS > LIVE_STATUS > HISTORY > TROUBLESHOOTING > KNOWLEDGE**, GENERAL=명시적 잡담만(30자 미만·장비 명사 없음), 미매칭=KNOWLEDGE(confidence 0.5 — 코퍼스가 답할 수 있는지는 검색이 판단)
+- 핵심 분기: "지금 진공압 **얼마야**"→LIVE_STATUS / "진공압 **정상 범위**가 얼마야"→KNOWLEDGE / "지금 진공압이 **정상인지** 확인해줘"→LIVE_DIAGNOSIS(now+reference+machine, 명세 §17)
+- 34문항 규칙 테스트(명세 §9·§17·§18 예시 + 샘플 평가셋 기대값) 전부 통과. 잡은 함정: 한글은 전부 `\w`라 **`\b`가 한글 사이에서 절대 안 걸림**("넌 누구야", "나와요") — 이 프로젝트 정규식 3곳에서 반복된 실수
+
+### ✅ 3.2 Troubleshooting Engine (명세 §19–§20)
+- `configs/troubleshooting.yaml` — 결정트리 3종: **pickup_failure**(명세 §19 그대로: vision→robot_pose→vacuum→box), **detection_failure**(카메라→실시간모드→조명→임계값; 오퍼레이터 체크리스트 노트 기반), **position_offset**(일정한 어긋남→캘리브레이션 / 불규칙→검출 품질). issue = `triggers`(트리거 최장 일치) + `facts`(yes/no 질문, Phase 4용 `tool` 키) + `order` + `steps`(`when` 조건 전부 충족 시 권고, `doc_query`로 검색) + `escalate`
+- `app/troubleshooting/rules.py` — 로드·검증(`when`/`order`가 미정의 fact 참조 시 예외)
+- `app/troubleshooting/state.py` — 세션별 `TroubleshootingState`(issue·facts·pending_fact·current_step·resolved)
+- `app/troubleshooting/engine.py` — `next()`: 조건 충족 step 있으면 **recommend**, 없으면 `order` 순으로 **아직 관련 있는**(어떤 step이 여전히 필요로 하는) 미확인 fact 하나를 **ask**, 다 알면 **escalate**. `apply_reply()`: yes/no 파싱(`parse_yes_no`), "해결됐어"→resolved, "그만/다른 질문"→cancelled, 모호→unclear(재질문). `is_reply()`: 명시적 yes/no/해결/취소는 40자까지, 그 외 25자 이하 & 새 질문 표지(뭐야·알려·얼마·알람코드) 없음. `prefill_from_tools()`: Phase 4 훅
+- vision=false로 답하면 robot/vacuum 질문을 건너뛰고 바로 check_vision 권고(관련 없는 fact는 묻지 않음). 테스트 27건
+
+### ✅ 3.3 ChatPipeline 라우팅 (`app/llm/generator.py` 재작성)
+| intent | 동작 | LLM | 검색 |
+|---|---|---|---|
+| GENERAL | 도우미 소개(결정론) | ✗ | ✗ |
+| LIVE_STATUS (도구 없음) | "설비 조회 도구 미연결" 정직 응답, `is_refusal=True` | ✗ | ✗ |
+| LIVE_STATUS (machine_state 있음) | `[MACHINE STATE]` 블록 포함 생성 (Phase 4) | ✓ | ✓ |
+| LIVE_DIAGNOSIS (도구 없음) | 문서 기준값·점검 순서 + 상단 ⚠️ 미연결 안내 | ✓ | ✓ |
+| HISTORY | `document_type=maintenance` 필터 우선, 0건이면 무필터 재검색(`history.filtered`/`history.unfiltered`) | ✓ | ✓ |
+| TROUBLESHOOTING + 트리 매칭 + 증상 보고 | **ask**: 결정론 질문(0ms) → 답변마다 갱신 → **recommend**: step의 `doc_query`로 검색, `[TROUBLESHOOTING STATE]`와 함께 생성, 끝에 "해결되면 '해결됐어'" → **resolved/escalate**: 결정론 | ask ✗ / recommend ✓ | 동일 |
+| TROUBLESHOOTING + "원인이 뭐야?"(설명 요구) 또는 트리 없음 | 일반 RAG(`_ASKS_EXPLANATION`으로 구분 — "박스 흡착 실패 원인이 뭐야?"는 트리를 시작하지 않음) | ✓ | ✓ |
+| KNOWLEDGE | Phase 1 경로 | ✓ | ✓ |
+- sticky: 진단 중 짧은 답변은 intent와 무관하게 엔진으로; 새 주제 질문이 오면 진단 상태 폐기. `ChatResponse.route`/`troubleshooting` 필드 추가
+- E2E(`scripts/test_troubleshooting.py`, 샘플 코퍼스): 라우트 5종 정상, **명세 §20 대화 재현** — "박스를 못 집어." → 비전? "응" → 로봇? "응" → 진공? "아니, -45…" → check_vacuum 권고(호스→패드→발생기, 이미 정상인 항목 재점검 금지 준수, 4문서 근거) → "해결됐어" → 종료
+
+**이 단계에서 잡은 날조:** VIS-301 답변이 코퍼스에 없는 "과거 유지보수 이력"·"현장 엔지니어 메모" 절을 지어냄(공식 매뉴얼 1건만 컨텍스트에 있었음, 수치가 없어 검증기 미포착 — rule 14 예시의 "현장 엔지니어 메모:" 형식을 흉내 낸 것으로 추정). → **rule 18**(해당 Trust의 SOURCE가 있을 때만 언급) + **검증기 `fabricated_source_types`**(답변이 이력/메모를 주장하는데 컨텍스트에 그 타입 문서가 없으면 플래그, `ok=False`). 3회 재실행 날조 0. 잔여 코스메틱(빈 "참고:" 제목)은 `canonicalize_citations`에서 제거
+
+### ✅ 3.4 평가 — Phase 3 종료 (2026-09-22)
+
+샘플 평가셋 갱신: `expected_route` 11건(트리 시작 4건은 `expected_source: null` + 첫 진단 질문 키워드로 채점, LIVE 1건 `live.no_tools`, HISTORY 2건 `history.filtered`), 범위 밖 3건의 기대 intent를 general→**knowledge**로(GENERAL은 잡담 전용, 범위 밖은 검색이 거절을 결정하는 설계). `answer_eval`에 `route_accuracy`·`fabricated_source_types`·`foreign_script` 기록 추가.
+
+| 샘플 37문항 | Phase 1 최종 | Phase 3 1차 | **Phase 3 최종** |
+|---|---|---|---|
+| answer_correct | 1.000 | 0.973 | **1.000** |
+| intent_accuracy | 0.541 (고정 KNOWLEDGE) | 0.892 | **1.000** |
+| route_accuracy | — | 0.909 | **1.000** |
+| citation_accuracy | 1.000 | 1.000 | **1.000** |
+| unsupported_claim_rate | 0.000 | 0.061 | **0.000** |
+| false_refusal_rate | 0 | 0 | **0** |
+| latency median | 2.9s | 1.7s | **1.4s** |
+
+1차→최종에서 잡은 것: ① Q041 "진공압 표시가 0으로 **고정돼** 있어" → 증상 어휘(고정/표시/먹통/깜빡/끊겨/느려) 라우터 보강 ② Q033 답변이 "원인은 현재 제공된 문서에서는 확인할 수 없습니다"로 **열고 나서** §8.5 근거로 원인 3가지를 다 제시 → 거절로 오분류되어 sources 비움. **rule 16에 WRONG/RIGHT 오프닝 예시**(플레이스홀더) + **거절 판정 = 첫 문장 문구 AND (본문 ≤220자 OR 섹션·문서 참조 없음)** — 진짜 거절(~120자, 인용 없음)과 헤지형 정답(300자+, 인용 있음) 분리 ③ 1차의 unsupported 2건은 재실행에서 재현 안 됨(temp 0.1 변동) — 이후 평가 행에 플래그 종류를 기록해 다음엔 식별 가능
+
+**knowhow 40문항 회귀 게이트:** 1차 실행 **0.950으로 게이트 실패** → 원인 3개 모두 실코퍼스가 드러낸 결함: ① 과거형 어미 "…밀려나 **있었어**?"가 `_HISTORY`에 걸려 KD006·KD016이 HISTORY로 오라우팅 → 이력 힌트 때문에 모델이 빈 "과거 유지보수 이력: … 확인할 수 없습니다" 절을 붙임(금지 문구) — 라우터를 "발생/재발/조치" 표지 기반으로 재작성, 무필터 폴백 시 힌트도 "기록 없으면 한 문장만" ② 검증기 `fabricated_source_types`가 "유지보수 기록은 **없습니다**"(정직한 부정문)까지 잡음 → 문장 단위 부정어 제외 ③ 모델이 문서명에 공백 삽입("2026 년 3 월")해 인용 불일치 → 공백 무시 비교. 재실행 **1.000 / unsupported 0.000, 게이트 통과**. intent 0.950은 knowhow 평가셋의 기대 intent가 전부 자동 "knowledge"라서(오퍼레이터 증상 질문 2건이 troubleshooting으로 분류된 것은 타당)
+
+**Phase 3 완료.** 라우터·트리·세션 상태·라우팅 전부 결정론적 Python(명세 §30-7); LLM은 권고 단계의 근거 설명과 KNOWLEDGE/HISTORY/LIVE_DIAGNOSIS 답변만 담당. Phase 4 훅 준비됨: `facts.tool` → `prefill_from_tools()`, `machine_state` 슬롯(LIVE 라우트가 도구 결과를 받으면 LLM 경로로 전환).
+
+### 📋 다음: Phase 4 Machine Tools — `app/tools/base.py` 인터페이스 + Mock(알람·PLC·로봇·비전·센서·유지보수), `ToolRegistry`, LIVE_STATUS/LIVE_DIAGNOSIS 라우트에 도구 결과 주입, 트리 facts 자동 채움, READ ONLY 강제
 - BM25 인덱싱
 - 키워드 기반 검색
 

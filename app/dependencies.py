@@ -49,8 +49,14 @@ def build_chat_pipeline():
     )
     sessions = SessionStore(settings.session_timeout_minutes, settings.history_turns)
 
-    logger.info(f"chat pipeline ready in {time.perf_counter()-t0:.1f}s (aux={device}, chunks={sparse.size})")
-    return ChatPipeline(retrieval, prompt_builder, llm, sessions)
+    from pathlib import Path
+    from app.router.intent_router import IntentRouter
+    from app.troubleshooting import TroubleshootingEngine, load_rules
+    engine = TroubleshootingEngine(load_rules(Path(settings.troubleshooting_config)))
+
+    logger.info(f"chat pipeline ready in {time.perf_counter()-t0:.1f}s (aux={device}, chunks={sparse.size}, "
+                f"issues={list(engine.rules.issues)})")
+    return ChatPipeline(retrieval, prompt_builder, llm, sessions, router=IntentRouter(), engine=engine)
 
 
 def resolve_aux_device() -> str:
