@@ -72,7 +72,6 @@ models/
 Thumbs.db
 
 # Project specific
-results/
 experiments/
 temp/
 .omc/

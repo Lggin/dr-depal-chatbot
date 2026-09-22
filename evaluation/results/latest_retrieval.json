@@ -1,0 +1,1618 @@
+{
+ "mode": "retrieval",
+ "timestamp": "20260922_101209",
+ "summary": {
+  "cases": 37,
+  "scored": 33,
+  "out_of_scope": 4,
+  "alarm_parsing_accuracy": 1.0,
+  "fused_recall@1": 0.8484848484848485,
+  "fused_hit@1": 0.8787878787878788,
+  "fused_recall@3": 0.9696969696969697,
+  "fused_hit@3": 0.9696969696969697,
+  "fused_recall@5": 1.0,
+  "fused_hit@5": 1.0,
+  "fused_mrr": 0.9252525252525252,
+  "final_recall@1": 0.9090909090909091,
+  "final_hit@1": 0.9393939393939394,
+  "final_recall@3": 1.0,
+  "final_hit@3": 1.0,
+  "final_recall@5": 1.0,
+  "final_hit@5": 1.0,
+  "final_mrr": 0.9696969696969697,
+  "final_ndcg@5": 0.9776321062770581,
+  "final_hit@5_by_category": {
+   "alarm_definition": 1.0,
+   "colloquial": 1.0,
+   "faq": 1.0,
+   "follow_up": 1.0,
+   "history": 1.0,
+   "normal_value": 1.0,
+   "procedure": 1.0,
+   "symptom_to_alarm": 1.0
+  },
+  "misses_at_5": []
+ },
+ "rows": [
+  {
+   "id": "Q001",
+   "category": "alarm_definition",
+   "question": "VAC-203이 뭐야?",
+   "expected": [
+    "VAC_203_001"
+   ],
+   "retrieval_query": null,
+   "fused_top": [
+    "VAC_203_001",
+    "MAINT_20260910_001",
+    "ENG_NOTE_HOSE_001",
+    "TS_PICKUP_FAIL_001",
+    "VAC_201_001",
+    "VIS_301_001",
+    "ROB_105_001",
+    "VIS_302_001",
+    "SOP_CALIB_001",
+    "VAC_MANUAL_SPEC_001"
+   ],
+   "final": [
+    "VAC_203_001",
+    "MAINT_20260910_001",
+    "ENG_NOTE_HOSE_001",
+    "TS_PICKUP_FAIL_001"
+   ],
+   "alarm_parsed": [
+    "VAC-203"
+   ],
+   "alarm_ok": true,
+   "out_of_scope": false,
+   "fused_recall@1": 1.0,
+   "fused_hit@1": 1.0,
+   "final_recall@1": 1.0,
+   "final_hit@1": 1.0,
+   "fused_recall@3": 1.0,
+   "fused_hit@3": 1.0,
+   "final_recall@3": 1.0,
+   "final_hit@3": 1.0,
+   "fused_recall@5": 1.0,
+   "fused_hit@5": 1.0,
+   "final_recall@5": 1.0,
+   "final_hit@5": 1.0,
+   "fused_mrr": 1.0,
+   "final_mrr": 1.0,
+   "final_ndcg@5": 1.0,
+   "final_rank": 1
+  },
+  {
+   "id": "Q002",
+   "category": "alarm_definition",
+   "question": "VAC203 알람 설명해줘",
+   "expected": [
+    "VAC_203_001"
+   ],
+   "retrieval_query": null,
+   "fused_top": [
+    "VAC_203_001",
+    "ROB_105_001",
+    "ENG_NOTE_HOSE_001",
+    "MAINT_20260910_001",
+    "TS_PICKUP_FAIL_001",
+    "VAC_201_001",
+    "VIS_301_001",
+    "VIS_302_001",
+    "VAC_MANUAL_SPEC_001",
+    "SOP_CALIB_001"
+   ],
+   "final": [
+    "VAC_203_001"
+   ],
+   "alarm_parsed": [
+    "VAC-203"
+   ],
+   "alarm_ok": true,
+   "out_of_scope": false,
+   "fused_recall@1": 1.0,
+   "fused_hit@1": 1.0,
+   "final_recall@1": 1.0,
+   "final_hit@1": 1.0,
+   "fused_recall@3": 1.0,
+   "fused_hit@3": 1.0,
+   "final_recall@3": 1.0,
+   "final_hit@3": 1.0,
+   "fused_recall@5": 1.0,
+   "fused_hit@5": 1.0,
+   "final_recall@5": 1.0,
+   "final_hit@5": 1.0,
+   "fused_mrr": 1.0,
+   "final_mrr": 1.0,
+   "final_ndcg@5": 1.0,
+   "final_rank": 1
+  },
+  {
+   "id": "Q003",
+   "category": "alarm_definition",
+   "question": "vac_203 뜻이 뭔지 알려줘",
+   "expected": [
+    "VAC_203_001"
+   ],
+   "retrieval_query": null,
+   "fused_top": [
+    "VAC_203_001",
+    "ENG_NOTE_HOSE_001",
+    "MAINT_20260910_001",
+    "TS_PICKUP_FAIL_001",
+    "VAC_201_001",
+    "VIS_301_001",
+    "VIS_302_001",
+    "ROB_105_001",
+    "SOP_TEACH_001",
+    "SOP_CALIB_001"
+   ],
+   "final": [
+    "VAC_203_001",
+    "MAINT_20260910_001",
+    "ENG_NOTE_HOSE_001",
+    "TS_PICKUP_FAIL_001"
+   ],
+   "alarm_parsed": [
+    "VAC-203"
+   ],
+   "alarm_ok": true,
+   "out_of_scope": false,
+   "fused_recall@1": 1.0,
+   "fused_hit@1": 1.0,
+   "final_recall@1": 1.0,
+   "final_hit@1": 1.0,
+   "fused_recall@3": 1.0,
+   "fused_hit@3": 1.0,
+   "final_recall@3": 1.0,
+   "final_hit@3": 1.0,
+   "fused_recall@5": 1.0,
+   "fused_hit@5": 1.0,
+   "final_recall@5": 1.0,
+   "final_hit@5": 1.0,
+   "fused_mrr": 1.0,
+   "final_mrr": 1.0,
+   "final_ndcg@5": 1.0,
+   "final_rank": 1
+  },
+  {
+   "id": "Q004",
+   "category": "alarm_definition",
+   "question": "VAC-201은 어떤 알람이야?",
+   "expected": [
+    "VAC_201_001"
+   ],
+   "retrieval_query": null,
+   "fused_top": [
+    "VAC_201_001",
+    "ROB_105_001",
+    "VAC_203_001",
+    "ENG_NOTE_HOSE_001",
+    "VIS_301_001",
+    "MAINT_20260910_001",
+    "VIS_302_001",
+    "TS_PICKUP_FAIL_001",
+    "SOP_CALIB_001",
+    "VAC_MANUAL_SPEC_001"
+   ],
+   "final": [
+    "VAC_201_001"
+   ],
+   "alarm_parsed": [
+    "VAC-201"
+   ],
+   "alarm_ok": true,
+   "out_of_scope": false,
+   "fused_recall@1": 1.0,
+   "fused_hit@1": 1.0,
+   "final_recall@1": 1.0,
+   "final_hit@1": 1.0,
+   "fused_recall@3": 1.0,
+   "fused_hit@3": 1.0,
+   "final_recall@3": 1.0,
+   "final_hit@3": 1.0,
+   "fused_recall@5": 1.0,
+   "fused_hit@5": 1.0,
+   "final_recall@5": 1.0,
+   "final_hit@5": 1.0,
+   "fused_mrr": 1.0,
+   "final_mrr": 1.0,
+   "final_ndcg@5": 1.0,
+   "final_rank": 1
+  },
+  {
+   "id": "Q005",
+   "category": "alarm_definition",
+   "question": "ROB-105 알람 원인이 뭐야?",
+   "expected": [
+    "ROB_105_001"
+   ],
+   "retrieval_query": null,
+   "fused_top": [
+    "ROB_105_001",
+    "VIS_301_001",
+    "VAC_201_001",
+    "VAC_203_001",
+    "ENG_NOTE_HOSE_001",
+    "VIS_302_001",
+    "TS_PICKUP_FAIL_001",
+    "MAINT_20260910_001",
+    "SOP_CALIB_001",
+    "VAC_MANUAL_SPEC_001"
+   ],
+   "final": [
+    "ROB_105_001"
+   ],
+   "alarm_parsed": [
+    "ROB-105"
+   ],
+   "alarm_ok": true,
+   "out_of_scope": false,
+   "fused_recall@1": 1.0,
+   "fused_hit@1": 1.0,
+   "final_recall@1": 1.0,
+   "final_hit@1": 1.0,
+   "fused_recall@3": 1.0,
+   "fused_hit@3": 1.0,
+   "final_recall@3": 1.0,
+   "final_hit@3": 1.0,
+   "fused_recall@5": 1.0,
+   "fused_hit@5": 1.0,
+   "final_recall@5": 1.0,
+   "final_hit@5": 1.0,
+   "fused_mrr": 1.0,
+   "final_mrr": 1.0,
+   "final_ndcg@5": 1.0,
+   "final_rank": 1
+  },
+  {
+   "id": "Q006",
+   "category": "alarm_definition",
+   "question": "VIS-301 알람이 떴어. 뭘 확인해?",
+   "expected": [
+    "VIS_301_001"
+   ],
+   "retrieval_query": null,
+   "fused_top": [
+    "VIS_301_001",
+    "TS_PICKUP_FAIL_001",
+    "ROB_105_001",
+    "VIS_302_001",
+    "VAC_201_001",
+    "VAC_203_001",
+    "SOP_CALIB_001",
+    "VAC_MANUAL_SPEC_001",
+    "ENG_NOTE_HOSE_001",
+    "MAINT_20260910_001"
+   ],
+   "final": [
+    "VIS_301_001"
+   ],
+   "alarm_parsed": [
+    "VIS-301"
+   ],
+   "alarm_ok": true,
+   "out_of_scope": false,
+   "fused_recall@1": 1.0,
+   "fused_hit@1": 1.0,
+   "final_recall@1": 1.0,
+   "final_hit@1": 1.0,
+   "fused_recall@3": 1.0,
+   "fused_hit@3": 1.0,
+   "final_recall@3": 1.0,
+   "final_hit@3": 1.0,
+   "fused_recall@5": 1.0,
+   "fused_hit@5": 1.0,
+   "final_recall@5": 1.0,
+   "final_hit@5": 1.0,
+   "fused_mrr": 1.0,
+   "final_mrr": 1.0,
+   "final_ndcg@5": 1.0,
+   "final_rank": 1
+  },
+  {
+   "id": "Q007",
+   "category": "alarm_definition",
+   "question": "VIS302 원인",
+   "expected": [
+    "VIS_302_001"
+   ],
+   "retrieval_query": null,
+   "fused_top": [
+    "VIS_302_001",
+    "VIS_301_001",
+    "TS_PICKUP_FAIL_001",
+    "VAC_203_001",
+    "ENG_NOTE_HOSE_001",
+    "ROB_105_001",
+    "VAC_201_001",
+    "MAINT_20260910_001",
+    "FAQ_BOX_TYPES_001",
+    "SOP_TEACH_001"
+   ],
+   "final": [
+    "VIS_302_001"
+   ],
+   "alarm_parsed": [
+    "VIS-302"
+   ],
+   "alarm_ok": true,
+   "out_of_scope": false,
+   "fused_recall@1": 1.0,
+   "fused_hit@1": 1.0,
+   "final_recall@1": 1.0,
+   "final_hit@1": 1.0,
+   "fused_recall@3": 1.0,
+   "fused_hit@3": 1.0,
+   "final_recall@3": 1.0,
+   "final_hit@3": 1.0,
+   "fused_recall@5": 1.0,
+   "fused_hit@5": 1.0,
+   "final_recall@5": 1.0,
+   "final_hit@5": 1.0,
+   "fused_mrr": 1.0,
+   "final_mrr": 1.0,
+   "final_ndcg@5": 1.0,
+   "final_rank": 1
+  },
+  {
+   "id": "Q010",
+   "category": "normal_value",
+   "question": "진공압 정상 범위 알려줘",
+   "expected": [
+    "VAC_203_001",
+    "VAC_MANUAL_SPEC_001"
+   ],
+   "retrieval_query": null,
+   "fused_top": [
+    "VAC_203_001",
+    "VAC_MANUAL_SPEC_001",
+    "MAINT_20260910_001",
+    "VAC_201_001",
+    "TS_PICKUP_FAIL_001",
+    "ROB_105_001",
+    "FAQ_BOX_TYPES_001",
+    "ENG_NOTE_HOSE_001",
+    "VIS_302_001",
+    "VIS_301_001"
+   ],
+   "final": [
+    "VAC_203_001",
+    "VAC_MANUAL_SPEC_001",
+    "VAC_201_001",
+    "MAINT_20260910_001"
+   ],
+   "alarm_parsed": [],
+   "alarm_ok": true,
+   "out_of_scope": false,
+   "fused_recall@1": 0.5,
+   "fused_hit@1": 1.0,
+   "final_recall@1": 0.5,
+   "final_hit@1": 1.0,
+   "fused_recall@3": 1.0,
+   "fused_hit@3": 1.0,
+   "final_recall@3": 1.0,
+   "final_hit@3": 1.0,
+   "fused_recall@5": 1.0,
+   "fused_hit@5": 1.0,
+   "final_recall@5": 1.0,
+   "final_hit@5": 1.0,
+   "fused_mrr": 1.0,
+   "final_mrr": 1.0,
+   "final_ndcg@5": 1.0,
+   "final_rank": 1
+  },
+  {
+   "id": "Q011",
+   "category": "normal_value",
+   "question": "진공 발생기 공급 공기압은 얼마여야 해?",
+   "expected": [
+    "VAC_MANUAL_SPEC_001"
+   ],
+   "retrieval_query": null,
+   "fused_top": [
+    "VAC_MANUAL_SPEC_001",
+    "TS_PICKUP_FAIL_001",
+    "VAC_203_001",
+    "MAINT_20260910_001",
+    "VAC_201_001",
+    "ENG_NOTE_HOSE_001",
+    "ROB_105_001",
+    "FAQ_BOX_TYPES_001",
+    "VIS_302_001",
+    "VIS_301_001"
+   ],
+   "final": [
+    "VAC_MANUAL_SPEC_001"
+   ],
+   "alarm_parsed": [],
+   "alarm_ok": true,
+   "out_of_scope": false,
+   "fused_recall@1": 1.0,
+   "fused_hit@1": 1.0,
+   "final_recall@1": 1.0,
+   "final_hit@1": 1.0,
+   "fused_recall@3": 1.0,
+   "fused_hit@3": 1.0,
+   "final_recall@3": 1.0,
+   "final_hit@3": 1.0,
+   "fused_recall@5": 1.0,
+   "fused_hit@5": 1.0,
+   "final_recall@5": 1.0,
+   "final_hit@5": 1.0,
+   "fused_mrr": 1.0,
+   "final_mrr": 1.0,
+   "final_ndcg@5": 1.0,
+   "final_rank": 1
+  },
+  {
+   "id": "Q012",
+   "category": "normal_value",
+   "question": "로봇 payload 한계가 얼마야?",
+   "expected": [
+    "ROB_105_001"
+   ],
+   "retrieval_query": null,
+   "fused_top": [
+    "ROB_105_001",
+    "SOP_CALIB_001",
+    "TS_PICKUP_FAIL_001",
+    "ENG_NOTE_HOSE_001",
+    "SOP_TEACH_001",
+    "FAQ_BOX_TYPES_001",
+    "VAC_203_001",
+    "VAC_201_001",
+    "VIS_302_001",
+    "MAINT_20260910_001"
+   ],
+   "final": [
+    "ROB_105_001"
+   ],
+   "alarm_parsed": [],
+   "alarm_ok": true,
+   "out_of_scope": false,
+   "fused_recall@1": 1.0,
+   "fused_hit@1": 1.0,
+   "final_recall@1": 1.0,
+   "final_hit@1": 1.0,
+   "fused_recall@3": 1.0,
+   "fused_hit@3": 1.0,
+   "final_recall@3": 1.0,
+   "final_hit@3": 1.0,
+   "fused_recall@5": 1.0,
+   "fused_hit@5": 1.0,
+   "final_recall@5": 1.0,
+   "final_hit@5": 1.0,
+   "fused_mrr": 1.0,
+   "final_mrr": 1.0,
+   "final_ndcg@5": 1.0,
+   "final_rank": 1
+  },
+  {
+   "id": "Q013",
+   "category": "normal_value",
+   "question": "진공 센서 출력 정상 범위는?",
+   "expected": [
+    "VAC_201_001"
+   ],
+   "retrieval_query": null,
+   "fused_top": [
+    "VAC_201_001",
+    "VAC_203_001",
+    "VAC_MANUAL_SPEC_001",
+    "MAINT_20260910_001",
+    "TS_PICKUP_FAIL_001",
+    "ROB_105_001",
+    "VIS_302_001",
+    "VIS_301_001",
+    "ENG_NOTE_HOSE_001",
+    "SOP_CALIB_001"
+   ],
+   "final": [
+    "VAC_201_001"
+   ],
+   "alarm_parsed": [],
+   "alarm_ok": true,
+   "out_of_scope": false,
+   "fused_recall@1": 1.0,
+   "fused_hit@1": 1.0,
+   "final_recall@1": 1.0,
+   "final_hit@1": 1.0,
+   "fused_recall@3": 1.0,
+   "fused_hit@3": 1.0,
+   "final_recall@3": 1.0,
+   "final_hit@3": 1.0,
+   "fused_recall@5": 1.0,
+   "fused_hit@5": 1.0,
+   "final_recall@5": 1.0,
+   "final_hit@5": 1.0,
+   "fused_mrr": 1.0,
+   "final_mrr": 1.0,
+   "final_ndcg@5": 1.0,
+   "final_rank": 1
+  },
+  {
+   "id": "Q014",
+   "category": "normal_value",
+   "question": "흡착 확인 시간은 보통 얼마 안에 도달해야 정상이야?",
+   "expected": [
+    "VAC_MANUAL_SPEC_001"
+   ],
+   "retrieval_query": null,
+   "fused_top": [
+    "VAC_MANUAL_SPEC_001",
+    "TS_PICKUP_FAIL_001",
+    "VAC_203_001",
+    "VIS_302_001",
+    "VIS_301_001",
+    "VAC_201_001",
+    "MAINT_20260910_001",
+    "ROB_105_001",
+    "SOP_CALIB_001",
+    "ENG_NOTE_HOSE_001"
+   ],
+   "final": [
+    "VAC_MANUAL_SPEC_001"
+   ],
+   "alarm_parsed": [],
+   "alarm_ok": true,
+   "out_of_scope": false,
+   "fused_recall@1": 1.0,
+   "fused_hit@1": 1.0,
+   "final_recall@1": 1.0,
+   "final_hit@1": 1.0,
+   "fused_recall@3": 1.0,
+   "fused_hit@3": 1.0,
+   "final_recall@3": 1.0,
+   "final_hit@3": 1.0,
+   "fused_recall@5": 1.0,
+   "fused_hit@5": 1.0,
+   "final_recall@5": 1.0,
+   "final_hit@5": 1.0,
+   "fused_mrr": 1.0,
+   "final_mrr": 1.0,
+   "final_ndcg@5": 1.0,
+   "final_rank": 1
+  },
+  {
+   "id": "Q015",
+   "category": "normal_value",
+   "question": "detection_threshold 기본값이 뭐야?",
+   "expected": [
+    "VIS_302_001"
+   ],
+   "retrieval_query": null,
+   "fused_top": [
+    "VIS_302_001",
+    "VAC_201_001",
+    "ROB_105_001",
+    "VIS_301_001",
+    "TS_PICKUP_FAIL_001",
+    "VAC_203_001",
+    "SOP_CALIB_001",
+    "MAINT_20260910_001",
+    "VAC_MANUAL_SPEC_001",
+    "SOP_TEACH_001"
+   ],
+   "final": [
+    "VIS_302_001"
+   ],
+   "alarm_parsed": [],
+   "alarm_ok": true,
+   "out_of_scope": false,
+   "fused_recall@1": 1.0,
+   "fused_hit@1": 1.0,
+   "final_recall@1": 1.0,
+   "final_hit@1": 1.0,
+   "fused_recall@3": 1.0,
+   "fused_hit@3": 1.0,
+   "final_recall@3": 1.0,
+   "final_hit@3": 1.0,
+   "fused_recall@5": 1.0,
+   "fused_hit@5": 1.0,
+   "final_recall@5": 1.0,
+   "final_hit@5": 1.0,
+   "fused_mrr": 1.0,
+   "final_mrr": 1.0,
+   "final_ndcg@5": 1.0,
+   "final_rank": 1
+  },
+  {
+   "id": "Q016",
+   "category": "normal_value",
+   "question": "캘리브레이션 재투영 오차는 얼마 이하여야 저장할 수 있어?",
+   "expected": [
+    "SOP_CALIB_001"
+   ],
+   "retrieval_query": null,
+   "fused_top": [
+    "SOP_CALIB_001",
+    "FAQ_BOX_TYPES_001",
+    "ROB_105_001",
+    "TS_PICKUP_FAIL_001",
+    "VIS_302_001",
+    "ENG_NOTE_HOSE_001",
+    "VAC_201_001",
+    "VAC_MANUAL_SPEC_001",
+    "VAC_203_001",
+    "MAINT_20260910_001"
+   ],
+   "final": [
+    "SOP_CALIB_001"
+   ],
+   "alarm_parsed": [],
+   "alarm_ok": true,
+   "out_of_scope": false,
+   "fused_recall@1": 1.0,
+   "fused_hit@1": 1.0,
+   "final_recall@1": 1.0,
+   "final_hit@1": 1.0,
+   "fused_recall@3": 1.0,
+   "fused_hit@3": 1.0,
+   "final_recall@3": 1.0,
+   "final_hit@3": 1.0,
+   "fused_recall@5": 1.0,
+   "fused_hit@5": 1.0,
+   "final_recall@5": 1.0,
+   "final_hit@5": 1.0,
+   "fused_mrr": 1.0,
+   "final_mrr": 1.0,
+   "final_ndcg@5": 1.0,
+   "final_rank": 1
+  },
+  {
+   "id": "Q020",
+   "category": "procedure",
+   "question": "캘리브레이션 방법 알려줘",
+   "expected": [
+    "SOP_CALIB_001"
+   ],
+   "retrieval_query": null,
+   "fused_top": [
+    "SOP_CALIB_001",
+    "TS_PICKUP_FAIL_001",
+    "ENG_NOTE_HOSE_001",
+    "SOP_TEACH_001",
+    "ROB_105_001",
+    "VIS_302_001",
+    "VAC_MANUAL_SPEC_001",
+    "VAC_201_001",
+    "MAINT_20260910_001",
+    "VAC_203_001"
+   ],
+   "final": [
+    "SOP_CALIB_001"
+   ],
+   "alarm_parsed": [],
+   "alarm_ok": true,
+   "out_of_scope": false,
+   "fused_recall@1": 1.0,
+   "fused_hit@1": 1.0,
+   "final_recall@1": 1.0,
+   "final_hit@1": 1.0,
+   "fused_recall@3": 1.0,
+   "fused_hit@3": 1.0,
+   "final_recall@3": 1.0,
+   "final_hit@3": 1.0,
+   "fused_recall@5": 1.0,
+   "fused_hit@5": 1.0,
+   "final_recall@5": 1.0,
+   "final_hit@5": 1.0,
+   "fused_mrr": 1.0,
+   "final_mrr": 1.0,
+   "final_ndcg@5": 1.0,
+   "final_rank": 1
+  },
+  {
+   "id": "Q021",
+   "category": "procedure",
+   "question": "로봇 티칭은 어떻게 해?",
+   "expected": [
+    "SOP_TEACH_001"
+   ],
+   "retrieval_query": null,
+   "fused_top": [
+    "SOP_TEACH_001",
+    "SOP_CALIB_001",
+    "ENG_NOTE_HOSE_001",
+    "ROB_105_001",
+    "TS_PICKUP_FAIL_001",
+    "VIS_301_001",
+    "VIS_302_001",
+    "VAC_203_001",
+    "VAC_MANUAL_SPEC_001",
+    "VAC_201_001"
+   ],
+   "final": [
+    "SOP_TEACH_001",
+    "SOP_CALIB_001"
+   ],
+   "alarm_parsed": [],
+   "alarm_ok": true,
+   "out_of_scope": false,
+   "fused_recall@1": 1.0,
+   "fused_hit@1": 1.0,
+   "final_recall@1": 1.0,
+   "final_hit@1": 1.0,
+   "fused_recall@3": 1.0,
+   "fused_hit@3": 1.0,
+   "final_recall@3": 1.0,
+   "final_hit@3": 1.0,
+   "fused_recall@5": 1.0,
+   "fused_hit@5": 1.0,
+   "final_recall@5": 1.0,
+   "final_hit@5": 1.0,
+   "fused_mrr": 1.0,
+   "final_mrr": 1.0,
+   "final_ndcg@5": 1.0,
+   "final_rank": 1
+  },
+  {
+   "id": "Q022",
+   "category": "procedure",
+   "question": "Pick 포지션도 티칭해야 해?",
+   "expected": [
+    "SOP_TEACH_001"
+   ],
+   "retrieval_query": null,
+   "fused_top": [
+    "SOP_TEACH_001",
+    "SOP_CALIB_001",
+    "TS_PICKUP_FAIL_001",
+    "ENG_NOTE_HOSE_001",
+    "VIS_301_001",
+    "VIS_302_001",
+    "VAC_MANUAL_SPEC_001",
+    "ROB_105_001",
+    "VAC_203_001",
+    "FAQ_BOX_TYPES_001"
+   ],
+   "final": [
+    "SOP_TEACH_001"
+   ],
+   "alarm_parsed": [],
+   "alarm_ok": true,
+   "out_of_scope": false,
+   "fused_recall@1": 1.0,
+   "fused_hit@1": 1.0,
+   "final_recall@1": 1.0,
+   "final_hit@1": 1.0,
+   "fused_recall@3": 1.0,
+   "fused_hit@3": 1.0,
+   "final_recall@3": 1.0,
+   "final_hit@3": 1.0,
+   "fused_recall@5": 1.0,
+   "fused_hit@5": 1.0,
+   "final_recall@5": 1.0,
+   "final_hit@5": 1.0,
+   "fused_mrr": 1.0,
+   "final_mrr": 1.0,
+   "final_ndcg@5": 1.0,
+   "final_rank": 1
+  },
+  {
+   "id": "Q023",
+   "category": "procedure",
+   "question": "박스 흡착 실패 원인이 뭐야?",
+   "expected": [
+    "TS_PICKUP_FAIL_001"
+   ],
+   "retrieval_query": null,
+   "fused_top": [
+    "TS_PICKUP_FAIL_001",
+    "VAC_203_001",
+    "VAC_MANUAL_SPEC_001",
+    "VIS_302_001",
+    "ENG_NOTE_HOSE_001",
+    "FAQ_BOX_TYPES_001",
+    "ROB_105_001",
+    "VIS_301_001",
+    "VAC_201_001",
+    "MAINT_20260910_001"
+   ],
+   "final": [
+    "TS_PICKUP_FAIL_001",
+    "VAC_203_001"
+   ],
+   "alarm_parsed": [],
+   "alarm_ok": true,
+   "out_of_scope": false,
+   "fused_recall@1": 1.0,
+   "fused_hit@1": 1.0,
+   "final_recall@1": 1.0,
+   "final_hit@1": 1.0,
+   "fused_recall@3": 1.0,
+   "fused_hit@3": 1.0,
+   "final_recall@3": 1.0,
+   "final_hit@3": 1.0,
+   "fused_recall@5": 1.0,
+   "fused_hit@5": 1.0,
+   "final_recall@5": 1.0,
+   "final_hit@5": 1.0,
+   "fused_mrr": 1.0,
+   "final_mrr": 1.0,
+   "final_ndcg@5": 1.0,
+   "final_rank": 1
+  },
+  {
+   "id": "Q030",
+   "category": "colloquial",
+   "question": "빨판이 박스를 못 잡아",
+   "expected": [
+    "TS_PICKUP_FAIL_001"
+   ],
+   "retrieval_query": null,
+   "fused_top": [
+    "VAC_203_001",
+    "MAINT_20260910_001",
+    "VAC_MANUAL_SPEC_001",
+    "VAC_201_001",
+    "TS_PICKUP_FAIL_001",
+    "FAQ_BOX_TYPES_001",
+    "ENG_NOTE_HOSE_001",
+    "VIS_302_001",
+    "ROB_105_001",
+    "SOP_TEACH_001"
+   ],
+   "final": [
+    "TS_PICKUP_FAIL_001",
+    "VAC_203_001",
+    "VIS_302_001",
+    "ROB_105_001"
+   ],
+   "alarm_parsed": [],
+   "alarm_ok": true,
+   "out_of_scope": false,
+   "fused_recall@1": 0.0,
+   "fused_hit@1": 0.0,
+   "final_recall@1": 1.0,
+   "final_hit@1": 1.0,
+   "fused_recall@3": 0.0,
+   "fused_hit@3": 0.0,
+   "final_recall@3": 1.0,
+   "final_hit@3": 1.0,
+   "fused_recall@5": 1.0,
+   "fused_hit@5": 1.0,
+   "final_recall@5": 1.0,
+   "final_hit@5": 1.0,
+   "fused_mrr": 0.2,
+   "final_mrr": 1.0,
+   "final_ndcg@5": 1.0,
+   "final_rank": 1
+  },
+  {
+   "id": "Q031",
+   "category": "colloquial",
+   "question": "박스를 못 집는데 뭘 봐야 해?",
+   "expected": [
+    "TS_PICKUP_FAIL_001"
+   ],
+   "retrieval_query": null,
+   "fused_top": [
+    "ENG_NOTE_HOSE_001",
+    "TS_PICKUP_FAIL_001",
+    "VIS_302_001",
+    "FAQ_BOX_TYPES_001",
+    "VAC_203_001",
+    "ROB_105_001",
+    "SOP_CALIB_001",
+    "SOP_TEACH_001",
+    "VIS_301_001",
+    "MAINT_20260910_001"
+   ],
+   "final": [
+    "TS_PICKUP_FAIL_001",
+    "VAC_203_001"
+   ],
+   "alarm_parsed": [],
+   "alarm_ok": true,
+   "out_of_scope": false,
+   "fused_recall@1": 0.0,
+   "fused_hit@1": 0.0,
+   "final_recall@1": 1.0,
+   "final_hit@1": 1.0,
+   "fused_recall@3": 1.0,
+   "fused_hit@3": 1.0,
+   "final_recall@3": 1.0,
+   "final_hit@3": 1.0,
+   "fused_recall@5": 1.0,
+   "fused_hit@5": 1.0,
+   "final_recall@5": 1.0,
+   "final_hit@5": 1.0,
+   "fused_mrr": 0.5,
+   "final_mrr": 1.0,
+   "final_ndcg@5": 1.0,
+   "final_rank": 1
+  },
+  {
+   "id": "Q032",
+   "category": "colloquial",
+   "question": "카메라가 응답이 없어",
+   "expected": [
+    "VIS_301_001"
+   ],
+   "retrieval_query": null,
+   "fused_top": [
+    "VIS_301_001",
+    "SOP_CALIB_001",
+    "VIS_302_001",
+    "TS_PICKUP_FAIL_001",
+    "VAC_201_001",
+    "ENG_NOTE_HOSE_001",
+    "ROB_105_001",
+    "VAC_203_001",
+    "MAINT_20260910_001",
+    "SOP_TEACH_001"
+   ],
+   "final": [
+    "VIS_301_001"
+   ],
+   "alarm_parsed": [],
+   "alarm_ok": true,
+   "out_of_scope": false,
+   "fused_recall@1": 1.0,
+   "fused_hit@1": 1.0,
+   "final_recall@1": 1.0,
+   "final_hit@1": 1.0,
+   "fused_recall@3": 1.0,
+   "fused_hit@3": 1.0,
+   "final_recall@3": 1.0,
+   "final_hit@3": 1.0,
+   "fused_recall@5": 1.0,
+   "fused_hit@5": 1.0,
+   "final_recall@5": 1.0,
+   "final_hit@5": 1.0,
+   "fused_mrr": 1.0,
+   "final_mrr": 1.0,
+   "final_ndcg@5": 1.0,
+   "final_rank": 1
+  },
+  {
+   "id": "Q033",
+   "category": "colloquial",
+   "question": "로봇이 자꾸 멈추고 서보 과부하래",
+   "expected": [
+    "ROB_105_001"
+   ],
+   "retrieval_query": null,
+   "fused_top": [
+    "ROB_105_001",
+    "SOP_CALIB_001",
+    "ENG_NOTE_HOSE_001",
+    "SOP_TEACH_001",
+    "TS_PICKUP_FAIL_001",
+    "VIS_302_001",
+    "MAINT_20260910_001",
+    "VIS_301_001",
+    "VAC_203_001",
+    "VAC_201_001"
+   ],
+   "final": [
+    "ROB_105_001"
+   ],
+   "alarm_parsed": [],
+   "alarm_ok": true,
+   "out_of_scope": false,
+   "fused_recall@1": 1.0,
+   "fused_hit@1": 1.0,
+   "final_recall@1": 1.0,
+   "final_hit@1": 1.0,
+   "fused_recall@3": 1.0,
+   "fused_hit@3": 1.0,
+   "final_recall@3": 1.0,
+   "final_hit@3": 1.0,
+   "fused_recall@5": 1.0,
+   "fused_hit@5": 1.0,
+   "final_recall@5": 1.0,
+   "final_hit@5": 1.0,
+   "fused_mrr": 1.0,
+   "final_mrr": 1.0,
+   "final_ndcg@5": 1.0,
+   "final_rank": 1
+  },
+  {
+   "id": "Q040",
+   "category": "symptom_to_alarm",
+   "question": "박스가 있는데 비전에서 검출이 안 돼",
+   "expected": [
+    "VIS_302_001"
+   ],
+   "retrieval_query": null,
+   "fused_top": [
+    "VIS_302_001",
+    "TS_PICKUP_FAIL_001",
+    "VIS_301_001",
+    "FAQ_BOX_TYPES_001",
+    "SOP_TEACH_001",
+    "ENG_NOTE_HOSE_001",
+    "VAC_203_001",
+    "VAC_201_001",
+    "ROB_105_001",
+    "MAINT_20260910_001"
+   ],
+   "final": [
+    "VIS_302_001"
+   ],
+   "alarm_parsed": [],
+   "alarm_ok": true,
+   "out_of_scope": false,
+   "fused_recall@1": 1.0,
+   "fused_hit@1": 1.0,
+   "final_recall@1": 1.0,
+   "final_hit@1": 1.0,
+   "fused_recall@3": 1.0,
+   "fused_hit@3": 1.0,
+   "final_recall@3": 1.0,
+   "final_hit@3": 1.0,
+   "fused_recall@5": 1.0,
+   "fused_hit@5": 1.0,
+   "final_recall@5": 1.0,
+   "final_hit@5": 1.0,
+   "fused_mrr": 1.0,
+   "final_mrr": 1.0,
+   "final_ndcg@5": 1.0,
+   "final_rank": 1
+  },
+  {
+   "id": "Q041",
+   "category": "symptom_to_alarm",
+   "question": "진공압 표시가 0으로 고정돼 있어",
+   "expected": [
+    "VAC_201_001"
+   ],
+   "retrieval_query": null,
+   "fused_top": [
+    "VAC_201_001",
+    "MAINT_20260910_001",
+    "VAC_MANUAL_SPEC_001",
+    "VAC_203_001",
+    "TS_PICKUP_FAIL_001",
+    "ROB_105_001",
+    "ENG_NOTE_HOSE_001",
+    "VIS_302_001",
+    "SOP_TEACH_001",
+    "VIS_301_001"
+   ],
+   "final": [
+    "VAC_201_001"
+   ],
+   "alarm_parsed": [],
+   "alarm_ok": true,
+   "out_of_scope": false,
+   "fused_recall@1": 1.0,
+   "fused_hit@1": 1.0,
+   "final_recall@1": 1.0,
+   "final_hit@1": 1.0,
+   "fused_recall@3": 1.0,
+   "fused_hit@3": 1.0,
+   "final_recall@3": 1.0,
+   "final_hit@3": 1.0,
+   "fused_recall@5": 1.0,
+   "fused_hit@5": 1.0,
+   "final_recall@5": 1.0,
+   "final_hit@5": 1.0,
+   "fused_mrr": 1.0,
+   "final_mrr": 1.0,
+   "final_ndcg@5": 1.0,
+   "final_rank": 1
+  },
+  {
+   "id": "Q042",
+   "category": "symptom_to_alarm",
+   "question": "로봇이 박스 위치에서 항상 조금씩 어긋나",
+   "expected": [
+    "SOP_CALIB_001"
+   ],
+   "retrieval_query": null,
+   "fused_top": [
+    "SOP_CALIB_001",
+    "ENG_NOTE_HOSE_001",
+    "TS_PICKUP_FAIL_001",
+    "SOP_TEACH_001",
+    "ROB_105_001",
+    "VIS_302_001",
+    "VAC_203_001",
+    "FAQ_BOX_TYPES_001",
+    "VAC_201_001",
+    "VIS_301_001"
+   ],
+   "final": [
+    "SOP_CALIB_001",
+    "TS_PICKUP_FAIL_001",
+    "ROB_105_001"
+   ],
+   "alarm_parsed": [],
+   "alarm_ok": true,
+   "out_of_scope": false,
+   "fused_recall@1": 1.0,
+   "fused_hit@1": 1.0,
+   "final_recall@1": 1.0,
+   "final_hit@1": 1.0,
+   "fused_recall@3": 1.0,
+   "fused_hit@3": 1.0,
+   "final_recall@3": 1.0,
+   "final_hit@3": 1.0,
+   "fused_recall@5": 1.0,
+   "fused_hit@5": 1.0,
+   "final_recall@5": 1.0,
+   "final_hit@5": 1.0,
+   "fused_mrr": 1.0,
+   "final_mrr": 1.0,
+   "final_ndcg@5": 1.0,
+   "final_rank": 1
+  },
+  {
+   "id": "Q050",
+   "category": "history",
+   "question": "VAC-203 지난번에도 있었어?",
+   "expected": [
+    "MAINT_20260910_001"
+   ],
+   "retrieval_query": null,
+   "fused_top": [
+    "VAC_203_001",
+    "ENG_NOTE_HOSE_001",
+    "MAINT_20260910_001",
+    "VIS_302_001",
+    "TS_PICKUP_FAIL_001",
+    "FAQ_BOX_TYPES_001",
+    "VAC_201_001",
+    "VIS_301_001",
+    "ROB_105_001",
+    "VAC_MANUAL_SPEC_001"
+   ],
+   "final": [
+    "VAC_203_001",
+    "MAINT_20260910_001",
+    "ENG_NOTE_HOSE_001",
+    "TS_PICKUP_FAIL_001"
+   ],
+   "alarm_parsed": [
+    "VAC-203"
+   ],
+   "alarm_ok": true,
+   "out_of_scope": false,
+   "fused_recall@1": 0.0,
+   "fused_hit@1": 0.0,
+   "final_recall@1": 0.0,
+   "final_hit@1": 0.0,
+   "fused_recall@3": 1.0,
+   "fused_hit@3": 1.0,
+   "final_recall@3": 1.0,
+   "final_hit@3": 1.0,
+   "fused_recall@5": 1.0,
+   "fused_hit@5": 1.0,
+   "final_recall@5": 1.0,
+   "final_hit@5": 1.0,
+   "fused_mrr": 0.3333333333333333,
+   "final_mrr": 0.5,
+   "final_ndcg@5": 0.6309297535714575,
+   "final_rank": 2
+  },
+  {
+   "id": "Q051",
+   "category": "history",
+   "question": "9월 10일에 VAC-203 어떻게 조치했어?",
+   "expected": [
+    "MAINT_20260910_001"
+   ],
+   "retrieval_query": null,
+   "fused_top": [
+    "VAC_203_001",
+    "MAINT_20260910_001",
+    "ENG_NOTE_HOSE_001",
+    "TS_PICKUP_FAIL_001",
+    "SOP_TEACH_001",
+    "SOP_CALIB_001",
+    "VAC_201_001",
+    "VIS_301_001",
+    "ROB_105_001",
+    "VIS_302_001"
+   ],
+   "final": [
+    "VAC_203_001",
+    "MAINT_20260910_001"
+   ],
+   "alarm_parsed": [
+    "VAC-203"
+   ],
+   "alarm_ok": true,
+   "out_of_scope": false,
+   "fused_recall@1": 0.0,
+   "fused_hit@1": 0.0,
+   "final_recall@1": 0.0,
+   "final_hit@1": 0.0,
+   "fused_recall@3": 1.0,
+   "fused_hit@3": 1.0,
+   "final_recall@3": 1.0,
+   "final_hit@3": 1.0,
+   "fused_recall@5": 1.0,
+   "fused_hit@5": 1.0,
+   "final_recall@5": 1.0,
+   "final_hit@5": 1.0,
+   "fused_mrr": 0.5,
+   "final_mrr": 0.5,
+   "final_ndcg@5": 0.6309297535714575,
+   "final_rank": 2
+  },
+  {
+   "id": "Q052",
+   "category": "history",
+   "question": "VAC-203이 며칠에 걸쳐 서서히 나빠지면 어디부터 봐?",
+   "expected": [
+    "ENG_NOTE_HOSE_001",
+    "VAC_203_001"
+   ],
+   "retrieval_query": null,
+   "fused_top": [
+    "VAC_203_001",
+    "ENG_NOTE_HOSE_001",
+    "MAINT_20260910_001",
+    "TS_PICKUP_FAIL_001",
+    "VAC_201_001",
+    "VIS_301_001",
+    "VIS_302_001",
+    "ROB_105_001",
+    "SOP_CALIB_001",
+    "VAC_MANUAL_SPEC_001"
+   ],
+   "final": [
+    "VAC_203_001",
+    "ENG_NOTE_HOSE_001"
+   ],
+   "alarm_parsed": [
+    "VAC-203"
+   ],
+   "alarm_ok": true,
+   "out_of_scope": false,
+   "fused_recall@1": 0.5,
+   "fused_hit@1": 1.0,
+   "final_recall@1": 0.5,
+   "final_hit@1": 1.0,
+   "fused_recall@3": 1.0,
+   "fused_hit@3": 1.0,
+   "final_recall@3": 1.0,
+   "final_hit@3": 1.0,
+   "fused_recall@5": 1.0,
+   "fused_hit@5": 1.0,
+   "final_recall@5": 1.0,
+   "final_hit@5": 1.0,
+   "fused_mrr": 1.0,
+   "final_mrr": 1.0,
+   "final_ndcg@5": 1.0,
+   "final_rank": 1
+  },
+  {
+   "id": "Q060",
+   "category": "faq",
+   "question": "처리할 수 있는 박스 최대 크기가 얼마야?",
+   "expected": [
+    "FAQ_BOX_TYPES_001"
+   ],
+   "retrieval_query": null,
+   "fused_top": [
+    "FAQ_BOX_TYPES_001",
+    "VIS_302_001",
+    "TS_PICKUP_FAIL_001",
+    "ROB_105_001",
+    "VAC_203_001",
+    "SOP_CALIB_001",
+    "ENG_NOTE_HOSE_001",
+    "VAC_201_001",
+    "MAINT_20260910_001",
+    "VAC_MANUAL_SPEC_001"
+   ],
+   "final": [
+    "FAQ_BOX_TYPES_001"
+   ],
+   "alarm_parsed": [],
+   "alarm_ok": true,
+   "out_of_scope": false,
+   "fused_recall@1": 1.0,
+   "fused_hit@1": 1.0,
+   "final_recall@1": 1.0,
+   "final_hit@1": 1.0,
+   "fused_recall@3": 1.0,
+   "fused_hit@3": 1.0,
+   "final_recall@3": 1.0,
+   "final_hit@3": 1.0,
+   "fused_recall@5": 1.0,
+   "fused_hit@5": 1.0,
+   "final_recall@5": 1.0,
+   "final_hit@5": 1.0,
+   "fused_mrr": 1.0,
+   "final_mrr": 1.0,
+   "final_ndcg@5": 1.0,
+   "final_rank": 1
+  },
+  {
+   "id": "Q061",
+   "category": "faq",
+   "question": "비닐 랩으로 감싼 박스도 처리돼?",
+   "expected": [
+    "FAQ_BOX_TYPES_001"
+   ],
+   "retrieval_query": null,
+   "fused_top": [
+    "FAQ_BOX_TYPES_001",
+    "TS_PICKUP_FAIL_001",
+    "VIS_302_001",
+    "ENG_NOTE_HOSE_001",
+    "VAC_203_001",
+    "ROB_105_001",
+    "SOP_TEACH_001",
+    "SOP_CALIB_001",
+    "VIS_301_001",
+    "MAINT_20260910_001"
+   ],
+   "final": [
+    "FAQ_BOX_TYPES_001"
+   ],
+   "alarm_parsed": [],
+   "alarm_ok": true,
+   "out_of_scope": false,
+   "fused_recall@1": 1.0,
+   "fused_hit@1": 1.0,
+   "final_recall@1": 1.0,
+   "final_hit@1": 1.0,
+   "fused_recall@3": 1.0,
+   "fused_hit@3": 1.0,
+   "final_recall@3": 1.0,
+   "final_hit@3": 1.0,
+   "fused_recall@5": 1.0,
+   "fused_hit@5": 1.0,
+   "final_recall@5": 1.0,
+   "final_hit@5": 1.0,
+   "fused_mrr": 1.0,
+   "final_mrr": 1.0,
+   "final_ndcg@5": 1.0,
+   "final_rank": 1
+  },
+  {
+   "id": "Q070",
+   "category": "out_of_scope",
+   "question": "로봇 컨트롤러 IP 주소가 뭐야?",
+   "expected": [],
+   "retrieval_query": null,
+   "fused_top": [
+    "SOP_CALIB_001",
+    "SOP_TEACH_001",
+    "ENG_NOTE_HOSE_001",
+    "ROB_105_001",
+    "TS_PICKUP_FAIL_001",
+    "VIS_301_001",
+    "VAC_201_001",
+    "VIS_302_001",
+    "MAINT_20260910_001",
+    "VAC_203_001"
+   ],
+   "final": [
+    "ROB_105_001",
+    "SOP_CALIB_001",
+    "TS_PICKUP_FAIL_001",
+    "ENG_NOTE_HOSE_001"
+   ],
+   "alarm_parsed": [],
+   "alarm_ok": true,
+   "out_of_scope": true
+  },
+  {
+   "id": "Q071",
+   "category": "out_of_scope",
+   "question": "감속기 윤활유 교체 주기가 얼마야?",
+   "expected": [],
+   "retrieval_query": null,
+   "fused_top": [
+    "MAINT_20260910_001",
+    "ROB_105_001",
+    "VAC_201_001",
+    "VIS_301_001",
+    "TS_PICKUP_FAIL_001",
+    "VAC_203_001",
+    "VAC_MANUAL_SPEC_001",
+    "ENG_NOTE_HOSE_001",
+    "SOP_TEACH_001",
+    "VIS_302_001"
+   ],
+   "final": [
+    "ENG_NOTE_HOSE_001",
+    "ROB_105_001",
+    "TS_PICKUP_FAIL_001",
+    "MAINT_20260910_001"
+   ],
+   "alarm_parsed": [],
+   "alarm_ok": true,
+   "out_of_scope": true
+  },
+  {
+   "id": "Q072",
+   "category": "out_of_scope",
+   "question": "설비 담당자 연락처 알려줘",
+   "expected": [],
+   "retrieval_query": null,
+   "fused_top": [
+    "ENG_NOTE_HOSE_001",
+    "MAINT_20260910_001",
+    "VAC_201_001",
+    "ROB_105_001",
+    "TS_PICKUP_FAIL_001",
+    "SOP_TEACH_001",
+    "VIS_301_001",
+    "VAC_203_001",
+    "VAC_MANUAL_SPEC_001",
+    "FAQ_BOX_TYPES_001"
+   ],
+   "final": [
+    "MAINT_20260910_001"
+   ],
+   "alarm_parsed": [],
+   "alarm_ok": true,
+   "out_of_scope": true
+  },
+  {
+   "id": "Q073",
+   "category": "out_of_scope",
+   "question": "지금 진공압 얼마야?",
+   "expected": [],
+   "retrieval_query": null,
+   "fused_top": [
+    "MAINT_20260910_001",
+    "VAC_MANUAL_SPEC_001",
+    "VAC_203_001",
+    "TS_PICKUP_FAIL_001",
+    "VAC_201_001",
+    "ROB_105_001",
+    "ENG_NOTE_HOSE_001",
+    "FAQ_BOX_TYPES_001",
+    "VIS_302_001",
+    "SOP_TEACH_001"
+   ],
+   "final": [
+    "VAC_MANUAL_SPEC_001",
+    "VAC_203_001",
+    "TS_PICKUP_FAIL_001",
+    "MAINT_20260910_001"
+   ],
+   "alarm_parsed": [],
+   "alarm_ok": true,
+   "out_of_scope": true
+  },
+  {
+   "id": "Q080",
+   "category": "follow_up",
+   "question": "그 알람 원인이 뭐야?",
+   "expected": [
+    "VAC_203_001"
+   ],
+   "retrieval_query": "그 알람 원인이 뭐야? VAC-203",
+   "fused_top": [
+    "VAC_203_001",
+    "MAINT_20260910_001",
+    "ROB_105_001",
+    "ENG_NOTE_HOSE_001",
+    "TS_PICKUP_FAIL_001",
+    "VAC_201_001",
+    "VIS_301_001",
+    "VIS_302_001",
+    "VAC_MANUAL_SPEC_001",
+    "SOP_CALIB_001"
+   ],
+   "final": [
+    "VAC_203_001"
+   ],
+   "alarm_parsed": [
+    "VAC-203"
+   ],
+   "alarm_ok": true,
+   "out_of_scope": false,
+   "fused_recall@1": 1.0,
+   "fused_hit@1": 1.0,
+   "final_recall@1": 1.0,
+   "final_hit@1": 1.0,
+   "fused_recall@3": 1.0,
+   "fused_hit@3": 1.0,
+   "final_recall@3": 1.0,
+   "final_hit@3": 1.0,
+   "fused_recall@5": 1.0,
+   "fused_hit@5": 1.0,
+   "final_recall@5": 1.0,
+   "final_hit@5": 1.0,
+   "fused_mrr": 1.0,
+   "final_mrr": 1.0,
+   "final_ndcg@5": 1.0,
+   "final_rank": 1
+  },
+  {
+   "id": "Q081",
+   "category": "follow_up",
+   "question": "그거 정상 범위가 얼마야?",
+   "expected": [
+    "ROB_105_001"
+   ],
+   "retrieval_query": "그거 정상 범위가 얼마야? ROB-105",
+   "fused_top": [
+    "ROB_105_001",
+    "VAC_203_001",
+    "VAC_MANUAL_SPEC_001",
+    "MAINT_20260910_001",
+    "ENG_NOTE_HOSE_001",
+    "VAC_201_001",
+    "TS_PICKUP_FAIL_001",
+    "SOP_CALIB_001",
+    "VIS_302_001",
+    "FAQ_BOX_TYPES_001"
+   ],
+   "final": [
+    "ROB_105_001"
+   ],
+   "alarm_parsed": [
+    "ROB-105"
+   ],
+   "alarm_ok": true,
+   "out_of_scope": false,
+   "fused_recall@1": 1.0,
+   "fused_hit@1": 1.0,
+   "final_recall@1": 1.0,
+   "final_hit@1": 1.0,
+   "fused_recall@3": 1.0,
+   "fused_hit@3": 1.0,
+   "final_recall@3": 1.0,
+   "final_hit@3": 1.0,
+   "fused_recall@5": 1.0,
+   "fused_hit@5": 1.0,
+   "final_recall@5": 1.0,
+   "final_hit@5": 1.0,
+   "fused_mrr": 1.0,
+   "final_mrr": 1.0,
+   "final_ndcg@5": 1.0,
+   "final_rank": 1
+  },
+  {
+   "id": "Q082",
+   "category": "follow_up",
+   "question": "해당 알람 점검 순서 알려줘",
+   "expected": [
+    "VIS_301_001"
+   ],
+   "retrieval_query": "해당 알람 점검 순서 알려줘 VIS-301",
+   "fused_top": [
+    "VIS_301_001",
+    "TS_PICKUP_FAIL_001",
+    "ROB_105_001",
+    "SOP_CALIB_001",
+    "VIS_302_001",
+    "VAC_201_001",
+    "ENG_NOTE_HOSE_001",
+    "VAC_203_001",
+    "MAINT_20260910_001",
+    "SOP_TEACH_001"
+   ],
+   "final": [
+    "VIS_301_001",
+    "TS_PICKUP_FAIL_001",
+    "VIS_302_001"
+   ],
+   "alarm_parsed": [
+    "VIS-301"
+   ],
+   "alarm_ok": true,
+   "out_of_scope": false,
+   "fused_recall@1": 1.0,
+   "fused_hit@1": 1.0,
+   "final_recall@1": 1.0,
+   "final_hit@1": 1.0,
+   "fused_recall@3": 1.0,
+   "fused_hit@3": 1.0,
+   "final_recall@3": 1.0,
+   "final_hit@3": 1.0,
+   "fused_recall@5": 1.0,
+   "fused_hit@5": 1.0,
+   "final_recall@5": 1.0,
+   "final_hit@5": 1.0,
+   "fused_mrr": 1.0,
+   "final_mrr": 1.0,
+   "final_ndcg@5": 1.0,
+   "final_rank": 1
+  }
+ ]
+}
