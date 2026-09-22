@@ -233,7 +233,23 @@ grounding check ✅
 
 **이 단계에서 잡은 것:** ①검증기가 `§6.3`·`3.2` 섹션 번호를 근거 없는 수치로 오탐(+`0.5`→`.5` 정규화 버그) — 단위테스트가 먼저 잡음 ②거절에도 sources 4건 노출 ③지시대명사 후속질문 실패 ④정의 질문에 비공식 exact 히트 강제 주입. 잔여: 미사용 문서 과잉 인용(검증기는 "인용"과 "사용"을 구분 못 함), 원인 항목에 원문에 없는 짧은 설명 덧붙임("공기가 새어 들어와 압력이 낮아짐") — 수치가 아니라 검증기 미포착, Phase 5 평가셋에서 groundedness로 측정 예정.
 
-### 📋 이후: Step 8 FastAPI(/api/chat 실구현, /api/session, 로깅 §25) → Step 9 Evaluation
+### ✅ Step 8: FastAPI + 로깅 (COMPLETE, 2026-09-22)
+
+**파일:**
+- `app/main.py` — lifespan에서 DB 초기화 + `build_chat_pipeline()` 1회(7.4s), 종료 시 `close()`. `SKIP_MODEL_LOAD=1`이면 모델 없이 기동(테스트)
+- `app/api/chat.py` — `POST /api/chat`: 스레드풀 실행 + **`threading.Lock`으로 생성 직렬화**(llama.cpp 컨텍스트는 단일). 응답 후 로그 기록 → `log_id`. `POST /api/feedback`(`up|down`, note)
+- `app/api/session.py` — `POST /api/session`(201) / `GET` / `DELETE`(204)
+- `app/api/health.py` — `/ready`: llm·retrieval·qdrant·database 각각 확인, 하나라도 false면 503
+- `app/api/admin.py` — `GET /admin/documents`(문서별·타입별 청크 수), `GET /admin/logs`, `ingest`/`reindex`는 Phase 2까지 **501**
+- `app/database/` — SQLAlchemy 2.0, `ChatLog`(§25: timestamp·session·question·normalized_query·intent·alarm_codes·retrieved_chunk_ids·reranker_scores·sources·answer·validation·timing·latency·user_feedback). SQLite `data/chatbot.db`; `:memory:`는 StaticPool
+- 스키마: `ChatResponse.retrieval_query/log_id`, `RetrievalInfo.scores`, `SessionInfo`, `FeedbackRequest`
+- 테스트 8개(`tests/test_api.py`, 가짜 파이프라인 주입·인메모리 DB) → **86 passed**
+
+**실서버 검증 (uvicorn + curl):** `/ready` 200 → 세션 생성 → `VAC-203이 뭐야?` 3.5s(`log_id=1`) → 후속 `그 알람 원인이 뭐야?` → `retrieval_query="… VAC-203"`, `alarm_codes=['VAC-203']` → 피드백 `up` → `/admin/documents` 12청크/9문서 → `/admin/logs`에 청크 id·피드백 반영 → 세션 삭제 204
+
+**잡은 함정:** `httpx 0.28`이 `Client(app=)`를 제거해 Starlette 0.35 TestClient가 깨짐 → `httpx==0.27.2` 핀(qdrant-client 요구범위 내)
+
+### 📋 이후: Step 9 Evaluation(§26~27) — 평가셋 스키마, Recall@k·MRR·nDCG, 답변 groundedness, `scripts/run_eval.py`
 - BM25 인덱싱
 - 키워드 기반 검색
 

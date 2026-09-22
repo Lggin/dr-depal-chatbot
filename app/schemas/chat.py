@@ -48,6 +48,7 @@ class RetrievalInfo(BaseModel):
     reranked: bool
     top_k: int
     sources: List[DocumentSource]
+    scores: List[float] = []  # final (reranker) score per entry in `sources`
 
 
 class ChatResponse(BaseModel):
@@ -61,8 +62,27 @@ class ChatResponse(BaseModel):
     retrieval: RetrievalInfo
     validation: Optional[ValidationInfo] = None
     alarm_codes: List[str] = []
+    retrieval_query: Optional[str] = None  # query actually sent to retrieval (after contextualization)
     timing_ms: dict = {}
     latency_ms: float
+    log_id: Optional[int] = None
+
+
+class SessionCreateResponse(BaseModel):
+    session_id: str
+
+
+class SessionInfo(BaseModel):
+    session_id: str
+    turns: int
+    created_at: float
+    updated_at: float
+
+
+class FeedbackRequest(BaseModel):
+    log_id: int
+    feedback: str = Field(..., pattern="^(up|down)$")
+    note: Optional[str] = None
 
 
 class ChatHistory(BaseModel):

@@ -1,6 +1,7 @@
 # Core
 fastapi==0.109.0
 uvicorn[standard]==0.27.0
+httpx==0.27.2  # 0.28 dropped Client(app=...) which Starlette 0.35's TestClient still uses
 pydantic==2.5.0
 pydantic-settings==2.1.0
 python-dotenv==1.0.0

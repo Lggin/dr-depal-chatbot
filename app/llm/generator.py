@@ -106,9 +106,11 @@ class ChatPipeline:
                 reranked=self.retrieval.reranker is not None,
                 top_k=len(built.included),
                 sources=[build_sources([d])[0] for d in built.included],
+                scores=[round(d.score, 4) for d in built.included],
             ),
             validation=ValidationInfo(**validation.to_dict(), danger_flags=danger),
             alarm_codes=alarm_codes,
+            retrieval_query=retrieval_query if retrieval_query != question else None,
             timing_ms={k: round(v, 1) for k, v in timing.items()},
             latency_ms=round(total, 1),
         )

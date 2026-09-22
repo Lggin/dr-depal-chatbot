@@ -1,49 +1,54 @@
-"""Chat API endpoints."""
+"""Chat and feedback endpoints."""
 
 import logging
-import time
-from fastapi import APIRouter
 
-from app.schemas.chat import ChatRequest, ChatResponse, IntentType, DocumentSource, RetrievalInfo
+from fastapi import APIRouter, HTTPException, Request
+from fastapi.concurrency import run_in_threadpool
+
+from app.schemas.chat import ChatRequest, ChatResponse, FeedbackRequest
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
 
+def _pipeline(request: Request):
+    pipe = getattr(request.app.state, "pipeline", None)
+    if pipe is None:
+        raise HTTPException(status_code=503, detail="Model pipeline not loaded")
+    return pipe
+
+
 @router.post("/chat", response_model=ChatResponse)
-async def chat(request: ChatRequest):
-    """
-    Main chat endpoint.
+async def chat(body: ChatRequest, request: Request):
+    pipe = _pipeline(request)
+    lock = request.app.state.generate_lock  # llama.cpp context is single-threaded
 
-    Phase 1 placeholder - will be implemented in subsequent steps.
-    """
-    start_time = time.time()
+    def _run():
+        with lock:
+            return pipe.answer(body.session_id, body.message)
 
-    # TODO: Implement full chat pipeline
-    # 1. Query processor
-    # 2. Intent router
-    # 3. Retrieval
-    # 4. LLM generation
-    # 5. Answer validation
+    try:
+        response: ChatResponse = await run_in_threadpool(_run)
+    except Exception as e:  # keep the server alive; surface the reason
+        logger.exception("chat failed")
+        raise HTTPException(status_code=500, detail=f"generation failed: {type(e).__name__}: {e}")
 
-    # Placeholder response
-    answer = f"[PLACEHOLDER] Received: {request.message}"
+    repo = getattr(request.app.state, "log_repo", None)
+    if repo is not None:
+        try:
+            response.log_id = await run_in_threadpool(repo.log, response)
+        except Exception:
+            logger.exception("chat log write failed")
+    return response
 
-    latency_ms = (time.time() - start_time) * 1000
 
-    return ChatResponse(
-        session_id=request.session_id,
-        message=request.message,
-        answer=answer,
-        intent=IntentType.GENERAL,
-        sources=[],
-        tools_used=[],
-        retrieval=RetrievalInfo(
-            documents_found=0,
-            reranked=False,
-            top_k=0,
-            sources=[],
-        ),
-        latency_ms=latency_ms,
-    )
+@router.post("/feedback")
+async def feedback(body: FeedbackRequest, request: Request):
+    repo = getattr(request.app.state, "log_repo", None)
+    if repo is None:
+        raise HTTPException(status_code=503, detail="Logging not available")
+    ok = await run_in_threadpool(repo.set_feedback, body.log_id, body.feedback, body.note)
+    if not ok:
+        raise HTTPException(status_code=404, detail=f"log_id {body.log_id} not found")
+    return {"ok": True, "log_id": body.log_id, "feedback": body.feedback}

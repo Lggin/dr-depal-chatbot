@@ -70,6 +70,9 @@ class Settings(BaseSettings):
     # Database
     database_url: str = "sqlite:///./data/chatbot.db"
 
+    # Skip loading models at API startup (tests / schema checks)
+    skip_model_load: bool = False
+
     # Paths
     corpus_path: str = "corpus"
     data_path: str = "data"
