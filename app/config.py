@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     llm_context_length: int = 8192
     llm_n_gpu_layers: int = -1  # -1 = all layers on GPU
     llm_max_tokens: int = 1200
-    llm_temperature: float = 0.2
+    llm_temperature: float = 0.1  # spec range 0.1-0.3; lower end reduces run-to-run variance
     llm_top_p: float = 0.9
     llm_enable_thinking: bool = False
 

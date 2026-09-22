@@ -63,6 +63,25 @@ def test_validator_refusal_skips_number_check():
     assert v.is_refusal and v.unsupported_numbers == [] and v.ok
 
 
+def test_number_followed_by_paren_or_period_counts_as_evidence():
+    src = doc("v", "detection_threshold 값 확인(기본 0.5). 소프트웨어 v2.3.", document_name="Vision Manual", document_type="alarm_manual")
+    v = AnswerValidator().validate("기본값은 0.5 이고 버전은 2.3 입니다.", [src], "q")
+    assert v.unsupported_numbers == [] and v.ok
+
+
+def test_chinese_characters_flagged_as_foreign_script():
+    v = AnswerValidator().validate("정상 가동을恢复了습니다.", [MANUAL], "q")
+    assert v.foreign_script and not v.ok
+    assert not AnswerValidator().validate("정상 가동을 회복했습니다.", [MANUAL], "q").foreign_script
+
+
+def test_refusal_phrase_mid_answer_is_a_caveat_not_a_refusal():
+    text = ("카메라 응답이 없어 VIS-301 알람 가능성이 높습니다.\n\n현재 제공된 문서에서는 카메라의 실제 상태를 확인할 수 없으므로 "
+            "다음 순서로 점검합니다: 1. LED 2. ping 3. 케이블")
+    v = AnswerValidator().validate(text, [MANUAL], "카메라가 응답이 없어")
+    assert not v.is_refusal
+
+
 def test_validator_uses_machine_state_as_evidence():
     v = AnswerValidator().validate("현재 진공압 -43 kPa 로 부족합니다.", [MANUAL], "지금 진공압?",
                                   extra_evidence="vacuum_pressure: -43")

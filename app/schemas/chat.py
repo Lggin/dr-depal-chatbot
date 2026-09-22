@@ -39,6 +39,7 @@ class ValidationInfo(BaseModel):
     unsupported_numbers: List[str] = []
     unsupported_codes: List[str] = []
     invalid_citations: List[str] = []
+    foreign_script: bool = False
     danger_flags: List[str] = []
 
 

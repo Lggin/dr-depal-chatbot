@@ -16,9 +16,20 @@ from app.router.alarm_parser import extract_alarm_codes
 from app.schemas.retrieval import RetrievedDoc
 
 REFUSAL_PHRASE = "현재 제공된 문서에서는"
+# A real refusal *opens* with the phrase (first sentence). The same words later in
+# an answer ("…문서에서는 현재 상태를 확인할 수 없으므로 다음을 점검…") are a caveat.
+_FIRST_SENTENCE_END = re.compile(r"[.!?\n]")
 
-# Numbers incl. sign and decimals; skip bare 1-digit list markers like "1." / "2)".
-_NUM = re.compile(r"(?<![A-Za-z0-9_])[-−–]?\d+(?:[.,]\d+)*(?![A-Za-z0-9_.)])")
+
+def is_refusal_text(answer: str) -> bool:
+    first = _FIRST_SENTENCE_END.split(answer.strip(), maxsplit=1)[0]
+    return REFUSAL_PHRASE in first
+
+# Numbers incl. sign and decimals. List markers ("1.", "2)") are small ints and get
+# filtered later — don't exclude ')' or '.' here or "(기본 0.5)" / "v2.3." are lost.
+# Lookbehind allows a letter prefix so "v2.3" / "F3" still yield their numbers.
+_NUM = re.compile(r"(?<![0-9_.])[-−–]?\d+(?:[.,]\d+)*(?![A-Za-z0-9_])")
+_HAN = re.compile(r"[一-鿿]")  # Chinese characters — never legitimate in a Korean answer
 _CITATION_LINE = re.compile(r"^\W*출처\W*[:：](.*)$", re.MULTILINE)
 
 
@@ -51,6 +62,7 @@ class ValidationResult:
     unsupported_codes: List[str] = field(default_factory=list)
     invalid_citations: List[str] = field(default_factory=list)
     cited_documents: List[str] = field(default_factory=list)
+    foreign_script: bool = False
 
     def to_dict(self) -> dict:
         return {
@@ -59,6 +71,7 @@ class ValidationResult:
             "unsupported_numbers": self.unsupported_numbers,
             "unsupported_codes": self.unsupported_codes,
             "invalid_citations": self.invalid_citations,
+            "foreign_script": self.foreign_script,
         }
 
 
@@ -78,7 +91,7 @@ class AnswerValidator:
         # Section/alarm metadata is shown to the model in the [SOURCE] header, so it counts as evidence.
         header_bits = [str(d.metadata.get(k) or "") for d in docs for k in ("section", "alarm_code", "document_name")]
         evidence = "\n".join([question] + [d.text for d in docs] + header_bits + ([extra_evidence] if extra_evidence else []))
-        is_refusal = REFUSAL_PHRASE in answer
+        is_refusal = is_refusal_text(answer)
         # The model's own citation line is replaced later; judge only the body.
         body = _CITATION_LINE.sub("", answer)
 
@@ -97,5 +110,6 @@ class AnswerValidator:
         cited = _parse_citations(answer)
         invalid = [c for c in cited if not any(c in p or p in c for p in provided)]
 
-        ok = not unsupported_numbers and not unsupported_codes and not invalid
-        return ValidationResult(ok, is_refusal, unsupported_numbers, unsupported_codes, invalid, cited)
+        foreign = bool(_HAN.search(answer))
+        ok = not unsupported_numbers and not unsupported_codes and not invalid and not foreign
+        return ValidationResult(ok, is_refusal, unsupported_numbers, unsupported_codes, invalid, cited, foreign)

@@ -29,10 +29,12 @@ Rules:
 12. Copy codes, numbers, units, and key names exactly from the source, checking similar-looking characters (l/1, O/0, -/_) character by character.
 13. Write in natural Korean. Codes, identifiers, units, product names, and English technical terms that appear in the source (e.g. "suction cup") may stay in English exactly as written — never transliterate English into Hangul (not "서셉션 컵"), and do not sprinkle other loose English words into Korean sentences.
 14. Keep facts from different sources separate. Never merge a detail from one source into a statement about another source. Each fact belongs to exactly the source it came from.
-    Example — SOURCE 2 (Maintenance History) says "CAM-410: 카메라 GigE 케이블 단선 확인, 케이블 교체 후 복구" and SOURCE 3 (Engineer Note) says "이 라인은 케이블이 안전문 힌지 근처에서 자주 눌림".
-    WRONG: "안전문 힌지 근처에서 눌린 GigE 케이블을 교체했습니다." (attaches the note's explanation to the record's action)
-    RIGHT: "GigE 케이블 단선이 확인되어 케이블을 교체한 후 복구되었습니다." and, if useful, a separate sentence: "현장 엔지니어 메모: 이 라인은 케이블이 안전문 힌지 근처에서 자주 눌린다고 합니다."
+    Illustration with placeholders (not a document — never cite or mention it): Maintenance History says "부품A 교체 후 정상" and an Engineer Note says "부품A는 이유B 때문에 자주 고장남".
+    WRONG: "이유B 때문에 고장난 부품A를 교체했습니다." (the note's reason is welded onto the record)
+    RIGHT: "부품A를 교체한 후 정상화되었습니다." and, only if useful, a separate sentence: "현장 엔지니어 메모: 부품A는 이유B 때문에 자주 고장난다고 합니다."
 15. If the question refers back to the conversation ("그 알람", "해당 원인", "아까 그거"), resolve the reference from the previous turn — a note like "(이전 대화에서 언급된 알람: VAC-203)" may be attached to the question for this — and answer about that item.
+16. When the user reports a symptom ("카메라가 응답이 없어", "진공압이 0으로 고정돼 있어"), take it as their observation and answer from the documents: name the matching alarm/cause and the inspection order. Do not say the documents cannot confirm their observation, and do not use the sentence from rule 5 for it — that sentence is only for questions the documents do not cover at all.
+17. Never output Chinese characters (漢字). Korean (Hangul) and, where rule 13 allows, English only.
 """
 
 _TRUST_LABEL = {

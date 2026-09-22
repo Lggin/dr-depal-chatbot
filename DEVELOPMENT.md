@@ -249,7 +249,50 @@ grounding check ✅
 
 **잡은 함정:** `httpx 0.28`이 `Client(app=)`를 제거해 Starlette 0.35 TestClient가 깨짐 → `httpx==0.27.2` 핀(qdrant-client 요구범위 내)
 
-### 📋 이후: Step 9 Evaluation(§26~27) — 평가셋 스키마, Recall@k·MRR·nDCG, 답변 groundedness, `scripts/run_eval.py`
+### ✅ Step 9: Evaluation (COMPLETE, 2026-09-22) — Phase 1 종료
+
+**파일:**
+- `evaluation/datasets/test_questions.json` — §26 스키마 **37문항**, 9카테고리(alarm_definition 7 · normal_value 7 · procedure 4 · colloquial 4 · symptom_to_alarm 3 · history 3 · faq 2 · out_of_scope 4 · follow_up 3). `history` 필드로 후속질문, `expect_refusal`로 범위 밖
+- `evaluation/metrics.py` — Recall@k / Hit@k / MRR / nDCG (binary relevance, 정답 없는 케이스는 NaN 제외)
+- `evaluation/retrieval_eval.py` — LLM 없이 검색만(follow-up은 `contextualize` 적용). fused(리랭커 전)·final(리랭커 후) 두 단계 + 알람 파싱 정확도. **~30s**
+- `evaluation/answer_eval.py` — ChatPipeline E2E: must_include/must_not, 거절 정확도(recall·false rate), 인용 적중(expected chunk ∈ sources), unsupported claim rate, intent, 지연. **~3분**
+- `evaluation/report.py` — `results/<ts>_<mode>.json` + `latest_<mode>.json`(커밋됨), Markdown 표(이전 대비 Δ), **회귀 게이트**(retrieval: hit@5/recall@5 하락 0 허용, mrr 0.02; full: answer_correct/citation/refusal_recall 하락 0 허용) → 종료코드 1
+- `scripts/run_eval.py --mode retrieval|full [--show-failures] [--no-gate]`
+- 테스트 6개 → **95 passed**
+
+**Phase 1 최종 지표 (샘플 코퍼스 12청크 / 37문항):**
+
+| 검색 (33건 채점) | fused | final(rerank) |
+|---|---|---|
+| Hit@1 | 0.879 | **0.939** |
+| Hit@3 / Recall@3 | 0.970 | **1.000** |
+| Hit@5 / Recall@5 | 1.000 | **1.000** |
+| MRR | 0.925 | **0.970** |
+| nDCG@5 | — | 0.978 |
+| 알람 파싱 정확도 | 1.000 | |
+
+| 답변 (37건) | 1차 | **최종** |
+|---|---|---|
+| answer_correct | 0.892 | **1.000** |
+| citation_accuracy | 0.892 | **1.000** |
+| refusal_recall (범위 밖 4건) | 1.000 | **1.000** |
+| false_refusal_rate | 0.121 | **0.000** |
+| unsupported_claim_rate | 0.091 | **0.000** |
+| danger_flag_rate | 0 | 0 |
+| intent_accuracy | 0.541 | 0.541 (라우터 없음 — Phase 3 베이스라인) |
+| latency median / p95 | 3.2s / 4.5s | **2.9s / 4.6s** |
+
+**1차 → 최종 사이에 잡은 것 (평가가 아니었으면 못 봤을 것들):**
+1. **거짓 거절 4건** — 사용자가 증상을 말하면("카메라가 응답이 없어") 답은 정확한데 rule 7 때문에 "현재 제공된 문서에서는 실제 상태를 확인할 수 없으므로…"를 덧붙이고, 검증기가 그 문구로 거절 판정 → sources 비움. **프롬프트 rule 16**(사용자 보고 증상은 전제로) + **검증기: 문구가 첫 문장에 있을 때만 거절**
+2. **프롬프트 예시 누출** — rule 14의 가상 사례(CAM-410 케이블)를 Q041 답변이 "과거 유지보수 이력"으로 인용. 구체 예시는 혼합을 막지만 9B 모델은 그것을 문서로 오인 → `부품A`/`이유B` 한국어 플레이스홀더 예시로 교체(구조는 구체, 인용은 불가). 이후 누출 0, 혼합 0
+3. **검증기 오탐 2종** — `(기본 0.5)`처럼 `)` 뒤 숫자, `v2.3`처럼 문자 뒤 숫자를 근거에서 놓침 → 정규식 수정
+4. **한자 누출** — "정상 가동을恢复了습니다" 1건 → `foreign_script` 플래그(결정론적) + rule 17. temperature 0.2→**0.1**(명세 하한)로 실행 간 변동 축소
+
+**평가셋 한계(정직하게):** 12청크 샘플 코퍼스 기준이라 37/37은 "파이프라인이 설계대로 동작한다"는 확인이지 실코퍼스 성능이 아님. 명세 §26의 300문항은 Phase 2에서 실문서가 들어온 뒤 의미가 있음. 또 must_include 토큰이 느슨해(예: "진공") 답변 품질 상한을 재지 못함 — Phase 5에서 LLM judge 또는 사람 채점 필요.
+
+**Phase 1 완료.** 명세 §32 목표(질문 → Query Processor → Hybrid RAG → Reranker → Local LLM → 출처 포함 답변)와 §28 Phase 1 예시 질문 4종("VAC-203이 뭐야?", "진공압 정상 범위", "캘리브레이션 방법", "박스 흡착 실패 원인") 전부 정답.
+
+### 📋 다음: Phase 2 Corpus Pipeline — `ingestion/`(PDF/Markdown 파서, semantic chunker, metadata generator, `scripts/ingest.py`), `/api/admin/ingest|reindex` 실구현
 - BM25 인덱싱
 - 키워드 기반 검색
 

@@ -77,3 +77,5 @@ experiments/
 temp/
 .omc/
 models/gguf/
+evaluation/results/*
+!evaluation/results/latest_*.json
