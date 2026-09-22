@@ -11,7 +11,8 @@ import yaml
 class Fact:
     name: str
     question: str
-    tool: Optional[str] = None
+    tool: Optional[str] = None          # machine_state key that can answer this fact (Phase 4)
+    ok_when: Optional[str] = None       # for numeric/string values: "<= -60", ">= 5", "== connected"
 
 
 @dataclass
@@ -52,7 +53,7 @@ def load_rules(path: Path) -> Rules:
     raw = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
     rules = Rules()
     for iid, spec in (raw.get("issues") or {}).items():
-        facts = {n: Fact(n, f["question"], f.get("tool")) for n, f in spec["facts"].items()}
+        facts = {n: Fact(n, f["question"], f.get("tool"), f.get("ok_when")) for n, f in spec["facts"].items()}
         steps = [Step(s["id"], dict(s.get("when", {})), list(s["actions"]), s["doc_query"]) for s in spec["steps"]]
         for s in steps:
             unknown = set(s.when) - set(facts)

@@ -71,6 +71,10 @@ class Settings(BaseSettings):
     corpus_config: str = "configs/corpus.yaml"
     troubleshooting_config: str = "configs/troubleshooting.yaml"
 
+    # Machine tools (Phase 4): "mock" reads configs/machine.yaml scenarios; "none" disables tools
+    tools_backend: str = "mock"
+    machine_config: str = "configs/machine.yaml"
+
     # Database
     database_url: str = "sqlite:///./data/chatbot.db"
 

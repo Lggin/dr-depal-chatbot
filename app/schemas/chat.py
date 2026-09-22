@@ -67,6 +67,7 @@ class ChatResponse(BaseModel):
     retrieval_query: Optional[str] = None  # query actually sent to retrieval (after contextualization)
     route: Optional[str] = None            # which pipeline path produced the answer, e.g. "troubleshooting.ask"
     troubleshooting: Optional[dict] = None # diagnosis state snapshot when a tree is active
+    machine_state: Optional[dict] = None   # live values the answer was allowed to use (from tools)
     timing_ms: dict = {}
     latency_ms: float
     log_id: Optional[int] = None

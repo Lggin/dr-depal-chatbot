@@ -24,6 +24,26 @@ _NEW_TOPIC = re.compile(r"(뭐야|뭔지|무엇|알려|설명|방법|절차|얼�
 _ALARM = re.compile(r"[A-Za-z]{1,4}[\s\-_]?\d{2,4}")
 
 
+_OK_WHEN = re.compile(r"^\s*(<=|>=|==|!=|<|>)\s*(.+?)\s*$")
+
+
+def evaluate_ok_when(value, ok_when: Optional[str]) -> Optional[bool]:
+    """Compare a tool reading against a rule like "<= -60" or "== connected". None if not decidable."""
+    if ok_when is None or value is None or isinstance(value, str) and value.startswith("unavailable"):
+        return None
+    m = _OK_WHEN.match(ok_when)
+    if not m:
+        return None
+    op, ref = m.group(1), m.group(2)
+    try:
+        a, b = float(value), float(ref)
+    except (TypeError, ValueError):
+        a, b = str(value).lower(), ref.lower()
+        if op not in ("==", "!="):
+            return None
+    return {"<=": a <= b, ">=": a >= b, "<": a < b, ">": a > b, "==": a == b, "!=": a != b}[op]
+
+
 def parse_yes_no(text: str) -> Optional[bool]:
     """True/False for a yes/no reply, None when ambiguous or not a reply."""
     t = text.strip()
@@ -95,16 +115,25 @@ class TroubleshootingEngine:
         state.pending_fact = None
         return "answered"
 
-    def prefill_from_tools(self, state: TroubleshootingState, machine_state: Optional[Dict[str, object]]) -> None:
-        """Phase 4 hook: facts with a `tool` key are filled from live machine data when available."""
+    def prefill_from_tools(self, state: TroubleshootingState, machine_state: Optional[Dict[str, object]]) -> List[str]:
+        """Fill facts from live machine data (spec §18). Returns the fact names that were filled.
+
+        A bool reading is used as-is; other readings need the fact's `ok_when` comparator
+        (e.g. vacuum_pressure with "<= -60"). Anything else is left for the user to answer."""
+        filled: List[str] = []
         if not machine_state:
-            return
+            return filled
         issue = self.rules.issues[state.issue]
         for name, fact in issue.facts.items():
-            if fact.tool and fact.tool in machine_state and name not in state.facts:
-                v = machine_state[fact.tool]
-                if isinstance(v, bool):
-                    state.facts[name] = v
+            if not fact.tool or fact.tool not in machine_state or name in state.facts:
+                continue
+            v = machine_state[fact.tool]
+            val = v if isinstance(v, bool) else evaluate_ok_when(v, fact.ok_when)
+            if val is not None:
+                state.facts[name] = val
+                filled.append(name)
+        state.tool_filled = list(dict.fromkeys(state.tool_filled + filled))
+        return filled
 
     # ---------- decision ----------
 

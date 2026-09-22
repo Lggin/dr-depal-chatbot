@@ -1,0 +1,73 @@
+# Mock machine backend (Phase 4). Real PLC/robot/vision adapters replace app/tools/mock.py
+# behind the same tool interface; this file then only documents tag names.
+#
+# `scenario` selects which snapshot the mock tools report. Switch at runtime with
+#   POST /api/admin/mock/scenario?name=<scenario>
+
+machine_id: DP-01
+scenario: vac203_low
+
+scenarios:
+  # spec §16 / §18 example
+  vac203_low:
+    machine_state: HOLD
+    current_alarm: {code: VAC-203, severity: error, since: "2026-09-22T09:12:40"}
+    vacuum_pressure: -43          # kPa (normal -60 ~ -80)
+    vision_detection: true
+    detected_objects: 6
+    robot_state: NORMAL
+    robot_pose: {x: 812.4, y: -95.2, z: 640.0, rx: 180.0, ry: 0.0, rz: 92.5, frame: base}
+    camera_state: connected
+    sensors: {vacuum_pressure_kpa: -43, gripper_temp_c: 31.2, supply_air_mpa: 0.55}
+    plc_io: {X001_vacuum_ok: false, X002_door_closed: true, Y010_vacuum_on: true, Y011_conveyor_run: false}
+
+  normal:
+    machine_state: RUNNING
+    current_alarm: null
+    vacuum_pressure: -71
+    vision_detection: true
+    detected_objects: 8
+    robot_state: NORMAL
+    robot_pose: {x: 640.0, y: 120.0, z: 710.5, rx: 180.0, ry: 0.0, rz: 88.0, frame: base}
+    camera_state: connected
+    sensors: {vacuum_pressure_kpa: -71, gripper_temp_c: 29.8, supply_air_mpa: 0.56}
+    plc_io: {X001_vacuum_ok: true, X002_door_closed: true, Y010_vacuum_on: true, Y011_conveyor_run: true}
+
+  camera_timeout:
+    machine_state: HOLD
+    current_alarm: {code: VIS-301, severity: error, since: "2026-09-22T10:03:05"}
+    vacuum_pressure: -72
+    vision_detection: false
+    detected_objects: 0
+    robot_state: NORMAL
+    robot_pose: {x: 500.0, y: 0.0, z: 900.0, rx: 180.0, ry: 0.0, rz: 90.0, frame: base}
+    camera_state: disconnected
+    sensors: {vacuum_pressure_kpa: -72, gripper_temp_c: 30.1, supply_air_mpa: 0.55}
+    plc_io: {X001_vacuum_ok: true, X002_door_closed: true, Y010_vacuum_on: false, Y011_conveyor_run: false}
+
+# Maintenance DB (spec §21). Consistent with the sample corpus record.
+maintenance_records:
+  - date: "2026-09-10"
+    machine: DP-01
+    alarm_code: VAC-203
+    component: vacuum_system
+    symptom: 진공압 -45 kPa 정체
+    action: 3번 suction cup 측 vacuum hose 교체
+    result: 정상 복구 (-72 kPa)
+    engineer: 김엔지니어
+  - date: "2026-08-02"
+    machine: DP-01
+    alarm_code: VIS-301
+    component: camera
+    symptom: 카메라 통신 타임아웃 간헐 발생
+    action: GigE 케이블 교체, 스위치 포트 변경
+    result: 정상 복구
+    engineer: 박엔지니어
+  - date: "2026-07-15"
+    machine: DP-01
+    alarm_code: null
+    component: suction_cup
+    symptom: 정기 점검
+    action: suction cup 4개 교체 (마모)
+    result: 완료
+    engineer: 김엔지니어

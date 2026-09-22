@@ -60,6 +60,7 @@ class ChatPipeline:
         validator: Optional[AnswerValidator] = None,
         router: Optional[IntentRouter] = None,
         engine=None,   # TroubleshootingEngine; optional so retrieval-only tests can skip it
+        tools=None,    # ToolRegistry (READ ONLY machine tools); None = no live data
     ):
         self.retrieval = retrieval
         self.prompt_builder = prompt_builder
@@ -68,6 +69,25 @@ class ChatPipeline:
         self.validator = validator or AnswerValidator()
         self.router = router or IntentRouter()
         self.engine = engine
+        self.tools = tools
+
+    # ------------------------------------------------------------------ tools
+
+    def _live_state(self, machine_state: Optional[Dict[str, Any]]) -> Tuple[Optional[Dict[str, Any]], List[str]]:
+        """Caller-supplied state wins; otherwise snapshot the machine through the registry."""
+        if machine_state is not None or self.tools is None:
+            return machine_state, []
+        return self.tools.snapshot()
+
+    def _maintenance(self, codes: List[str]) -> Tuple[Optional[List[Dict[str, Any]]], List[str]]:
+        if self.tools is None or self.tools.get("get_maintenance_history") is None:
+            return None, []
+        rows: List[Dict[str, Any]] = []
+        for code in codes or [None]:
+            r = self.tools.call("get_maintenance_history", alarm_code=code) if code else self.tools.call("get_maintenance_history")
+            if r.success and isinstance(r.data, list):
+                rows.extend(x for x in r.data if x not in rows)
+        return rows, ["get_maintenance_history"]
 
     # ------------------------------------------------------------------ public
 
@@ -82,25 +102,30 @@ class ChatPipeline:
         timing: Dict[str, float] = {}
         session = self.sessions.get_or_create(session_id)
         intent = self.router.classify(question).intent
+        tools_used: List[str] = []
 
         # --- troubleshooting: sticky follow-up reply, or a new issue ---
         ts = session.troubleshooting
         if self.engine and ts is not None and not ts.resolved and self.engine.is_reply(question):
             outcome = self.engine.apply_reply(ts, question)
-            return self._troubleshoot(session, question, ts, outcome, machine_state, timing, t_start)
+            machine_state, tools_used = self._live_state(machine_state)
+            return self._troubleshoot(session, question, ts, outcome, machine_state, timing, t_start, tools_used)
         if self.engine and intent == IntentType.TROUBLESHOOTING and not _ASKS_EXPLANATION.search(question):
             issue = self.engine.match_issue(question)
             if issue:
                 ts = self.engine.start(issue)
-                self.engine.prefill_from_tools(ts, machine_state)
+                machine_state, tools_used = self._live_state(machine_state)
+                filled = self.engine.prefill_from_tools(ts, machine_state)
                 session.troubleshooting = ts
-                return self._troubleshoot(session, question, ts, "started", machine_state, timing, t_start)
+                return self._troubleshoot(session, question, ts, "started", machine_state, timing, t_start, tools_used, filled)
         if ts is not None and not self.engine.is_reply(question) if self.engine and ts is not None else False:
             session.troubleshooting = None   # user moved on to a new topic
 
         # --- deterministic routes ---
         if intent == IntentType.GENERAL:
             return self._plain(session, question, GENERAL_HELP, intent, "general", t_start)
+        if intent in (IntentType.LIVE_STATUS, IntentType.LIVE_DIAGNOSIS):
+            machine_state, tools_used = self._live_state(machine_state)
         if intent == IntentType.LIVE_STATUS and machine_state is None:
             return self._plain(session, question, LIVE_UNAVAILABLE, intent, "live.no_tools", t_start)
 
@@ -108,11 +133,18 @@ class ChatPipeline:
         retrieval_query, prompt_question, carried = contextualize(question, session.history)
         route = intent.value
         effective_filters = dict(filters or {})
+        maintenance_history = None
         if intent == IntentType.HISTORY:
             effective_filters.setdefault("document_type", "maintenance")
             prompt_question += "\n(이력 질문: 과거 유지보수 기록을 기준으로 답하고, 공식 매뉴얼 내용과 구분해 주세요.)"
+            maintenance_history, used = self._maintenance(list(dict.fromkeys(extract_alarm_codes(question) + carried)))
+            tools_used += used
         if intent == IntentType.LIVE_DIAGNOSIS and machine_state is None:
             prompt_question += "\n(현재 설비 값은 조회할 수 없습니다. 문서의 기준값과 점검 순서만 제시하고, 현재 값은 확인되지 않았다고 명시해 주세요.)"
+        elif intent == IntentType.LIVE_DIAGNOSIS:
+            prompt_question += ("\n([MACHINE STATE]의 현재 값을 문서의 기준값과 비교해 관측 사실과 가능한 원인을 구분하고, "
+                                "정상으로 확인된 계통은 제외한 뒤 우선 점검할 계통과 순서를 제시해 주세요.)")
+            route = "live_diagnosis.tools" if tools_used else "live_diagnosis.state"
 
         t = time.perf_counter()
         res = self.retrieval.search(retrieval_query, filters=effective_filters or None)
@@ -127,16 +159,19 @@ class ChatPipeline:
             route = "history.filtered"
         timing["retrieval"] = (time.perf_counter() - t) * 1000
 
-        text, built, validation, danger, timing = self._generate(prompt_question, res.docs, session, machine_state, None, timing)
+        text, built, validation, danger, timing = self._generate(prompt_question, res.docs, session, machine_state, None, timing,
+                                                                 maintenance_history=maintenance_history)
         if intent == IntentType.LIVE_DIAGNOSIS and machine_state is None:
             text = f"⚠️ 현재 설비 값은 조회 도구 미연결로 확인할 수 없습니다. 아래는 문서 기준값과 점검 순서입니다.\n\n{text}"
             route = "live_diagnosis.no_tools"
+        if intent == IntentType.LIVE_STATUS:
+            route = "live_status.tools" if tools_used else "live_status.state"   # .state = caller-supplied machine_state
 
         self.sessions.record(session_id, question, text)
         return self._response(session, question, text, intent, route, res, built, validation, danger,
                               alarm_codes=list(dict.fromkeys(res.alarm_codes + carried)),
                               retrieval_query=retrieval_query if retrieval_query != question else None,
-                              timing=timing, t_start=t_start)
+                              timing=timing, t_start=t_start, tools_used=tools_used, machine_state=machine_state)
 
     def reindex(self, config_path: Optional[str] = None) -> Dict[str, Any]:
         """Rebuild the corpus from configs/corpus.yaml into the live collection and refresh BM25.
@@ -165,27 +200,35 @@ class ChatPipeline:
 
     # ------------------------------------------------------------- troubleshooting
 
-    def _troubleshoot(self, session: Session, question: str, ts, outcome: str, machine_state, timing, t_start) -> ChatResponse:
+    def _troubleshoot(self, session: Session, question: str, ts, outcome: str, machine_state, timing, t_start,
+                      tools_used: Optional[List[str]] = None, prefilled: Optional[List[str]] = None) -> ChatResponse:
         decision = self.engine.next(ts)
         label = decision.label
         snapshot = ts.snapshot()
+        tools_used = tools_used or []
 
         if decision.kind == "ask":
             if outcome == "started":
-                text = f"'{label}' 증상을 단계적으로 확인하겠습니다.\n\n{decision.question}"
+                text = f"'{label}' 증상을 단계적으로 확인하겠습니다."
+                if prefilled:
+                    text += "\n" + self._prefill_note(ts, prefilled, machine_state)
+                text += f"\n\n{decision.question}"
             elif outcome == "unclear":
                 text = f"예/아니오로 답해 주시면 다음 단계로 넘어갈 수 있습니다.\n\n{decision.question}"
             else:
                 text = f"확인했습니다.\n\n{decision.question}"
-            return self._plain(session, question, text, IntentType.TROUBLESHOOTING, "troubleshooting.ask", t_start, snapshot)
+            return self._plain(session, question, text, IntentType.TROUBLESHOOTING, "troubleshooting.ask", t_start, snapshot,
+                               tools_used=tools_used, machine_state=machine_state)
 
         if decision.kind in ("escalate", "resolved"):
             session.troubleshooting = None
             return self._plain(session, question, decision.message, IntentType.TROUBLESHOOTING,
-                               f"troubleshooting.{decision.kind}", t_start, snapshot)
+                               f"troubleshooting.{decision.kind}", t_start, snapshot, tools_used=tools_used)
 
         # recommend: ground the inspection procedure in the documents
         facts_txt = ", ".join(f"{k}={'예' if v else '아니오'}" for k, v in decision.confirmed.items()) or "없음"
+        if ts.tool_filled:
+            facts_txt += f" (설비 조회로 자동 확인: {', '.join(ts.tool_filled)})"
         prompt_question = (
             f"[{label}] 진단 중입니다. 확인된 사항: {facts_txt}.\n"
             f"다음 점검 단계 '{decision.step}'의 권장 조치는 {', '.join(decision.actions)} 입니다.\n"
@@ -202,14 +245,26 @@ class ChatPipeline:
         self.sessions.record(session.session_id, question, text)
         return self._response(session, question, text, IntentType.TROUBLESHOOTING, "troubleshooting.recommend",
                               res, built, validation, danger, alarm_codes=res.alarm_codes,
-                              retrieval_query=decision.doc_query, timing=timing, t_start=t_start, troubleshooting=snapshot)
+                              retrieval_query=decision.doc_query, timing=timing, t_start=t_start, troubleshooting=snapshot,
+                              tools_used=tools_used, machine_state=machine_state)
+
+    def _prefill_note(self, ts, prefilled: List[str], machine_state: Optional[Dict[str, Any]]) -> str:
+        issue = self.engine.rules.issues[ts.issue]
+        bits = []
+        for name in prefilled:
+            fact = issue.facts[name]
+            raw = machine_state.get(fact.tool) if machine_state and fact.tool else None
+            verdict = "정상" if ts.facts.get(name) else "이상"
+            bits.append(f"{name}={verdict}" + (f" ({fact.tool}={raw})" if raw is not None else ""))
+        return "설비 조회로 자동 확인된 항목: " + ", ".join(bits) + " — 해당 질문은 건너뜁니다."
 
     # ------------------------------------------------------------------ helpers
 
-    def _generate(self, prompt_question, docs, session, machine_state, ts_state, timing):
+    def _generate(self, prompt_question, docs, session, machine_state, ts_state, timing, maintenance_history=None):
         t = time.perf_counter()
         messages, built = self.prompt_builder.build(prompt_question, docs, history=session.history,
-                                                    machine_state=machine_state, troubleshooting_state=ts_state)
+                                                    machine_state=machine_state, troubleshooting_state=ts_state,
+                                                    maintenance_history=maintenance_history)
         gen = self.llm.generate(messages)
         timing["generation"] = (time.perf_counter() - t) * 1000
 
@@ -225,30 +280,33 @@ class ChatPipeline:
         return text, built, validation, danger, timing
 
     def _plain(self, session: Session, question: str, text: str, intent: IntentType, route: str, t_start: float,
-               troubleshooting: Optional[dict] = None) -> ChatResponse:
+               troubleshooting: Optional[dict] = None, tools_used: Optional[List[str]] = None,
+               machine_state: Optional[Dict[str, Any]] = None) -> ChatResponse:
         """Deterministic answer — no retrieval, no LLM."""
         self.sessions.record(session.session_id, question, text)
         total = (time.perf_counter() - t_start) * 1000
-        logger.info(f"chat[{session.session_id}] {total:.0f}ms route={route}")
+        logger.info(f"chat[{session.session_id}] {total:.0f}ms route={route} tools={tools_used or []}")
         return ChatResponse(
-            session_id=session.session_id, message=question, answer=text, intent=intent, sources=[], tools_used=[],
+            session_id=session.session_id, message=question, answer=text, intent=intent, sources=[], tools_used=tools_used or [],
             retrieval=RetrievalInfo(documents_found=0, reranked=False, top_k=0, sources=[]),
             # a "no live tools" notice is a refusal to provide the value, and is scored as one
             validation=ValidationInfo(ok=True, is_refusal=(route == "live.no_tools")), alarm_codes=extract_alarm_codes(question),
-            route=route, troubleshooting=troubleshooting, timing_ms={}, latency_ms=round(total, 1),
+            route=route, troubleshooting=troubleshooting, machine_state=machine_state, timing_ms={}, latency_ms=round(total, 1),
         )
 
     def _response(self, session, question, text, intent, route, res, built, validation: ValidationResult, danger,
-                  alarm_codes, retrieval_query, timing, t_start, troubleshooting=None) -> ChatResponse:
+                  alarm_codes, retrieval_query, timing, t_start, troubleshooting=None, tools_used=None,
+                  machine_state=None) -> ChatResponse:
         total = (time.perf_counter() - t_start) * 1000
         sources = getattr(built, "sources", [])
         logger.info(
             f"chat[{session.session_id}] {total:.0f}ms route={route} retrieval={timing.get('retrieval', 0):.0f} "
-            f"gen={timing.get('generation', 0):.0f} docs={len(built.included)} codes={alarm_codes} "
+            f"gen={timing.get('generation', 0):.0f} docs={len(built.included)} codes={alarm_codes} tools={tools_used or []} "
             f"ok={validation.ok} refusal={validation.is_refusal} danger={danger}"
         )
         return ChatResponse(
-            session_id=session.session_id, message=question, answer=text, intent=intent, sources=sources, tools_used=[],
+            session_id=session.session_id, message=question, answer=text, intent=intent, sources=sources, tools_used=tools_used or [],
+            machine_state=machine_state,
             retrieval=RetrievalInfo(
                 documents_found=len(res.docs), reranked=self.retrieval.reranker is not None, top_k=len(built.included),
                 sources=[build_sources([d])[0] for d in built.included], scores=[round(d.score, 4) for d in built.included],

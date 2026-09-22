@@ -2,9 +2,9 @@
  "mode": "full",
  "dataset": "sample__depalletizer_docs",
  "collection": "depalletizer_docs",
- "timestamp": "20260922_112445",
+ "timestamp": "20260922_114311",
  "summary": {
-  "cases": 37,
+  "cases": 39,
   "answer_correct": 1.0,
   "must_include_pass": 1.0,
   "must_not_include_pass": 1.0,
@@ -15,14 +15,15 @@
   "danger_flag_rate": 0.0,
   "intent_accuracy": 1.0,
   "route_accuracy": 1.0,
-  "latency_ms_median": 1389.0,
-  "latency_ms_p95": 3039.7,
+  "latency_ms_median": 1555.9,
+  "latency_ms_p95": 3126.7,
   "answer_correct_by_category": {
    "alarm_definition": 1.0,
    "colloquial": 1.0,
    "faq": 1.0,
    "follow_up": 1.0,
    "history": 1.0,
+   "live": 1.0,
    "normal_value": 1.0,
    "out_of_scope": 1.0,
    "procedure": 1.0,
@@ -64,11 +65,11 @@
    "intent": "knowledge",
    "expected_intent": "knowledge",
    "correct": true,
-   "latency_ms": 3039.7,
+   "latency_ms": 3026.1,
    "timing_ms": {
-    "retrieval": 293.0,
-    "generation": 2746.0,
-    "validation": 0.6
+    "retrieval": 295.4,
+    "generation": 2729.4,
+    "validation": 1.2
    }
   },
   {
@@ -104,10 +105,10 @@
    "intent": "knowledge",
    "expected_intent": "knowledge",
    "correct": true,
-   "latency_ms": 3055.4,
+   "latency_ms": 3065.4,
    "timing_ms": {
-    "retrieval": 41.6,
-    "generation": 3013.2,
+    "retrieval": 40.8,
+    "generation": 3024.1,
     "validation": 0.5
    }
   },
@@ -144,11 +145,11 @@
    "intent": "knowledge",
    "expected_intent": "knowledge",
    "correct": true,
-   "latency_ms": 2404.3,
+   "latency_ms": 2407.9,
    "timing_ms": {
-    "retrieval": 41.6,
-    "generation": 2362.3,
-    "validation": 0.4
+    "retrieval": 41.8,
+    "generation": 2365.6,
+    "validation": 0.5
    }
   },
   {
@@ -184,11 +185,11 @@
    "intent": "knowledge",
    "expected_intent": "knowledge",
    "correct": true,
-   "latency_ms": 2768.4,
+   "latency_ms": 2771.1,
    "timing_ms": {
-    "retrieval": 41.2,
-    "generation": 2726.7,
-    "validation": 0.4
+    "retrieval": 41.9,
+    "generation": 2728.7,
+    "validation": 0.5
    }
   },
   {
@@ -224,10 +225,10 @@
    "intent": "knowledge",
    "expected_intent": "knowledge",
    "correct": true,
-   "latency_ms": 3025.1,
+   "latency_ms": 3031.3,
    "timing_ms": {
-    "retrieval": 45.9,
-    "generation": 2978.8,
+    "retrieval": 46.6,
+    "generation": 2984.2,
     "validation": 0.4
    }
   },
@@ -264,10 +265,10 @@
    "intent": "troubleshooting",
    "expected_intent": "troubleshooting",
    "correct": true,
-   "latency_ms": 2502.7,
+   "latency_ms": 2500.4,
    "timing_ms": {
-    "retrieval": 42.9,
-    "generation": 2459.3,
+    "retrieval": 43.3,
+    "generation": 2456.6,
     "validation": 0.5
    }
   },
@@ -304,11 +305,11 @@
    "intent": "knowledge",
    "expected_intent": "knowledge",
    "correct": true,
-   "latency_ms": 2852.8,
+   "latency_ms": 2847.2,
    "timing_ms": {
-    "retrieval": 40.4,
-    "generation": 2812.0,
-    "validation": 0.4
+    "retrieval": 43.0,
+    "generation": 2803.7,
+    "validation": 0.5
    }
   },
   {
@@ -345,10 +346,10 @@
    "intent": "knowledge",
    "expected_intent": "knowledge",
    "correct": true,
-   "latency_ms": 1658.8,
+   "latency_ms": 1662.8,
    "timing_ms": {
-    "retrieval": 39.6,
-    "generation": 1618.8,
+    "retrieval": 39.7,
+    "generation": 1622.7,
     "validation": 0.4
    }
   },
@@ -383,11 +384,11 @@
    "intent": "knowledge",
    "expected_intent": "knowledge",
    "correct": true,
-   "latency_ms": 782.0,
+   "latency_ms": 786.1,
    "timing_ms": {
-    "retrieval": 40.4,
-    "generation": 741.4,
-    "validation": 0.1
+    "retrieval": 39.6,
+    "generation": 746.2,
+    "validation": 0.2
    }
   },
   {
@@ -421,11 +422,11 @@
    "intent": "knowledge",
    "expected_intent": "knowledge",
    "correct": true,
-   "latency_ms": 1055.7,
+   "latency_ms": 1057.3,
    "timing_ms": {
-    "retrieval": 40.1,
-    "generation": 1015.3,
-    "validation": 0.2
+    "retrieval": 40.8,
+    "generation": 1016.1,
+    "validation": 0.3
    }
   },
   {
@@ -459,10 +460,10 @@
    "intent": "knowledge",
    "expected_intent": "knowledge",
    "correct": true,
-   "latency_ms": 698.7,
+   "latency_ms": 701.9,
    "timing_ms": {
-    "retrieval": 39.9,
-    "generation": 658.6,
+    "retrieval": 40.1,
+    "generation": 661.6,
     "validation": 0.2
    }
   },
@@ -497,10 +498,10 @@
    "intent": "knowledge",
    "expected_intent": "knowledge",
    "correct": true,
-   "latency_ms": 801.5,
+   "latency_ms": 801.9,
    "timing_ms": {
     "retrieval": 41.5,
-    "generation": 759.8,
+    "generation": 760.1,
     "validation": 0.2
    }
   },
@@ -535,10 +536,10 @@
    "intent": "knowledge",
    "expected_intent": "knowledge",
    "correct": true,
-   "latency_ms": 651.1,
+   "latency_ms": 653.0,
    "timing_ms": {
-    "retrieval": 39.2,
-    "generation": 611.6,
+    "retrieval": 40.1,
+    "generation": 612.5,
     "validation": 0.2
    }
   },
@@ -573,10 +574,10 @@
    "intent": "knowledge",
    "expected_intent": "knowledge",
    "correct": true,
-   "latency_ms": 1352.9,
+   "latency_ms": 1356.3,
    "timing_ms": {
-    "retrieval": 41.5,
-    "generation": 1311.1,
+    "retrieval": 41.0,
+    "generation": 1314.9,
     "validation": 0.3
    }
   },
@@ -611,10 +612,10 @@
    "intent": "knowledge",
    "expected_intent": "knowledge",
    "correct": true,
-   "latency_ms": 2448.5,
+   "latency_ms": 2448.1,
    "timing_ms": {
-    "retrieval": 39.4,
-    "generation": 2408.7,
+    "retrieval": 38.3,
+    "generation": 2409.3,
     "validation": 0.4
    }
   },
@@ -649,10 +650,10 @@
    "intent": "knowledge",
    "expected_intent": "knowledge",
    "correct": true,
-   "latency_ms": 1389.0,
+   "latency_ms": 1388.7,
    "timing_ms": {
-    "retrieval": 39.2,
-    "generation": 1349.4,
+    "retrieval": 40.2,
+    "generation": 1348.3,
     "validation": 0.2
    }
   },
@@ -687,10 +688,10 @@
    "intent": "knowledge",
    "expected_intent": "knowledge",
    "correct": true,
-   "latency_ms": 1476.4,
+   "latency_ms": 1476.6,
    "timing_ms": {
-    "retrieval": 40.6,
-    "generation": 1435.4,
+    "retrieval": 39.8,
+    "generation": 1436.5,
     "validation": 0.3
    }
   },
@@ -725,11 +726,11 @@
    "intent": "troubleshooting",
    "expected_intent": "troubleshooting",
    "correct": true,
-   "latency_ms": 4550.5,
+   "latency_ms": 4549.7,
    "timing_ms": {
-    "retrieval": 40.4,
-    "generation": 4509.3,
-    "validation": 0.7
+    "retrieval": 44.0,
+    "generation": 4504.8,
+    "validation": 0.8
    }
   },
   {
@@ -739,7 +740,7 @@
    "id": "Q030",
    "category": "colloquial",
    "question": "빨판이 박스를 못 잡아",
-   "answer": "'박스 흡착/픽업 실패' 증상을 단계적으로 확인하겠습니다.\n\n비전 화면에서 박스가 정상적으로 검출되고 있나요?",
+   "answer": "'박스 흡착/픽업 실패' 증상을 단계적으로 확인하겠습니다.\n설비 조회로 자동 확인된 항목: vision_detection=정상 (vision_detection=True), vacuum_ok=이상 (vacuum_pressure=-43) — 해당 질문은 건너뜁니다.\n\n로봇이 박스 상면 중앙까지 정상적으로 내려오나요? (위치가 어긋나지 않나요?)",
    "is_refusal": false,
    "expect_refusal": false,
    "missing": [],
@@ -769,7 +770,7 @@
    "id": "Q031",
    "category": "colloquial",
    "question": "박스를 못 집는데 뭘 봐야 해?",
-   "answer": "'박스 흡착/픽업 실패' 증상을 단계적으로 확인하겠습니다.\n\n비전 화면에서 박스가 정상적으로 검출되고 있나요?",
+   "answer": "'박스 흡착/픽업 실패' 증상을 단계적으로 확인하겠습니다.\n설비 조회로 자동 확인된 항목: vision_detection=정상 (vision_detection=True), vacuum_ok=이상 (vacuum_pressure=-43) — 해당 질문은 건너뜁니다.\n\n로봇이 박스 상면 중앙까지 정상적으로 내려오나요? (위치가 어긋나지 않나요?)",
    "is_refusal": false,
    "expect_refusal": false,
    "missing": [],
@@ -789,7 +790,7 @@
    "intent": "troubleshooting",
    "expected_intent": "troubleshooting",
    "correct": true,
-   "latency_ms": 0.0,
+   "latency_ms": 0.1,
    "timing_ms": {}
   },
   {
@@ -823,10 +824,10 @@
    "intent": "troubleshooting",
    "expected_intent": "troubleshooting",
    "correct": true,
-   "latency_ms": 1279.9,
+   "latency_ms": 1281.3,
    "timing_ms": {
-    "retrieval": 40.0,
-    "generation": 1239.6,
+    "retrieval": 39.7,
+    "generation": 1241.2,
     "validation": 0.3
    }
   },
@@ -861,11 +862,11 @@
    "intent": "troubleshooting",
    "expected_intent": "troubleshooting",
    "correct": true,
-   "latency_ms": 2044.3,
+   "latency_ms": 2046.7,
    "timing_ms": {
-    "retrieval": 41.3,
-    "generation": 2002.6,
-    "validation": 0.4
+    "retrieval": 42.2,
+    "generation": 2004.1,
+    "validation": 0.3
    }
   },
   {
@@ -875,7 +876,7 @@
    "id": "Q040",
    "category": "symptom_to_alarm",
    "question": "박스가 있는데 비전에서 검출이 안 돼",
-   "answer": "'박스 검출/인식 안 됨' 증상을 단계적으로 확인하겠습니다.\n\n카메라 영상이 화면에 정상적으로 나오나요? (검은 화면·멈춤이 아닌가요)",
+   "answer": "'박스 검출/인식 안 됨' 증상을 단계적으로 확인하겠습니다.\n설비 조회로 자동 확인된 항목: camera_connected=정상 (camera_state=connected) — 해당 질문은 건너뜁니다.\n\n실시간 검출 모드가 켜져 있나요? (`l` 키)",
    "is_refusal": false,
    "expect_refusal": false,
    "missing": [],
@@ -929,11 +930,11 @@
    "intent": "troubleshooting",
    "expected_intent": "troubleshooting",
    "correct": true,
-   "latency_ms": 1605.1,
+   "latency_ms": 1610.0,
    "timing_ms": {
-    "retrieval": 39.1,
-    "generation": 1565.6,
-    "validation": 0.3
+    "retrieval": 40.3,
+    "generation": 1569.2,
+    "validation": 0.4
    }
   },
   {
@@ -963,7 +964,7 @@
    "intent": "troubleshooting",
    "expected_intent": "troubleshooting",
    "correct": true,
-   "latency_ms": 0.1,
+   "latency_ms": 0.2,
    "timing_ms": {}
   },
   {
@@ -973,7 +974,7 @@
    "id": "Q050",
    "category": "history",
    "question": "VAC-203 지난번에도 있었어?",
-   "answer": "네, VAC-203 알람은 과거에도 발생했던 기록이 있습니다.\n\n과거 유지보수 이력에 따르면 2026 년 9 월 10 일 DP-01 에서 VAC-203 알람이 발생했습니다. 당시 진공압이 -45 kPa 에서 정체되었으며, 3 번 suction cup 측 vacuum hose 에 균열이 발견되어 호스를 교체한 결과 진공압이 -72 kPa 로 복귀하고 정상 가동이 이루어졌습니다.\n\n출처: Maintenance Log (VAC-203)",
+   "answer": "네, VAC-203 알람은 지난번에도 발생했습니다.\n\n과거 유지보수 이력에 따르면 2026 년 9 월 10 일 DP-01 에서 VAC-203 알람이 발생했으며, 당시 진공압이 -45 kPa 에서 정체되었습니다. 원인으로 3 번 suction cup 측 vacuum hose 에 균열이 발견되어 호스를 교체한 후 진공압이 -72 kPa 로 복귀하여 정상 가동이 되었습니다.\n\n출처: Maintenance Log (VAC-203)",
    "is_refusal": false,
    "expect_refusal": false,
    "missing": [],
@@ -999,10 +1000,10 @@
    "intent": "history",
    "expected_intent": "history",
    "correct": true,
-   "latency_ms": 1811.1,
+   "latency_ms": 1814.1,
    "timing_ms": {
     "retrieval": 17.8,
-    "generation": 1792.9,
+    "generation": 1795.8,
     "validation": 0.4
    }
   },
@@ -1013,7 +1014,7 @@
    "id": "Q051",
    "category": "history",
    "question": "9월 10일에 VAC-203 어떻게 조치했어?",
-   "answer": "2026 년 9 월 10 일 VAC-203 알람 발생 시, 3 번 suction cup 측 vacuum hose 에 균열이 발견되어 해당 호스를 교체하는 조치를 취했습니다.\n\n구체적인 조치 내용은 다음과 같습니다:\n*   **발생 일시**: 2026-09-10\n*   **발생 원인**: 3 번 suction cup 측 vacuum hose 에 균열 발견\n*   **조치 내용**: 균열이 발생한 호스 교체\n*   **결과**: 진공압이 -45 kPa 에서 정체하던 것이 -72 kPa 로 복귀하여 정상 가동됨\n\n출처: Maintenance Log (VAC-203)",
+   "answer": "2026 년 9 월 10 일 VAC-203 알람은 3 번 suction cup 측 vacuum hose 에 균열이 발견되어 해당 호스를 교체함으로써 조치되었습니다.\n\n구체적인 내용은 다음과 같습니다:\n*   **발생 일시**: 2026-09-10\n*   **알람 코드**: VAC-203\n*   **증상**: 진공압이 -45 kPa 에서 정체됨\n*   **조치 내용**: 3 번 suction cup 측 vacuum hose 에 균열이 발견되어 호스를 교체함\n*   **결과**: 진공압이 -72 kPa 로 복귀하여 정상 가동됨\n*   **담당자**: 김엔지니어\n\n이 정보는 과거 유지보수 이력에 기록된 사항입니다.\n\n출처: Maintenance Log (VAC-203)",
    "is_refusal": false,
    "expect_refusal": false,
    "missing": [],
@@ -1039,10 +1040,10 @@
    "intent": "history",
    "expected_intent": "history",
    "correct": true,
-   "latency_ms": 2209.2,
+   "latency_ms": 2673.2,
    "timing_ms": {
-    "retrieval": 18.9,
-    "generation": 2189.7,
+    "retrieval": 18.5,
+    "generation": 2654.0,
     "validation": 0.5
    }
   },
@@ -1081,10 +1082,10 @@
    "intent": "troubleshooting",
    "expected_intent": "troubleshooting",
    "correct": true,
-   "latency_ms": 2861.6,
+   "latency_ms": 2863.2,
    "timing_ms": {
-    "retrieval": 43.6,
-    "generation": 2817.4,
+    "retrieval": 42.7,
+    "generation": 2819.8,
     "validation": 0.6
    }
   },
@@ -1119,10 +1120,10 @@
    "intent": "knowledge",
    "expected_intent": "knowledge",
    "correct": true,
-   "latency_ms": 1656.3,
+   "latency_ms": 1659.4,
    "timing_ms": {
-    "retrieval": 39.7,
-    "generation": 1616.2,
+    "retrieval": 38.4,
+    "generation": 1620.7,
     "validation": 0.3
    }
   },
@@ -1157,10 +1158,10 @@
    "intent": "knowledge",
    "expected_intent": "knowledge",
    "correct": true,
-   "latency_ms": 787.1,
+   "latency_ms": 783.1,
    "timing_ms": {
-    "retrieval": 41.9,
-    "generation": 744.9,
+    "retrieval": 39.5,
+    "generation": 743.2,
     "validation": 0.2
    }
   },
@@ -1191,10 +1192,10 @@
    "intent": "knowledge",
    "expected_intent": "knowledge",
    "correct": true,
-   "latency_ms": 1201.7,
+   "latency_ms": 1195.4,
    "timing_ms": {
     "retrieval": 39.3,
-    "generation": 1162.1,
+    "generation": 1155.7,
     "validation": 0.3
    }
   },
@@ -1225,10 +1226,10 @@
    "intent": "knowledge",
    "expected_intent": "knowledge",
    "correct": true,
-   "latency_ms": 1333.0,
+   "latency_ms": 1327.7,
    "timing_ms": {
-    "retrieval": 40.5,
-    "generation": 1292.2,
+    "retrieval": 39.2,
+    "generation": 1288.2,
     "validation": 0.3
    }
   },
@@ -1259,29 +1260,32 @@
    "intent": "knowledge",
    "expected_intent": "knowledge",
    "correct": true,
-   "latency_ms": 923.8,
+   "latency_ms": 923.3,
    "timing_ms": {
-    "retrieval": 39.9,
-    "generation": 883.6,
+    "retrieval": 41.3,
+    "generation": 881.8,
     "validation": 0.2
    }
   },
   {
-   "route": "live.no_tools",
-   "expected_route": "live.no_tools",
+   "route": "live_status.tools",
+   "expected_route": "live_status.tools",
    "route_ok": true,
    "id": "Q073",
    "category": "out_of_scope",
    "question": "지금 진공압 얼마야?",
-   "answer": "현재 설비 값(알람·진공압·로봇 상태 등)은 설비 조회 도구가 아직 연결되어 있지 않아 확인할 수 없습니다. 정상 범위나 점검 절차가 필요하시면 그렇게 질문해 주세요.",
-   "is_refusal": true,
-   "expect_refusal": true,
+   "answer": "현재 진공압은 **-43 kPa**입니다.\n\n제공된 문서에 따르면 정상 작동 범위는 **-60 ~ -80 kPa**이며, 현재 측정값인 -43 kPa는 이 범위보다 높습니다 (진공도가 낮음). 이는 VAC-203 'Vacuum Pressure Low' 알람이 발생하고 있는 상태와 일치합니다.\n\n출처: Vacuum System Manual §3.2; Vacuum System Manual §6.3 (VAC-203)",
+   "is_refusal": false,
+   "expect_refusal": false,
    "missing": [],
    "forbidden": [],
    "refusal_ok": true,
-   "sources": [],
-   "expected": [],
-   "citation_ok": true,
+   "sources": [
+    "VAC_MANUAL_SPEC_001",
+    "VAC_203_001"
+   ],
+   "expected": null,
+   "citation_ok": null,
    "validation_ok": true,
    "unsupported_numbers": [],
    "unsupported_codes": [],
@@ -1293,8 +1297,12 @@
    "intent": "live_status",
    "expected_intent": "live_status",
    "correct": true,
-   "latency_ms": 0.0,
-   "timing_ms": {}
+   "latency_ms": 1809.3,
+   "timing_ms": {
+    "retrieval": 40.5,
+    "generation": 1768.2,
+    "validation": 0.5
+   }
   },
   {
    "route": "knowledge",
@@ -1329,11 +1337,11 @@
    "intent": "knowledge",
    "expected_intent": "knowledge",
    "correct": true,
-   "latency_ms": 1558.9,
+   "latency_ms": 1555.9,
    "timing_ms": {
-    "retrieval": 40.5,
-    "generation": 1517.9,
-    "validation": 0.4
+    "retrieval": 41.4,
+    "generation": 1514.2,
+    "validation": 0.3
    }
   },
   {
@@ -1343,7 +1351,7 @@
    "id": "Q081",
    "category": "follow_up",
    "question": "그거 정상 범위가 얼마야?",
-   "answer": "ROB-105 알람의 정상 범위는 Payload 가 30 kg 이하인 것입니다.\n\n출처: Robot Controller Manual §8.5 (ROB-105)",
+   "answer": "ROB-105 알람과 관련된 정상 범위는 Payload 가 30 kg 이하인 것입니다.\n\n출처: Robot Controller Manual §8.5 (ROB-105)",
    "is_refusal": false,
    "expect_refusal": false,
    "missing": [],
@@ -1369,10 +1377,10 @@
    "intent": "knowledge",
    "expected_intent": "knowledge",
    "correct": true,
-   "latency_ms": 823.8,
+   "latency_ms": 826.3,
    "timing_ms": {
-    "retrieval": 51.7,
-    "generation": 771.7,
+    "retrieval": 40.3,
+    "generation": 785.7,
     "validation": 0.2
    }
   },
@@ -1410,11 +1418,86 @@
    "intent": "troubleshooting",
    "expected_intent": "troubleshooting",
    "correct": true,
-   "latency_ms": 1034.8,
+   "latency_ms": 1031.2,
    "timing_ms": {
-    "retrieval": 40.9,
-    "generation": 993.6,
+    "retrieval": 40.8,
+    "generation": 990.0,
     "validation": 0.3
+   }
+  },
+  {
+   "route": "live_diagnosis.tools",
+   "expected_route": "live_diagnosis.tools",
+   "route_ok": true,
+   "id": "Q074",
+   "category": "live",
+   "question": "지금 박스를 왜 못 집어?",
+   "answer": "박스 흡착 실패는 **VAC-203 (진공압 저하)** 알람에 해당하며, 현재 진공압 **-43 kPa**가 정상 범위 **-60 ~ -80 kPa**보다 높기 때문에 박스를 집어 올릴 수 없습니다.\n\n**관측 사실:**\n*   현재 진공압: **-43 kPa** (정상 범위: -60 ~ -80 kPa)\n*   비전 검출: 정상 (6 개체 검출)\n*   로봇 상태: NORMAL (서보 과부하 등 로봇 계통 문제는 없음)\n\n**가능한 원인:**\n1.  진공 호스 누설 (Vacuum hose leakage)\n2.  흡착 패드 손상 (Suction cup damage)\n3.  진공 발생기 고장 (Vacuum generator malfunction)\n\n**우선 점검 순서:**\n1.  **진공압 확인**: 현재 압력 값이 지속적으로 -43 kPa로 고정되어 있는지, 변동이 있는지 확인합니다.\n2.  **호스 누설 확인**: 진공 호스에 누설이 없는지 점검합니다.\n3.  **흡착 패드 상태 확인**: 흡착 패드가 손상되었거나 박스 상면에 밀착되지 않는지 확인합니다.\n\n출처: Vacuum System Manual §6.3 (VAC-203)",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [
+    "VAC_203_001"
+   ],
+   "expected": [
+    "VAC_203_001"
+   ],
+   "citation_ok": true,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [],
+   "intent": "live_diagnosis",
+   "expected_intent": "live_diagnosis",
+   "correct": true,
+   "latency_ms": 4337.6,
+   "timing_ms": {
+    "retrieval": 39.1,
+    "generation": 4297.6,
+    "validation": 0.8
+   }
+  },
+  {
+   "route": "live_status.tools",
+   "expected_route": "live_status.tools",
+   "route_ok": true,
+   "id": "Q075",
+   "category": "live",
+   "question": "지금 알람 뭐 떠 있어?",
+   "answer": "현재 알람은 **VAC-203 (Vacuum Pressure Low)** 입니다.\n\n*   **알람 상태:** 오류 (error)\n*   **발생 시간:** 2026-09-22T09:12:40\n*   **현재 진공압력:** -43 kPa\n*   **정상 범위:** -60 ~ -80 kPa\n\n현재 측정된 진공압력 (-43 kPa) 은 정상 범위 (-60 ~ -80 kPa) 보다 높게 나타나 진공 흡입력이 부족함을 의미합니다.\n\n**문서상 가능한 원인 및 점검 순서:**\n1.  **Vacuum hose leakage (진공 호스 누수)** 확인\n2.  **Suction cup damage (흡입 컵 손상)** 확인\n3.  **Vacuum generator malfunction (진공 발생기 고장)** 확인\n\n출처: Vacuum System Manual §6.3 (VAC-203); Vacuum System Manual §6.1 (VAC-201)",
+   "is_refusal": false,
+   "expect_refusal": false,
+   "missing": [],
+   "forbidden": [],
+   "refusal_ok": true,
+   "sources": [
+    "VAC_203_001",
+    "VAC_201_001"
+   ],
+   "expected": null,
+   "citation_ok": null,
+   "validation_ok": true,
+   "unsupported_numbers": [],
+   "unsupported_codes": [],
+   "invalid_citations": [],
+   "foreign_script": false,
+   "fabricated_source_types": [],
+   "danger_flags": [],
+   "alarm_codes": [],
+   "intent": "live_status",
+   "expected_intent": "live_status",
+   "correct": true,
+   "latency_ms": 3126.7,
+   "timing_ms": {
+    "retrieval": 40.0,
+    "generation": 3086.0,
+    "validation": 0.6
    }
   }
  ]

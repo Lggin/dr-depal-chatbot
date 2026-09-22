@@ -62,6 +62,44 @@ async def ingest(request: Request, config_path: str | None = None):
     return await reindex(request, config_path)
 
 
+def _pipe(request: Request):
+    pipe = getattr(request.app.state, "pipeline", None)
+    if pipe is None:
+        raise HTTPException(status_code=503, detail="Model pipeline not loaded")
+    return pipe
+
+
+@router.get("/admin/tools")
+async def list_tools(request: Request):
+    pipe = _pipe(request)
+    if pipe.tools is None:
+        return {"backend": "none", "tools": []}
+    return {"backend": "mock" if getattr(pipe, "mock", None) else "live", "read_only": True, "tools": pipe.tools.describe(),
+            "scenario": getattr(getattr(pipe, "mock", None), "scenario", None)}
+
+
+@router.get("/admin/machine")
+async def machine_snapshot(request: Request):
+    pipe = _pipe(request)
+    if pipe.tools is None:
+        raise HTTPException(status_code=404, detail="no machine tools configured")
+    state, used = await run_in_threadpool(pipe.tools.snapshot)
+    return {"machine_state": state, "tools_used": used}
+
+
+@router.post("/admin/mock/scenario")
+async def set_mock_scenario(request: Request, name: str):
+    pipe = _pipe(request)
+    mock = getattr(pipe, "mock", None)
+    if mock is None:
+        raise HTTPException(status_code=404, detail="mock backend not active")
+    try:
+        mock.set_scenario(name)
+    except KeyError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    return {"scenario": mock.scenario, "available": list(mock.scenarios)}
+
+
 @router.get("/admin/logs")
 async def recent_logs(request: Request, limit: int = 20, session_id: str | None = None):
     repo = getattr(request.app.state, "log_repo", None)

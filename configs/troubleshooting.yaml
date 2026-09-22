@@ -21,6 +21,7 @@ issues:
       vacuum_ok:
         question: 흡착 시 진공압이 정상 범위(-60 kPa 이상)에 도달하나요?
         tool: vacuum_pressure
+        ok_when: "<= -60"          # kPa, more negative = stronger vacuum
       box_surface_ok:
         question: 박스 상면이 찢어지거나 테이프가 들떠 있지는 않나요?
     order: [vision_detection, robot_position_ok, vacuum_ok, box_surface_ok]
@@ -50,6 +51,7 @@ issues:
       camera_connected:
         question: 카메라 영상이 화면에 정상적으로 나오나요? (검은 화면·멈춤이 아닌가요)
         tool: camera_state
+        ok_when: "== connected"
       lighting_ok:
         question: 조명이 평소와 같나요? (역광, 그늘, 반사가 심하지 않나요)
       realtime_mode_on:

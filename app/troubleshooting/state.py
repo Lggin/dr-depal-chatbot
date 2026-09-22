@@ -9,6 +9,7 @@ from typing import Dict, List, Optional
 class TroubleshootingState:
     issue: str
     facts: Dict[str, bool] = field(default_factory=dict)      # confirmed observations
+    tool_filled: List[str] = field(default_factory=list)      # facts answered by machine tools, not the user
     pending_fact: Optional[str] = None                        # the fact we just asked about
     current_step: Optional[str] = None
     turns: int = 0

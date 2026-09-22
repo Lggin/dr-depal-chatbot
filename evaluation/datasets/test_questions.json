@@ -301,13 +301,12 @@
   "expected_alarm_code": null,
   "expected_source": null,
   "must_include": [
-   "비전",
-   "검출"
+   "로봇"
   ],
   "must_not_include": [],
   "expect_refusal": false,
   "expected_route": "troubleshooting.ask",
-  "note": "Phase 3: starts the decision tree; scored on the first diagnostic question"
+  "note": "Phase 4: tools prefill vision/vacuum from the vac203_low scenario; first question is about robot position"
  },
  {
   "id": "Q031",
@@ -317,13 +316,12 @@
   "expected_alarm_code": null,
   "expected_source": null,
   "must_include": [
-   "비전",
-   "검출"
+   "로봇"
   ],
   "must_not_include": [],
   "expect_refusal": false,
   "expected_route": "troubleshooting.ask",
-  "note": "Phase 3: starts the decision tree; scored on the first diagnostic question"
+  "note": "Phase 4: tools prefill vision/vacuum from the vac203_low scenario; first question is about robot position"
  },
  {
   "id": "Q032",
@@ -364,12 +362,12 @@
   "expected_alarm_code": null,
   "expected_source": null,
   "must_include": [
-   "카메라 영상"
+   "실시간"
   ],
   "must_not_include": [],
   "expect_refusal": false,
   "expected_route": "troubleshooting.ask",
-  "note": "Phase 3: starts the decision tree; scored on the first diagnostic question"
+  "note": "Phase 4: camera_state=connected prefilled; first question is realtime mode"
  },
  {
   "id": "Q041",
@@ -535,16 +533,14 @@
   "question": "지금 진공압 얼마야?",
   "expected_intent": "live_status",
   "expected_alarm_code": null,
-  "expected_source": [],
+  "expected_source": null,
   "must_include": [
-   "확인할 수 없습니다"
-  ],
-  "must_not_include": [
    "-43"
   ],
-  "expect_refusal": true,
-  "note": "Phase 1 has no tools; the assistant must not claim a live value",
-  "expected_route": "live.no_tools"
+  "must_not_include": [],
+  "expect_refusal": false,
+  "note": "Phase 4: mock tool returns -43 kPa (vac203_low)",
+  "expected_route": "live_status.tools"
  },
  {
   "id": "Q080",
@@ -600,6 +596,41 @@
   ],
   "must_include": [
    "ping"
+  ],
+  "must_not_include": [],
+  "expect_refusal": false
+ },
+ {
+  "id": "Q074",
+  "category": "live",
+  "question": "지금 박스를 왜 못 집어?",
+  "expected_intent": "live_diagnosis",
+  "expected_alarm_code": null,
+  "expected_source": [
+   "VAC_203_001"
+  ],
+  "expected_route": "live_diagnosis.tools",
+  "must_include": [
+   "VAC-203",
+   "-43",
+   "-60"
+  ],
+  "must_not_include": [
+   "확인할 수 없습니다"
+  ],
+  "expect_refusal": false,
+  "note": "spec §18: alarm + live value vs reference range, vacuum system first"
+ },
+ {
+  "id": "Q075",
+  "category": "live",
+  "question": "지금 알람 뭐 떠 있어?",
+  "expected_intent": "live_status",
+  "expected_alarm_code": null,
+  "expected_source": null,
+  "expected_route": "live_status.tools",
+  "must_include": [
+   "VAC-203"
   ],
   "must_not_include": [],
   "expect_refusal": false

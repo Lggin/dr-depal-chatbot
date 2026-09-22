@@ -26,6 +26,9 @@ class _FakeStore:
 
 
 class _FakePipeline:
+    tools = None
+    mock = None
+
     def __init__(self):
         self.sessions = SessionStore(max_turns=1)
         self.llm = type("L", (), {"llm": object()})()
@@ -129,6 +132,26 @@ def test_admin_reindex_and_ingest(loaded):
     assert r.json()["chunks"] == 5 and r.json()["sources"] == 2 and "per_source" not in r.json()
     assert loaded.post("/api/admin/ingest").status_code == 200
     assert loaded.post("/api/admin/reindex?config_path=missing.yaml").status_code == 404
+
+
+def test_admin_tools_endpoints_with_mock_backend(loaded):
+    from pathlib import Path
+    from app.tools.mock import build_mock_registry
+    reg, mock = build_mock_registry(Path(__file__).parent.parent / "configs/machine.yaml")
+    loaded.app.state.pipeline.tools, loaded.app.state.pipeline.mock = reg, mock
+    t = loaded.get("/api/admin/tools").json()
+    assert t["backend"] == "mock" and t["read_only"] and "get_vacuum_pressure" in [x["name"] for x in t["tools"]]
+    m = loaded.get("/api/admin/machine").json()
+    assert m["machine_state"]["vacuum_pressure"] == -43 and "get_current_alarm" in m["tools_used"]
+    s = loaded.post("/api/admin/mock/scenario?name=normal").json()
+    assert s["scenario"] == "normal" and loaded.get("/api/admin/machine").json()["machine_state"]["alarm"] is None
+    assert loaded.post("/api/admin/mock/scenario?name=nope").status_code == 404
+
+
+def test_admin_tools_without_backend(loaded):
+    loaded.app.state.pipeline.tools = None
+    assert loaded.get("/api/admin/tools").json()["tools"] == []
+    assert loaded.get("/api/admin/machine").status_code == 404
 
 
 def test_admin_reindex_503_without_models(client):

@@ -54,9 +54,19 @@ def build_chat_pipeline():
     from app.troubleshooting import TroubleshootingEngine, load_rules
     engine = TroubleshootingEngine(load_rules(Path(settings.troubleshooting_config)))
 
+    tools, mock = None, None
+    if settings.tools_backend == "mock":
+        from app.tools.mock import build_mock_registry
+        tools, mock = build_mock_registry(Path(settings.machine_config))
+    elif settings.tools_backend != "none":
+        raise ValueError(f"unknown tools_backend {settings.tools_backend!r} (mock|none)")
+
     logger.info(f"chat pipeline ready in {time.perf_counter()-t0:.1f}s (aux={device}, chunks={sparse.size}, "
-                f"issues={list(engine.rules.issues)})")
-    return ChatPipeline(retrieval, prompt_builder, llm, sessions, router=IntentRouter(), engine=engine)
+                f"issues={list(engine.rules.issues)}, tools={tools.names() if tools else 'none'}"
+                + (f", scenario={mock.scenario}" if mock else ""))
+    pipe = ChatPipeline(retrieval, prompt_builder, llm, sessions, router=IntentRouter(), engine=engine, tools=tools)
+    pipe.mock = mock  # admin endpoints switch scenarios through this
+    return pipe
 
 
 def resolve_aux_device() -> str:

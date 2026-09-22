@@ -109,7 +109,9 @@ def test_is_reply_distinguishes_answers_from_new_questions(engine):
 
 def test_prefill_from_machine_state(engine):
     st = engine.start("pickup_failure")
-    engine.prefill_from_tools(st, {"vision_detection": True, "vacuum_pressure": -43})   # non-bool ignored
-    assert st.facts == {"vision_detection": True}
+    filled = engine.prefill_from_tools(st, {"vision_detection": True, "vacuum_pressure": -43, "robot_state": "NORMAL"})
+    # bool used directly; numeric via ok_when ("<= -60" → -43 fails); robot_state has no fact → ignored
+    assert filled == ["vision_detection", "vacuum_ok"] and st.facts == {"vision_detection": True, "vacuum_ok": False}
+    assert st.tool_filled == ["vision_detection", "vacuum_ok"]
     d = engine.next(st)
     assert d.kind == "ask" and d.fact == "robot_position_ok"

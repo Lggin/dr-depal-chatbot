@@ -152,12 +152,21 @@ class PromptBuilder:
         history: Optional[List[Message]] = None,
         machine_state: Optional[Dict[str, Any]] = None,
         troubleshooting_state: Optional[Dict[str, Any]] = None,
+        maintenance_history: Optional[List[Dict[str, Any]]] = None,
     ) -> tuple[List[Message], BuiltContext]:
         built = self.ctx.build(docs)
 
         parts: List[str] = []
         if machine_state:
-            parts.append("[MACHINE STATE] (obtained via tool, current values)\n" + _kv_block(machine_state))
+            parts.append("[MACHINE STATE] (obtained via tool just now — these are the current values; "
+                         "report them as such and compare against reference ranges from the documents)\n" + _kv_block(machine_state))
+        if maintenance_history is not None:
+            if maintenance_history:
+                rows = "\n".join(f"- {r.get('date')}: {r.get('alarm_code') or '-'} / {r.get('symptom')} → {r.get('action')} → {r.get('result')}"
+                                 for r in maintenance_history)
+                parts.append("[MAINTENANCE HISTORY] (from the maintenance database via tool — past records, not the current cause)\n" + rows)
+            else:
+                parts.append("[MAINTENANCE HISTORY] (from the maintenance database via tool)\n(no matching records)")
         if troubleshooting_state:
             parts.append("[TROUBLESHOOTING STATE]\n" + _kv_block(troubleshooting_state))
         parts.append("[DOCUMENTS]\n" + (built.text if built.included else NO_DOCS_NOTICE))

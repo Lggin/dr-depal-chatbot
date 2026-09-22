@@ -115,8 +115,8 @@ curl -s -X POST http://localhost:8000/api/chat -H "Content-Type: application/jso
 |---|---|---|
 | `VAC-203이 뭐야?`, `진공압 정상 범위 알려줘` | knowledge | 문서 검색 → 답변 + 출처 |
 | `VAC-203 지난번에도 있었어?` | history | 유지보수 기록 우선 검색(`history.filtered`), 없으면 전체 |
-| `지금 진공압 얼마야?` | live_status | 설비 조회 도구 미연결 안내 (Phase 4에서 도구 연결) |
-| `지금 박스를 왜 못 집어?` | live_diagnosis | 문서 기준값·점검 순서 + ⚠️ 현재 값 미확인 표시 |
+| `지금 진공압 얼마야?` | live_status | 설비 도구 스냅샷 → 현재값 + 문서 기준값 비교 (도구 없으면 미연결 안내) |
+| `지금 박스를 왜 못 집어?` | live_diagnosis | 현재 알람·값 vs 기준값 → 우선 점검 순서 (도구 없으면 ⚠️ 표시 후 문서만) |
 | `박스를 못 집어.` | troubleshooting | **단계별 진단 시작**(아래) |
 | `박스 흡착 실패 원인이 뭐야?` | troubleshooting | 설명 요구 → 문서로 바로 답변 |
 | `안녕` | general | 도우미 소개 |
@@ -142,6 +142,26 @@ A: 문제가 해결되었다고 하셨습니다. …
 ```
 
 응답의 `troubleshooting` 필드에 `issue / facts / pending_fact / current_step`이 담깁니다. 진단 중 다른 주제를 질문하면 진단 상태는 폐기됩니다.
+
+### 설비 데이터 도구 (Phase 4, READ ONLY)
+
+`지금 …` 질문과 진단 트리는 설비 조회 도구(`app/tools/`)를 사용합니다. V1은 **읽기 전용**이며 `ToolRegistry`가 쓰기 도구 등록 자체를 거부합니다(명세 §22). 기본 백엔드는 **Mock**(`TOOLS_BACKEND=mock`) — `configs/machine.yaml`의 시나리오를 읽습니다.
+
+```bash
+curl -s localhost:8000/api/admin/tools                       # 도구 11종 목록, read_only, 현재 시나리오
+curl -s localhost:8000/api/admin/machine                     # 현재 스냅샷 (HOLD / VAC-203 / -43 kPa / ...)
+curl -s -X POST "localhost:8000/api/admin/mock/scenario?name=camera_timeout"   # vac203_low | normal | camera_timeout
+```
+
+| 질문 | 도구 | 문서 | 응답 |
+|---|---|---|---|
+| `지금 진공압 얼마야?` | ✓ | ✓(기준값) | "현재 -43 kPa, 정상 -60~-80보다 높음" |
+| `진공압 정상 범위가 얼마야?` | ✗ | ✓ | 문서만 |
+| `지금 박스를 왜 못 집어?` | ✓ | ✓ | 알람·현재값 vs 기준값 → 정상 계통 제외 → 우선 점검 순서 (명세 §18) |
+| `박스를 못 집어.` | ✓ | 권고 턴만 | 도구로 확인된 fact는 건너뛰고 남은 것만 질문 |
+| `VAC-203 지난번에도 있었어?` | 유지보수 DB | ✓ | 과거 기록 (현재 원인으로 단정하지 않음) |
+
+응답의 `tools_used`(호출 도구), `machine_state`(답변에 허용된 현재 값)로 어떤 값이 실제 조회된 것인지 추적할 수 있습니다. 실기기 연결은 `app/tools/mock.py`의 각 클래스를 같은 이름·인터페이스의 PLC/로봇/비전 어댑터로 교체하면 됩니다(`TOOLS_BACKEND=none`이면 도구 없이 동작).
 
 **트리 추가/수정**: `configs/troubleshooting.yaml`에 `issues.<id>`를 추가합니다 — `triggers`(질문 매칭 문자열), `facts`(예/아니오 질문, Phase 4용 `tool` 키), `order`(질문 순서), `steps`(`when` 조건이 모두 맞으면 권고, `doc_query`로 근거 검색), `escalate`. 로드 시 `when`/`order`가 미정의 fact를 참조하면 기동이 실패합니다. 서버 재시작 필요.
 
@@ -204,6 +224,6 @@ DEVELOPMENT.md   단계별 실측 기록·결정 근거
 - ✅ Phase 1 — Offline RAG MVP (검색 Hit@1 0.939 / 답변 37/37 on 샘플)
 - ✅ Phase 2 — Corpus Pipeline: `dr-depal-knowhow` 마크다운 → 621청크, `scripts/ingest.py` / `POST /api/admin/reindex` (검색 Hit@1 0.821, 답변 0.975 on 40 held-out)
 - ✅ Phase 3 — Intent Router, Troubleshooting 결정트리, 세션 진단 상태 (intent/route 정확도 1.0 on 샘플)
-- Phase 4 — Machine Tools (Mock → 실제 PLC/Robot/Vision), READ ONLY
+- ✅ Phase 4 — Machine Tools: Mock 11종(READ ONLY), LIVE 라우트·트리 facts·이력에 도구 결과 주입, 시나리오 전환
 - Phase 5 — Evaluation 자동화 (300+ 문항)
 - Phase 6 — LoRA/SFT (답변 형식·용어, 지식은 계속 RAG)

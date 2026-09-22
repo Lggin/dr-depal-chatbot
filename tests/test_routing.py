@@ -43,12 +43,64 @@ class FakeLLM:
     def count_tokens(self, s): return len(s)
 
 
-def make(retrieval=None, llm=None):
+def make(retrieval=None, llm=None, tools=None):
     llm = llm or FakeLLM()
     retrieval = retrieval or FakeRetrieval()
     pipe = ChatPipeline(retrieval, PromptBuilder(ContextBuilder(len), history_turns=1), llm, SessionStore(max_turns=1),
-                        router=IntentRouter(), engine=TroubleshootingEngine(load_rules(RULES)))
+                        router=IntentRouter(), engine=TroubleshootingEngine(load_rules(RULES)), tools=tools)
     return pipe, retrieval, llm
+
+
+def make_with_mock(llm=None, scenario="vac203_low", retrieval=None):
+    from app.tools.mock import build_mock_registry
+    reg, mock = build_mock_registry(Path(__file__).parent.parent / "configs/machine.yaml")
+    mock.set_scenario(scenario)
+    pipe, ret, llm = make(retrieval=retrieval, llm=llm, tools=reg)
+    return pipe, ret, llm, mock
+
+
+# ---------- Phase 4: tools ----------
+
+def test_live_status_with_mock_tools_answers_from_machine_state():
+    pipe, ret, llm, _ = make_with_mock(llm=FakeLLM("현재 진공압은 -43 kPa 입니다."))
+    r = pipe.answer("s", "지금 진공압 얼마야?")
+    assert r.route == "live_status.tools" and not r.validation.is_refusal
+    assert "vacuum_pressure: -43" in llm.calls[0][-1]["content"] and "get_vacuum_pressure" in r.tools_used
+    assert r.machine_state["alarm"] == "VAC-203" and r.validation.ok          # -43 is evidenced by the machine state
+
+
+def test_live_diagnosis_with_tools_has_no_unavailable_notice():
+    pipe, ret, llm, _ = make_with_mock(llm=FakeLLM("VAC-203, -43 kPa. 기준 -60 ~ -80 kPa. 진공 계통 우선.\n출처: Vacuum System Manual §6.3"))
+    r = pipe.answer("s", "지금 박스를 왜 못 집어?")
+    assert r.route == "live_diagnosis.tools" and not r.answer.startswith("⚠️")
+    assert "[MACHINE STATE]" in llm.calls[0][-1]["content"] and "정상으로 확인된 계통은 제외" in llm.calls[0][-1]["content"]
+    assert r.tools_used and r.sources
+
+
+def test_tree_prefilled_from_tools_asks_only_unknown_fact_then_recommends():
+    pipe, ret, llm, _ = make_with_mock(llm=FakeLLM("hose → cup → generator\n출처: Vacuum System Manual §6.3"))
+    r1 = pipe.answer("t", "박스를 못 집어.")
+    assert r1.route == "troubleshooting.ask" and "로봇" in r1.answer and "비전" not in r1.answer.split("\n\n")[-1]
+    assert "자동 확인" in r1.answer and "vacuum_pressure=-43" in r1.answer
+    assert r1.troubleshooting["facts"] == {"vision_detection": True, "vacuum_ok": False} and r1.tools_used
+    r2 = pipe.answer("t", "응")
+    assert r2.route == "troubleshooting.recommend" and r2.troubleshooting["current_step"] == "check_vacuum"
+    assert "자동 확인" in llm.calls[0][-1]["content"]
+
+
+def test_history_includes_maintenance_records_from_tool():
+    ret = FakeRetrieval(docs_by_filter={"maintenance": [LOG]})
+    pipe, _, llm, _ = make_with_mock(retrieval=ret, llm=FakeLLM("2026-09-10 호스 교체.\n출처: Maintenance Log"))
+    r = pipe.answer("h", "VAC-203 지난번에도 있었어?")
+    user_msg = llm.calls[0][-1]["content"]
+    assert "[MAINTENANCE HISTORY]" in user_msg and "2026-09-10" in user_msg and "vacuum hose 교체" in user_msg
+    assert "get_maintenance_history" in r.tools_used
+
+
+def test_caller_supplied_machine_state_overrides_tools():
+    pipe, ret, llm, _ = make_with_mock(llm=FakeLLM("현재 진공압은 -71 kPa 입니다."))
+    r = pipe.answer("s", "지금 진공압 얼마야?", machine_state={"vacuum_pressure": -71})
+    assert r.tools_used == [] and r.machine_state == {"vacuum_pressure": -71} and r.route == "live_status.state"
 
 
 # ---------- deterministic routes ----------
@@ -65,7 +117,7 @@ def test_general_and_live_status_skip_retrieval_and_llm():
 def test_live_status_with_machine_state_goes_through_llm():
     pipe, ret, llm = make()
     r = pipe.answer("s", "지금 진공압 얼마야?", machine_state={"vacuum_pressure": -43})
-    assert r.route == "live_status" and llm.calls and "[MACHINE STATE]" in llm.calls[0][-1]["content"]
+    assert r.route == "live_status.state" and llm.calls and "[MACHINE STATE]" in llm.calls[0][-1]["content"]
 
 
 def test_live_diagnosis_without_tools_adds_notice_and_uses_documents():

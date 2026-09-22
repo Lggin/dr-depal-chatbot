@@ -414,7 +414,43 @@ grounding check ✅
 
 **Phase 3 완료.** 라우터·트리·세션 상태·라우팅 전부 결정론적 Python(명세 §30-7); LLM은 권고 단계의 근거 설명과 KNOWLEDGE/HISTORY/LIVE_DIAGNOSIS 답변만 담당. Phase 4 훅 준비됨: `facts.tool` → `prefill_from_tools()`, `machine_state` 슬롯(LIVE 라우트가 도구 결과를 받으면 LLM 경로로 전환).
 
-### 📋 다음: Phase 4 Machine Tools — `app/tools/base.py` 인터페이스 + Mock(알람·PLC·로봇·비전·센서·유지보수), `ToolRegistry`, LIVE_STATUS/LIVE_DIAGNOSIS 라우트에 도구 결과 주입, 트리 facts 자동 채움, READ ONLY 강제
+---
+
+## Phase 4: Machine Tools — Mock, READ ONLY (2026-09-22)
+
+### ✅ 4.1 인터페이스 + Mock
+- `app/tools/base.py` — `BaseTool`(name/description/parameters/`read_only=True`, `call()`은 예외를 `ToolResult(success=False)`로 감쌈 — 센서 하나가 죽어도 챗이 안 죽음), **`ToolRegistry.register()`는 `read_only=False`인 도구를 거부**(명세 §22: V1에 쓰기 도구는 존재 자체가 없어야 함). `snapshot()` = 상태 도구 6종(machine_state·current_alarm·vacuum_pressure·vision_detection·robot_state·camera_state) 결과를 평탄화한 dict + 사용 도구 목록
+- `app/tools/mock.py` — 명세 §16 인터페이스 11종 전부(`get_current_alarm`, `get_alarm_history`, `get_machine_state`, `get_robot_state`, `get_robot_pose`, `get_vacuum_pressure`, `get_camera_state`, `get_vision_detection_state`, `get_sensor_value`, `get_plc_io`, `get_maintenance_history`). `MockMachine`이 `configs/machine.yaml`의 **시나리오**(기본 `vac203_low` = 명세 §16/§18 예시 그대로 `HOLD / VAC-203 / -43 / vision true / robot NORMAL`, 그 외 `normal`, `camera_timeout`)와 유지보수 DB(3건, 샘플 코퍼스 기록과 일치)를 읽음. 실기기 어댑터는 같은 `BaseTool` 서브클래스로 교체
+- 트리 facts 자동 채움: `Fact.ok_when` 비교식(`"<= -60"`, `"== connected"`)으로 수치·문자열 판독값을 bool fact로 변환(`evaluate_ok_when`), bool은 그대로. 채워진 fact는 `TroubleshootingState.tool_filled`에 기록되어 권고 프롬프트에 "설비 조회로 자동 확인"으로 전달
+- admin: `GET /admin/tools`(목록·read_only·시나리오), `GET /admin/machine`(스냅샷), `POST /admin/mock/scenario?name=`(전환). config `tools_backend: mock|none`
+
+### ✅ 4.2 파이프라인 통합 (명세 §17 원칙: 현재값→Tool, 기준값→RAG, 둘 다→Tool+RAG)
+| 상황 | 동작 | route |
+|---|---|---|
+| LIVE_STATUS, 도구 있음 | 스냅샷 → `[MACHINE STATE]` + 검색 → LLM이 현재값을 기준값과 비교 | `live_status.tools` |
+| LIVE_DIAGNOSIS, 도구 있음 | 스냅샷 + 검색 + "정상 계통 제외, 우선 점검 계통·순서" 지시 | `live_diagnosis.tools` |
+| 호출자가 `machine_state` 직접 제공 | 도구 호출 없이 그 값 사용 | `*.state` |
+| TROUBLESHOOTING 트리 시작·답변 턴 | 스냅샷으로 facts prefill → 남은 fact만 질문, 첫 메시지에 "자동 확인된 항목: vision_detection=정상 (True), vacuum_ok=이상 (-43) — 해당 질문은 건너뜁니다" | `troubleshooting.*` |
+| HISTORY | `get_maintenance_history(alarm_code)` → `[MAINTENANCE HISTORY]` 블록(과거 기록임을 명시, "현재 원인 단정 금지") + 코퍼스 maintenance 청크 | `history.*` |
+| 도구 없음(`tools_backend: none`) | Phase 3 동작 그대로(정직한 미연결 안내) | `live.no_tools` |
+- 응답에 `tools_used`, `machine_state` 기록. 검증기는 `[MACHINE STATE]` 값을 근거로 인정(`extra_evidence`)하므로 "-43 kPa"는 unsupported로 잡히지 않음
+
+### ✅ 4.3 E2E (`scripts/test_tools.py`, 샘플 코퍼스, 시나리오 vac203_low)
+- §17 "지금 진공압 얼마야?" → **-43 kPa**, 기준 -60~-80과 비교 / "정상 범위가 얼마야?" → 도구 미호출, 문서만 / "지금 정상인지 확인해줘" → 비교 + 우선 점검 순서
+- **§18 "지금 박스를 왜 못 집어?"** → 명세 예시와 거의 동일: "VAC-203, 현재 -43 kPa가 -60~-80 미달 → 원인. 관측 사실: 비전 6개 정상 검출, 로봇 NORMAL(ROB-105 없음). 우선 점검: 1 호스 누설 2 suction cup 3 vacuum generator. 출처 §6.3"
+- §20 대화: "박스를 못 집어" → 비전·진공 fact **자동 채움** → 로봇 위치만 질문 → "응" → check_vacuum 권고(현재 -43 반영, 유지보수 이력·엔지니어 메모는 각각 라벨 분리) → "해결됐어"
+- §21 이력: `[MAINTENANCE HISTORY]` + 코퍼스 기록 → 2026-09-10 호스 교체 답변
+- 시나리오 `camera_timeout` 전환 → "지금 알람 뭐 떠 있어?" → VIS-301 + camera disconnected / "박스가 있는데 검출이 안 돼" → camera_connected=false 자동 채움 → 질문 없이 즉시 check_camera 권고
+- 관찰: LIVE_STATUS 답변이 실제로 안 쓴 문서까지 인용(4건) — 과잉 인용 경향 지속(Phase 5 판정 항목)
+
+### ✅ 4.4 평가
+- 샘플 평가셋 **39문항**(LIVE 2건 추가: Q074 §18 진단 `must_include ["VAC-203","-43","-60"]`, Q075 현재 알람). 도구 기본 활성이라 기대값 갱신: Q073 "지금 진공압 얼마야?" 거절→**-43 kPa 답변**, 트리 시작 3건(Q030/031/040)은 자동 채움 후 첫 질문(로봇 위치 / 실시간 모드)으로
+- **샘플 39문항: answer·intent·route·citation·refusal 전부 1.000, unsupported 0, 중위 1.56s** (도구 스냅샷 6회 호출 포함) — 게이트 통과
+- **knowhow 40문항 게이트: answer 1.000 / unsupported 0 / 지연 2.97s — 변화 없음, 통과.** knowhow 질문은 KNOWLEDGE·HISTORY라 도구 영향이 HISTORY의 `[MAINTENANCE HISTORY]` 블록(mock DB엔 해당 알람 없음 → "(no matching records)")에 한정되고, 그 표시가 답변을 흔들지 않음을 확인
+
+**Phase 4 완료.** 명세 §16 도구 11종(Mock), §17 원칙(현재값→Tool, 기준값→RAG, 둘 다→Tool+RAG) 라우팅으로 구현, §18 예시 재현, §22 READ ONLY는 레지스트리 수준에서 강제. 실기기 연결 = `BaseTool` 서브클래스 교체.
+
+### 📋 다음: Phase 5 Evaluation 확장 — LLM judge(groundedness·completeness), 300문항 목표(knowhow 실질 문항 확대), 과잉 인용·파생 계산 판정, 도구 선택/인자 정확도(§27), 로그(§25) 기반 실사용 질문 회수
 - BM25 인덱싱
 - 키워드 기반 검색
 
