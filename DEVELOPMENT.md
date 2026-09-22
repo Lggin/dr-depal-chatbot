@@ -207,7 +207,33 @@ grounding check ✅
 
 **rule 14 안정화 과정:** 추상 지시만으로는 불안정(2차 수정 후 재실행에서 다시 혼합) → **구체적 WRONG/RIGHT worked example** 추가 후 동일 질의 3회 반복 **3/3 혼합 없음**(1회는 엔지니어 메모를 "참고 사항" 절로 분리 표기 — 의도한 패턴). ⚠️ 예시는 처음에 샘플 코퍼스 내용을 그대로 썼다가 **코퍼스에 없는 가상 사례(CAM-410 케이블)**로 교체 — 평가 데이터가 프롬프트에 새는 트레이드오프 회피. 잔여: Section 없는 문서에 본문 첫 줄을 §로 붙이는 경향(3회 중 2회) → Step 7에서 출처를 검색 메타데이터로 구조 생성해 LLM 텍스트 의존 제거 예정.
 
-### 📋 이후: Step 7 Chat Pipeline(+Answer Validator §23) → 8 FastAPI
+### ✅ Step 7: Chat Pipeline + Answer Validator (COMPLETE, 2026-09-22)
+
+**파일:**
+- `app/safety/command_guard.py` — §22 위험 명령(robot start/reset, servo on, PLC reset, motor move, e-stop 해제, 재시작) 한/영 명령형 감지, 부정문("리셋하지 마세요") 제외. 감지 시 답변 끝에 `DANGER_NOTICE` 부착(V1은 차단 대신 경고)
+- `app/safety/answer_validator.py` — §23 결정론적 검사: ①답변 수치가 컨텍스트·질문·장비상태·SOURCE 헤더(section/alarm)에 존재 ②알람코드 존재 ③인용 문서명이 제공 문서 중 하나 ④고정 거절문구 감지. 플래그만(차단 없음). 1~9 정수(목록 번호)는 무시, 인용 줄은 검사에서 제외
+- `app/safety/source_validator.py` — **`sources`는 검색 메타데이터로 생성**(LLM 텍스트 아님). LLM의 `출처:` 줄은 "어느 문서를 썼는지" 선택에만 사용 후 **정규 인용줄로 교체** → Step 6 잔여 문제(§에 본문 첫 줄 붙임) 구조적으로 해소. 거절이면 sources 비움
+- `app/memory/session.py` — `SessionStore`(인메모리, TTL 30분, history 1턴), 스레드 안전
+- `app/llm/generator.py` — `ChatPipeline.answer(session_id, question, filters, machine_state) → ChatResponse`. **`contextualize()`**: 질의에 알람코드가 없고 지시어("그 알람", "해당 원인", "아까 그거")가 있으면 직전 턴의 알람코드를 검색 질의와 프롬프트 질문에 결정론적으로 이어붙임(LLM 미사용). `close()`
+- `app/dependencies.py` — `build_chat_pipeline()`: 설정에서 3모델+검색스택 전체 배선(스크립트·FastAPI 공용), 7.3s
+- `app/rag/hybrid_retriever.py` — **`pin_min_trust=85`**: exact 히트 중 공식 문서만 상단 고정, 유지보수 로그·엔지니어 노트는 후보 풀에 넣어 리랭커와 경쟁
+- 스키마: `ChatResponse.validation/alarm_codes/timing_ms`, `DocumentSource.document_type`
+- 테스트 25개 추가(validator 10, guard 2, sources 4, pipeline 8, hybrid 3 갱신) → **78 passed**
+
+**E2E (`scripts/test_chat.py`)** — 5문항 + 2턴 세션, 전부 `validation.ok=true`, 질의당 2.6~4.5s(검색 1.4~1.5s + 생성 1.1~3.0s):
+
+| 질의 | 결과 |
+|---|---|
+| `VAC203이 뭐야?` | 매뉴얼만 사용, `출처: Vacuum System Manual §6.3 (VAC-203)` — 이전엔 로그·노트가 함께 고정되어 혼합 유발 |
+| `진공압 정상 범위 알려줘` | -60~-80 kPa + 사양 §3.2, 이력은 "과거 유지보수 이력" 라벨로 분리 ✅ (VAC-201 §6.1은 실제 미사용인데 인용 — 과잉 인용, 경미) |
+| `빨판이 박스를 못 잡아…` | 4단계 순서 ✅ |
+| `VAC-203 지난번에도 있었어?` | 로그 사실만, `출처: Maintenance Log (VAC-203)` ✅ |
+| `로봇 컨트롤러 IP 주소가 뭐야?` | 거절 문구 + **`sources: []`** ✅ |
+| 세션: `VAC-203이 뭐야?` → **`그 알람 원인이 뭐야?`** | 1차 시도에선 "알람 코드가 명시되지 않음"으로 실패 → `contextualize()` 도입 후 `codes=['VAC-203'] (carried)`, 원인 3가지 정확 ✅ |
+
+**이 단계에서 잡은 것:** ①검증기가 `§6.3`·`3.2` 섹션 번호를 근거 없는 수치로 오탐(+`0.5`→`.5` 정규화 버그) — 단위테스트가 먼저 잡음 ②거절에도 sources 4건 노출 ③지시대명사 후속질문 실패 ④정의 질문에 비공식 exact 히트 강제 주입. 잔여: 미사용 문서 과잉 인용(검증기는 "인용"과 "사용"을 구분 못 함), 원인 항목에 원문에 없는 짧은 설명 덧붙임("공기가 새어 들어와 압력이 낮아짐") — 수치가 아니라 검증기 미포착, Phase 5 평가셋에서 groundedness로 측정 예정.
+
+### 📋 이후: Step 8 FastAPI(/api/chat 실구현, /api/session, 로깅 §25) → Step 9 Evaluation
 - BM25 인덱싱
 - 키워드 기반 검색
 

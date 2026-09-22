@@ -121,8 +121,11 @@ class EmbeddingClient:
         if self.model is not None:
             del self.model
             self.model = None
-            logger.info("Model unloaded")
+            if logger:  # logging may already be torn down at interpreter exit
+                logger.info("Model unloaded")
 
     def __del__(self):
-        """Cleanup on deletion."""
-        self.unload()
+        try:
+            self.unload()
+        except Exception:
+            pass

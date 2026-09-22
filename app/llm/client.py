@@ -154,6 +154,9 @@ class LlamaCppClient:
 
     def unload(self):
         if self.llm is not None:
-            del self.llm
+            try:
+                self.llm.close()  # free llama.cpp resources explicitly (avoids __del__ noise at exit)
+            except Exception:
+                pass
             self.llm = None
             logger.info("LLM unloaded")

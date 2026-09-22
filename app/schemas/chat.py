@@ -30,6 +30,16 @@ class DocumentSource(BaseModel):
     alarm_code: Optional[str] = None
     trust_level: int = 100
     system: Optional[str] = None
+    document_type: Optional[str] = None
+
+
+class ValidationInfo(BaseModel):
+    ok: bool
+    is_refusal: bool
+    unsupported_numbers: List[str] = []
+    unsupported_codes: List[str] = []
+    invalid_citations: List[str] = []
+    danger_flags: List[str] = []
 
 
 class RetrievalInfo(BaseModel):
@@ -49,6 +59,9 @@ class ChatResponse(BaseModel):
     sources: List[DocumentSource]
     tools_used: List[str] = []
     retrieval: RetrievalInfo
+    validation: Optional[ValidationInfo] = None
+    alarm_codes: List[str] = []
+    timing_ms: dict = {}
     latency_ms: float
 
 

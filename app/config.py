@@ -56,6 +56,10 @@ class Settings(BaseSettings):
     fusion_top_k: int = 20
     rerank_top_k: int = 4
     rrf_k: int = 60
+    # Exact alarm-code hits at/above this trust are pinned to the top of the context;
+    # lower-trust hits (maintenance logs, engineer notes) compete through the reranker
+    # instead, so a definitional question isn't force-fed field anecdotes.
+    exact_pin_min_trust: int = 85
     # Cut candidates where consecutive reranker scores drop by more than this.
     # Absolute thresholds failed before (score scale varies per query); a gap
     # between neighbours is stable. Applied BEFORE the top_k cap, never after.

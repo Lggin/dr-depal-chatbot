@@ -44,6 +44,7 @@ class HybridRetriever:
         sparse_top_k: int = 20,
         fusion_top_k: int = 20,
         rrf_k: int = 60,
+        pin_min_trust: int = 85,
     ):
         self.dense = dense
         self.sparse = sparse
@@ -53,6 +54,7 @@ class HybridRetriever:
         self.sparse_top_k = sparse_top_k
         self.fusion_top_k = fusion_top_k
         self.rrf_k = rrf_k
+        self.pin_min_trust = pin_min_trust
 
     def _exact(self, codes: List[str], filters: Optional[Dict[str, Any]]) -> List[RetrievedDoc]:
         rows = []
@@ -82,17 +84,22 @@ class HybridRetriever:
         sparse_docs = self.sparse.retrieve(expanded, top_k=self.sparse_top_k, filters=filters).docs
         fused = rrf_fuse([dense_docs, sparse_docs], k=self.rrf_k)
 
-        pinned_ids = {d.chunk_id for d in exact}
-        merged = exact + [d for d in fused if d.chunk_id not in pinned_ids]
+        pinned = [d for d in exact if d.trust_level >= self.pin_min_trust]
+        unpinned = [d for d in exact if d.trust_level < self.pin_min_trust]
+        seen = {d.chunk_id for d in pinned}
+        merged = list(pinned)
+        for d in fused + unpinned:  # low-trust exact hits join the candidate pool for the reranker
+            if d.chunk_id not in seen:
+                merged.append(d); seen.add(d.chunk_id)
         docs = [d.model_copy(update={"rank": r}) for r, d in enumerate(merged[:k], start=1)]
 
         latency = (time.perf_counter() - t0) * 1000
         logger.debug(
-            f"hybrid: codes={codes} exact={len(exact)} glossary={matched} "
+            f"hybrid: codes={codes} exact={len(exact)} pinned={len(pinned)} glossary={matched} "
             f"dense={len(dense_docs)} sparse={len(sparse_docs)} -> {len(docs)} in {latency:.0f}ms"
         )
         return RetrievalResult(
             query=query, docs=docs, filters=filters or {}, latency_ms=latency,
             expanded_query=expanded if expanded != query else None,
-            alarm_codes=codes, exact_chunk_ids=[d.chunk_id for d in exact],
+            alarm_codes=codes, exact_chunk_ids=[d.chunk_id for d in pinned],
         )

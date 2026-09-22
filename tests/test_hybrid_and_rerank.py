@@ -84,21 +84,34 @@ class _FakeStore:
         return [r for r in self.rows if all(r["metadata"].get(k) == v for k, v in filters.items())]
 
 
-def test_exact_alarm_hits_pinned_first_in_trust_order():
-    store = _FakeStore([
-        {"chunk_id": "note", "text": "n", "metadata": {"alarm_code": "VAC-203", "trust_level": 50}},
-        {"chunk_id": "manual", "text": "m", "metadata": {"alarm_code": "VAC-203", "trust_level": 100}},
-        {"chunk_id": "log", "text": "l", "metadata": {"alarm_code": "VAC-203", "trust_level": 70}},
-    ])
+_ROWS = [
+    {"chunk_id": "note", "text": "n", "metadata": {"alarm_code": "VAC-203", "trust_level": 50}},
+    {"chunk_id": "manual", "text": "m", "metadata": {"alarm_code": "VAC-203", "trust_level": 100}},
+    {"chunk_id": "log", "text": "l", "metadata": {"alarm_code": "VAC-203", "trust_level": 70}},
+]
+
+
+def test_only_official_exact_hits_are_pinned_low_trust_join_candidate_pool():
     dense = _FakeRetriever([d("note", 1), d("other", 2)])
     sparse = _FakeRetriever([d("log", 1, "sparse")])
-    h = HybridRetriever(dense, sparse, store, expander=None)
+    h = HybridRetriever(dense, sparse, _FakeStore(_ROWS), expander=None, pin_min_trust=85)
     res = h.retrieve("vac203 뭐야")
     assert res.alarm_codes == ["VAC-203"]
-    assert res.chunk_ids()[:3] == ["manual", "log", "note"]
-    assert res.chunk_ids()[3] == "other"
+    assert res.exact_chunk_ids == ["manual"]
+    assert res.chunk_ids()[0] == "manual" and res.docs[0].source == "exact"
+    assert set(res.chunk_ids()[1:]) == {"log", "note", "other"}   # compete via RRF/reranker
+
+
+def test_pin_min_trust_zero_pins_all_exact_hits_in_trust_order():
+    h = HybridRetriever(_FakeRetriever([d("other", 1)]), _FakeRetriever([]), _FakeStore(_ROWS), expander=None, pin_min_trust=0)
+    res = h.retrieve("vac203 뭐야")
+    assert res.chunk_ids() == ["manual", "log", "note", "other"]
     assert res.exact_chunk_ids == ["manual", "log", "note"]
-    assert [x.source for x in res.docs[:3]] == ["exact"] * 3
+
+
+def test_low_trust_exact_hit_absent_from_dense_and_sparse_is_still_a_candidate():
+    h = HybridRetriever(_FakeRetriever([d("other", 1)]), _FakeRetriever([]), _FakeStore(_ROWS), expander=None, pin_min_trust=85)
+    assert set(h.retrieve("VAC-203").chunk_ids()) == {"manual", "other", "log", "note"}
 
 
 def test_no_code_means_no_exact_stage():

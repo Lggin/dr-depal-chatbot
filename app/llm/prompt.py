@@ -32,6 +32,7 @@ Rules:
     Example — SOURCE 2 (Maintenance History) says "CAM-410: 카메라 GigE 케이블 단선 확인, 케이블 교체 후 복구" and SOURCE 3 (Engineer Note) says "이 라인은 케이블이 안전문 힌지 근처에서 자주 눌림".
     WRONG: "안전문 힌지 근처에서 눌린 GigE 케이블을 교체했습니다." (attaches the note's explanation to the record's action)
     RIGHT: "GigE 케이블 단선이 확인되어 케이블을 교체한 후 복구되었습니다." and, if useful, a separate sentence: "현장 엔지니어 메모: 이 라인은 케이블이 안전문 힌지 근처에서 자주 눌린다고 합니다."
+15. If the question refers back to the conversation ("그 알람", "해당 원인", "아까 그거"), resolve the reference from the previous turn — a note like "(이전 대화에서 언급된 알람: VAC-203)" may be attached to the question for this — and answer about that item.
 """
 
 _TRUST_LABEL = {
