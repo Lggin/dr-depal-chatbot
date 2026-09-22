@@ -11,6 +11,13 @@ sentence-transformers==2.7.0  # 2.2.2 breaks with huggingface_hub>=0.20 (cached_
 transformers==4.36.2
 bitsandbytes==0.42.0
 
+# LLM serving — Qwen3.5 needs the 'qwen35' arch (llama.cpp >= 2026-08). No cu121/cu124
+# prebuilt wheel is recent enough (driver here caps at CUDA 12.4), so build from source:
+#   CMAKE_ARGS="-DGGML_CUDA=on -DCMAKE_CUDA_ARCHITECTURES=89" FORCE_CMAKE=1 \
+#   pip install --no-cache-dir llama-cpp-python==0.3.35
+llama-cpp-python==0.3.35
+gguf==0.19.0  # GGUF header inspection
+
 # Vector DB
 qdrant-client==1.19.1  # must match server image tag in docker-compose.yml
 

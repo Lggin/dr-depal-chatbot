@@ -158,7 +158,25 @@ docker compose up -d qdrant
 
 ---
 
-### 📋 다음 단계: Step 5 (Local LLM Client)
+### 🔄 Step 5: Local LLM Client (IN PROGRESS, 2026-09-22)
+
+**사전 조사 결과 (결정 근거):**
+- `Qwen/Qwen3.5-9B` 존재. GGUF: `unsloth/Qwen3.5-9B-GGUF` `Qwen3.5-9B-Q4_K_M.gguf` **5.29GB** 채택(bartowski 5.75GB 대안)
+- GGUF `general.architecture = qwen35` (HF `model_type=qwen3_5`, `Qwen3_5ForConditionalGeneration`, ctx 262144). **`qwen3`과 다른 신규 아키텍처** → 2026-08 이후 llama.cpp 필요
+- `llama-cpp-python 0.3.35`(2026-08-17)가 내장한 llama.cpp `4df29be`(08-16)에 `LLM_ARCH_QWEN35` 포함 ✅
+- 이 노트북 드라이버 550.144 → **CUDA 12.4 상한**. 프리빌드 휠: cu132(0.3.35)는 드라이버 불가, cu121은 0.3.19까지(qwen35 미지원) → **소스 빌드**: `CMAKE_ARGS="-DGGML_CUDA=on -DCMAKE_CUDA_ARCHITECTURES=89" FORCE_CMAKE=1 pip install llama-cpp-python==0.3.35` (로컬 nvcc 12.6, sm_89 SASS라 minor-version 호환 기대)
+- 폴백: Ollama(미설치, 시스템 서비스 설치 필요해 보류) — 라이브러리에 `qwen3.5:*` 태그 존재. 2차 폴백: transformers+bitsandbytes 4bit(단, transformers 4.36은 qwen3_5 미지원 → torch/transformers 상향 필요)
+- `transformers 4.36.2` 유지 가능 이유: LLM 경로가 llama.cpp라 transformers는 리랭커(XLM-R)에만 쓰임
+
+**설계 (`app/llm/client.py`):**
+- `LLMClient` Protocol(load/generate/stream/count_tokens) — 백엔드 교체 지점
+- `LlamaCppClient`: GGUF 내장 chat_template을 **Jinja2로 직접 렌더**(`enable_thinking=False` 전달 목적 — `create_chat_completion`은 템플릿 kwargs를 못 넘김). 생각모드 OFF는 이전 프로젝트 실측 결론(few-shot·그라운딩 환경에선 정확도 이득 없이 지연만 추가). 모델이 그래도 `<think>`를 내면 `_strip_think`
+- stop = `<|im_end|>`, `<|endoftext|>`; repeat_penalty 1.05
+- config: `llm_model_path`, `llm_n_gpu_layers=-1`, `llm_enable_thinking=False`
+
+**검증 스크립트:** `./run.sh python3 scripts/test_llm.py` — 로드 시간, VRAM, 렌더된 프롬프트 tail, tok/s, 그라운딩 체크(정상범위 -60~-80 + 출처 인용)
+
+### 📋 이후: Step 6 Prompt Builder → 7 Chat Pipeline → 8 FastAPI
 - BM25 인덱싱
 - 키워드 기반 검색
 

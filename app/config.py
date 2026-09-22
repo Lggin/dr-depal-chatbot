@@ -18,13 +18,17 @@ class Settings(BaseSettings):
     host: str = "0.0.0.0"
     port: int = 8000
 
-    # LLM
+    # LLM (llama.cpp GGUF)
     llm_model: str = "Qwen/Qwen3.5-9B"
-    llm_quantization: str = "q4_k_m"
+    llm_gguf_repo: str = "unsloth/Qwen3.5-9B-GGUF"
+    llm_gguf_file: str = "Qwen3.5-9B-Q4_K_M.gguf"
+    llm_model_path: str = "models/gguf/Qwen3.5-9B-Q4_K_M.gguf"
     llm_context_length: int = 8192
+    llm_n_gpu_layers: int = -1  # -1 = all layers on GPU
     llm_max_tokens: int = 1200
     llm_temperature: float = 0.2
     llm_top_p: float = 0.9
+    llm_enable_thinking: bool = False
 
     # Embedding
     embedding_model: str = "BAAI/bge-m3"
