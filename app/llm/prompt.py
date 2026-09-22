@@ -1,0 +1,174 @@
+"""System prompt, context builder, and chat message assembly (spec §13, §15, §21)."""
+
+import logging
+from dataclasses import dataclass, field
+from typing import Any, Callable, Dict, List, Optional
+
+from app.schemas.retrieval import RetrievedDoc
+
+logger = logging.getLogger(__name__)
+
+Message = Dict[str, str]
+
+SYSTEM_PROMPT = """You are a technical assistant for a depalletizing system.
+
+You assist operators and engineers with alarms, maintenance, troubleshooting, machine status, robot systems, vision systems, PLC systems, and vacuum grippers.
+
+Rules:
+1. Answer using ONLY the provided documents and machine data.
+2. Never invent specifications, parameter values, alarm causes, or procedures.
+3. Prefer official manuals over maintenance records or engineer notes. When you use a maintenance record or engineer note, label it as such ("과거 유지보수 이력:", "현장 엔지니어 메모:") and never present it as the certain current cause.
+4. Clearly distinguish observed machine state from possible causes.
+5. If the documents do not contain the answer, say exactly: "현재 제공된 문서에서는 해당 내용을 확인할 수 없습니다." and state what information is missing. Do not guess.
+6. Cite sources at the end as "출처: <Document> §<Section>" using the Document and Section exactly as shown in the [SOURCE] header; if a source has no Section line, write only "출처: <Document>" — do not invent a section from the content. Cite only sources you actually used.
+7. Do not claim that a machine state has been checked unless it appears in a [MACHINE STATE] block.
+8. Do not execute or suggest executing robot, PLC, or machine control commands (start, reset, servo on, restart).
+9. If multiple causes are possible, give a prioritized inspection order rather than asserting one cause.
+10. Answer in Korean unless the user asks for another language.
+11. Answer the question directly in the first sentence, then add detail. Do not enumerate every document.
+12. Copy codes, numbers, units, and key names exactly from the source, checking similar-looking characters (l/1, O/0, -/_) character by character.
+13. Write in natural Korean. Codes, identifiers, units, product names, and English technical terms that appear in the source (e.g. "suction cup") may stay in English exactly as written — never transliterate English into Hangul (not "서셉션 컵"), and do not sprinkle other loose English words into Korean sentences.
+14. Keep facts from different sources separate. Never merge a detail from one source into a statement about another source. Each fact belongs to exactly the source it came from.
+    Example — SOURCE 2 (Maintenance History) says "CAM-410: 카메라 GigE 케이블 단선 확인, 케이블 교체 후 복구" and SOURCE 3 (Engineer Note) says "이 라인은 케이블이 안전문 힌지 근처에서 자주 눌림".
+    WRONG: "안전문 힌지 근처에서 눌린 GigE 케이블을 교체했습니다." (attaches the note's explanation to the record's action)
+    RIGHT: "GigE 케이블 단선이 확인되어 케이블을 교체한 후 복구되었습니다." and, if useful, a separate sentence: "현장 엔지니어 메모: 이 라인은 케이블이 안전문 힌지 근처에서 자주 눌린다고 합니다."
+"""
+
+_TRUST_LABEL = {
+    "alarm_manual": "Official Alarm Manual",
+    "manual": "Official Manual",
+    "sop": "Official SOP",
+    "troubleshooting": "Official Troubleshooting Guide",
+    "maintenance": "Maintenance History (not an official manual)",
+    "faq": "FAQ (not an official manual)",
+    "engineer_note": "Engineer Note (field experience, not official)",
+}
+
+NO_DOCS_NOTICE = "(No documents were retrieved for this question.)"
+
+
+def trust_label(doc: RetrievedDoc) -> str:
+    return _TRUST_LABEL.get(str(doc.metadata.get("document_type", "")), f"Trust {doc.trust_level}")
+
+
+def format_source(index: int, doc: RetrievedDoc, text: Optional[str] = None) -> str:
+    m = doc.metadata
+    lines = [f"[SOURCE {index}]", f"Document: {m.get('document_name') or m.get('source') or 'unknown'}"]
+    if m.get("section"):
+        lines.append(f"Section: {m['section']}")
+    if m.get("alarm_code"):
+        lines.append(f"Alarm: {m['alarm_code']}")
+    lines.append(f"Trust: {trust_label(doc)}")
+    lines.append("Content:")
+    lines.append(text if text is not None else doc.text)
+    return "\n".join(lines)
+
+
+@dataclass
+class BuiltContext:
+    text: str
+    included: List[RetrievedDoc]
+    tokens: int
+    truncated: bool = False
+    dropped: List[str] = field(default_factory=list)
+
+
+class ContextBuilder:
+    """Packs retrieved docs into a token budget, preserving the pipeline's order."""
+
+    def __init__(
+        self,
+        count_tokens: Optional[Callable[[str], int]] = None,
+        max_tokens: int = 3000,
+        max_docs: int = 5,
+    ):
+        self.count = count_tokens or (lambda s: max(1, len(s) // 2))  # rough fallback
+        self.max_tokens = max_tokens
+        self.max_docs = max_docs
+
+    def build(self, docs: List[RetrievedDoc]) -> BuiltContext:
+        blocks: List[str] = []
+        included: List[RetrievedDoc] = []
+        dropped: List[str] = []
+        used = 0
+        truncated = False
+
+        for doc in docs[: self.max_docs]:
+            block = format_source(len(included) + 1, doc)
+            n = self.count(block)
+            if used + n <= self.max_tokens:
+                blocks.append(block); included.append(doc); used += n
+                continue
+            if not included:
+                # First doc alone exceeds the budget: keep as much as fits.
+                head = format_source(1, doc, text="")
+                room = self.max_tokens - self.count(head) - 4
+                text = self._cut(doc.text, room)
+                block = format_source(1, doc, text=text + " …[truncated]")
+                blocks.append(block); included.append(doc); used += self.count(block)
+                truncated = True
+            else:
+                dropped.append(doc.chunk_id)
+        dropped.extend(d.chunk_id for d in docs[self.max_docs:])
+
+        if dropped:
+            logger.debug(f"context: kept {len(included)}, dropped {dropped} (budget {self.max_tokens})")
+        return BuiltContext("\n\n".join(blocks), included, used, truncated, dropped)
+
+    def _cut(self, text: str, budget_tokens: int) -> str:
+        if budget_tokens <= 0:
+            return ""
+        lo, hi = 0, len(text)
+        while lo < hi:  # binary search longest prefix within budget
+            mid = (lo + hi + 1) // 2
+            if self.count(text[:mid]) <= budget_tokens:
+                lo = mid
+            else:
+                hi = mid - 1
+        return text[:lo]
+
+
+class PromptBuilder:
+    def __init__(
+        self,
+        context_builder: ContextBuilder,
+        system_prompt: str = SYSTEM_PROMPT,
+        history_turns: int = 1,
+    ):
+        self.ctx = context_builder
+        self.system_prompt = system_prompt
+        self.history_turns = history_turns
+
+    def build(
+        self,
+        question: str,
+        docs: List[RetrievedDoc],
+        history: Optional[List[Message]] = None,
+        machine_state: Optional[Dict[str, Any]] = None,
+        troubleshooting_state: Optional[Dict[str, Any]] = None,
+    ) -> tuple[List[Message], BuiltContext]:
+        built = self.ctx.build(docs)
+
+        parts: List[str] = []
+        if machine_state:
+            parts.append("[MACHINE STATE] (obtained via tool, current values)\n" + _kv_block(machine_state))
+        if troubleshooting_state:
+            parts.append("[TROUBLESHOOTING STATE]\n" + _kv_block(troubleshooting_state))
+        parts.append("[DOCUMENTS]\n" + (built.text if built.included else NO_DOCS_NOTICE))
+        parts.append(f"[QUESTION]\n{question}")
+        user_content = "\n\n".join(parts)
+
+        messages: List[Message] = [{"role": "system", "content": self.system_prompt}]
+        messages.extend(self._trim_history(history or []))
+        messages.append({"role": "user", "content": user_content})
+        return messages, built
+
+    def _trim_history(self, history: List[Message]) -> List[Message]:
+        """Keep only the last N user/assistant turns (a turn = user + assistant)."""
+        turns = [m for m in history if m.get("role") in ("user", "assistant")]
+        keep = self.history_turns * 2
+        return turns[-keep:] if keep > 0 else []
+
+
+def _kv_block(d: Dict[str, Any]) -> str:
+    return "\n".join(f"{k}: {v}" for k, v in d.items())

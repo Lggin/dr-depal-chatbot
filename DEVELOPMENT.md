@@ -158,7 +158,21 @@ docker compose up -d qdrant
 
 ---
 
-### 🔄 Step 5: Local LLM Client (IN PROGRESS, 2026-09-22)
+### ✅ Step 5: Local LLM Client (COMPLETE, 2026-09-22)
+
+**실측 (`scripts/test_llm.py`):**
+```
+LLM loaded in 1.3s: Qwen3.5-9B arch=qwen35 n_ctx=8192 gpu_layers=-1 (all on GPU)
+VRAM: 15 → 5,931 MiB (생성 중 5,983 MiB)          ← 16GB 중 ~10GB 여유
+prompt 170 + completion 69 tokens in 969ms → 71.2 tok/s
+rendered tail: <|im_start|>assistant\n<think>\n</think>\n   ← thinking OFF 정상 (빈 think 블록)
+answer: "VAC-203 은 진공압이 정상 범위에 도달하지 못하는 알람입니다. 정상 진공압 범위는 -60 ~ -80 kPa 입니다.
+         출처: [SOURCE 1] Vacuum System Manual, Section: 6.3, Alarm: VAC-203"
+grounding check ✅
+```
+- 소스 빌드 바이너리(nvcc 12.6)가 CUDA 12.4 드라이버에서 정상 동작 — minor-version 호환 우려 해소
+- **VRAM 여유 ~10GB** → Step 7 통합 시 임베딩(~1.1GB fp16)+리랭커(~1.1GB fp16)를 GPU에 올려도 될 가능성. 단, 현재 `aux_gpu_min_vram_gb=20` 규칙은 Qwen3-14B(≈10GB) 기준이었으므로 **세 모델 동시 상주 상태에서 실측 후** 조정(지금은 유지)
+- 커밋: Step 5
 
 **사전 조사 결과 (결정 근거):**
 - `Qwen/Qwen3.5-9B` 존재. GGUF: `unsloth/Qwen3.5-9B-GGUF` `Qwen3.5-9B-Q4_K_M.gguf` **5.29GB** 채택(bartowski 5.75GB 대안)
@@ -176,7 +190,24 @@ docker compose up -d qdrant
 
 **검증 스크립트:** `./run.sh python3 scripts/test_llm.py` — 로드 시간, VRAM, 렌더된 프롬프트 tail, tok/s, 그라운딩 체크(정상범위 -60~-80 + 출처 인용)
 
-### 📋 이후: Step 6 Prompt Builder → 7 Chat Pipeline → 8 FastAPI
+### ✅ Step 6: Prompt Builder (COMPLETE, 2026-09-22)
+
+**파일:** `app/llm/prompt.py` — `SYSTEM_PROMPT`(명세 §15 10규칙 + 검증된 추가 4규칙), `format_source()`/`trust_label()`(§13 `[SOURCE n]` 블록, 비공식 출처는 "not an official manual" 명시 §21), `ContextBuilder`(토큰 예산 3000·최대 5문서, 파이프라인 순서 보존, 예산 초과 문서는 건너뛰고 첫 문서만 초과 시 절단), `PromptBuilder`(system → 직전 1턴 history → `[MACHINE STATE]`/`[TROUBLESHOOTING STATE]`(옵션)/`[DOCUMENTS]`/`[QUESTION]`). 문서 0건이면 명시 공지 삽입. 테스트 8개 → **53 passed**
+
+**E2E (`scripts/test_prompt.py [질의...]`)** — 검색→프롬프트→LLM, 세 모델 동시 상주 VRAM **6.0GB**(aux CPU), 질의당 총 3~5s:
+
+| 질의 | 결과 |
+|---|---|
+| `VAC203이 뭐야?` | 정확, `출처: Vacuum System Manual §6.3` ✅ |
+| `빨판이 박스를 못 잡아. 뭘 확인해야 해?` | 4단계 점검 순서 그대로, `출처: Troubleshooting Guide §4.1` ✅ (gap 컷으로 1문서만 전달) |
+| `로봇 컨트롤러 IP 주소가 뭐야?` (범위 밖) | "현재 제공된 문서에서는 … 확인할 수 없습니다" + 없는 정보 명시 ✅ |
+| `VAC-203 지난번에도 있었어?` | 1차: "과거 유지보수 이력" 라벨은 정확했으나 **유지보수 로그 조치에 엔지니어 노트의 "3축 케이블 덕트" 세부를 혼합**, Section 없는 출처에 본문을 §로 오용 → **rule 14(출처 간 사실 혼합 금지)·rule 6(헤더 그대로 인용, Section 없으면 Document만) 추가** → 2차: 로그 사실만 사용, `출처: Maintenance Log` ✅ |
+
+**추가 규칙 근거(이전 프로젝트 실측):** 11 직접·짧게 먼저(문서별 나열 방지), 12 유사기호 원문대조(l/1), 13 영어 음차 금지("서셉션 컵" 실제 발생 → 수정), 14 문서 간 혼합 금지(rule9 재현). 범위 밖 거절 문구는 명세 §30-5 그대로 고정.
+
+**rule 14 안정화 과정:** 추상 지시만으로는 불안정(2차 수정 후 재실행에서 다시 혼합) → **구체적 WRONG/RIGHT worked example** 추가 후 동일 질의 3회 반복 **3/3 혼합 없음**(1회는 엔지니어 메모를 "참고 사항" 절로 분리 표기 — 의도한 패턴). ⚠️ 예시는 처음에 샘플 코퍼스 내용을 그대로 썼다가 **코퍼스에 없는 가상 사례(CAM-410 케이블)**로 교체 — 평가 데이터가 프롬프트에 새는 트레이드오프 회피. 잔여: Section 없는 문서에 본문 첫 줄을 §로 붙이는 경향(3회 중 2회) → Step 7에서 출처를 검색 메타데이터로 구조 생성해 LLM 텍스트 의존 제거 예정.
+
+### 📋 이후: Step 7 Chat Pipeline(+Answer Validator §23) → 8 FastAPI
 - BM25 인덱싱
 - 키워드 기반 검색
 
