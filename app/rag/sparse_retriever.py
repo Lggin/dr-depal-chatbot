@@ -51,7 +51,9 @@ class SparseRetriever:
         self._chunk_ids = [c["chunk_id"] for c in chunks]
         self._texts = [c["text"] for c in chunks]
         self._metas = [c.get("metadata", {}) for c in chunks]
-        self._bm25 = BM25Okapi([self.tokenizer.tokenize(t) for t in self._texts])
+        # Index heading-prefixed search_text when present so section titles are matchable.
+        index_texts = [m.get("search_text") or t for t, m in zip(self._texts, self._metas)]
+        self._bm25 = BM25Okapi([self.tokenizer.tokenize(t) for t in index_texts])
         logger.info(f"BM25 index: {len(chunks)} chunks in {(time.perf_counter()-t0)*1000:.0f}ms")
         return self
 

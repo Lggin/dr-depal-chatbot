@@ -30,14 +30,36 @@ async def list_documents(request: Request):
     }
 
 
-@router.post("/admin/ingest", status_code=501)
-async def ingest():
-    return {"detail": "Ingestion pipeline arrives in Phase 2. Use scripts/ingest_sample.py for now."}
+def _reindex(request: Request, config_path: str | None):
+    pipe = getattr(request.app.state, "pipeline", None)
+    if pipe is None:
+        raise HTTPException(status_code=503, detail="Model pipeline not loaded")
+    lock = request.app.state.generate_lock
+
+    def _run():
+        with lock:  # no generation while the collection is rebuilt
+            return pipe.reindex(config_path)
+    return _run
 
 
-@router.post("/admin/reindex", status_code=501)
-async def reindex():
-    return {"detail": "Reindex arrives in Phase 2. Use scripts/ingest_sample.py for now."}
+@router.post("/admin/reindex")
+async def reindex(request: Request, config_path: str | None = None):
+    """Rebuild the corpus from configs/corpus.yaml (or `config_path`) into the live collection."""
+    try:
+        manifest = await run_in_threadpool(_reindex(request, config_path))
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"reindex failed: {type(e).__name__}: {e}")
+    return {k: v for k, v in manifest.items() if k != "per_source"} | {"sources": len(manifest.get("per_source", []))}
+
+
+@router.post("/admin/ingest")
+async def ingest(request: Request, config_path: str | None = None):
+    """Same as reindex: sources are declarative (corpus.yaml), so ingesting = rebuilding from it."""
+    return await reindex(request, config_path)
 
 
 @router.get("/admin/logs")

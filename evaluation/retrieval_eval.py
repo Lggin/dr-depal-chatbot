@@ -41,7 +41,8 @@ class RetrievalEvaluator:
             "expected": case.expected_source, "retrieval_query": query if query != case.question else None,
             "fused_top": fused_ids[:10], "final": final_ids,
             "alarm_parsed": parsed, "alarm_ok": alarm_ok,
-            "out_of_scope": not case.expected_source,
+            "out_of_scope": case.expected_source == [],
+            "unknown_source": case.expected_source is None,
         }
         if case.expected_source:
             for k in K_LIST:
@@ -57,9 +58,11 @@ class RetrievalEvaluator:
 
     def run(self, cases: List[EvalCase]) -> dict:
         rows = [self.run_case(c) for c in cases]
-        scored = [r for r in rows if not r["out_of_scope"]]
+        scored = [r for r in rows if not r["out_of_scope"] and not r["unknown_source"]]
         summary = {
-            "cases": len(rows), "scored": len(scored), "out_of_scope": len(rows) - len(scored),
+            "cases": len(rows), "scored": len(scored),
+            "out_of_scope": sum(1 for r in rows if r["out_of_scope"]),
+            "unknown_source": sum(1 for r in rows if r["unknown_source"]),
             "alarm_parsing_accuracy": mean([1.0 if r["alarm_ok"] else 0.0 for r in rows]),
         }
         for stage in ("fused", "final"):

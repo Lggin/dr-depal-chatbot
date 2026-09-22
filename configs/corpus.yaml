@@ -1,0 +1,167 @@
+# Corpus sources for `scripts/ingest.py`.
+#
+# Each source is a markdown file or glob. Per-source fields become chunk metadata
+# (document_type / trust_level per spec §4, system, tags). Paths may be absolute,
+# ~-relative, or relative to the project root.
+#
+# Trust: official_manual 95 · official_sop 90 · official_troubleshooting 85 ·
+#        maintenance_history 70 · faq 60 · engineer_note 50
+# The dr-depal-knowhow docs are the team's curated, source-cited engineering
+# knowledge (not vendor manuals) → treated as manual@90 / troubleshooting@85.
+
+collection: knowhow_docs
+machine: depal
+manufacturer: Doosan Robotics
+language: ko
+alarm_codes: false          # this corpus has no VAC-203-style alarm codes; don't mine them
+
+chunking:
+  max_tokens: 800
+  min_tokens: 60
+  overlap_tokens: 80
+
+sources:
+  # ---- dr-depal-knowhow (auto-updated repo, Korean docs only) ----
+  - path: ~/scratch_github_check/dr-depal-knowhow/docs/01-system-overview.md
+    document_type: manual
+    trust_level: 90
+    system: architecture
+  - path: ~/scratch_github_check/dr-depal-knowhow/docs/02-timeline.md
+    document_type: manual
+    trust_level: 90
+    system: release
+    tags: [release_note, history]
+  - path: ~/scratch_github_check/dr-depal-knowhow/docs/03-grasp-estimation.md
+    document_type: manual
+    trust_level: 90
+    system: geometry
+  - path: ~/scratch_github_check/dr-depal-knowhow/docs/04-model-lifecycle.md
+    document_type: manual
+    trust_level: 90
+    system: training
+  - path: ~/scratch_github_check/dr-depal-knowhow/docs/05-jetson-tensorrt.md
+    document_type: manual
+    trust_level: 90
+    system: deployment
+  - path: ~/scratch_github_check/dr-depal-knowhow/docs/06-config-wiring.md
+    document_type: manual
+    trust_level: 90
+    system: config
+  - path: ~/scratch_github_check/dr-depal-knowhow/docs/07-measurement-methodology.md
+    document_type: sop
+    trust_level: 90
+    system: methodology
+  - path: ~/scratch_github_check/dr-depal-knowhow/docs/08-release-ops.md
+    document_type: sop
+    trust_level: 90
+    system: release
+  - path: ~/scratch_github_check/dr-depal-knowhow/docs/09-pitfall-catalog.md
+    document_type: troubleshooting
+    trust_level: 85
+    system: general
+  - path: ~/scratch_github_check/dr-depal-knowhow/docs/10-open-issues.md
+    document_type: troubleshooting
+    trust_level: 85
+    system: general
+    tags: [open_issues]
+  - path: ~/scratch_github_check/dr-depal-knowhow/docs/11-upgrade-digest.md
+    document_type: manual
+    trust_level: 90
+    system: release
+    tags: [release_note, upgrade]
+  - path: ~/scratch_github_check/dr-depal-knowhow/docs/packages/camera.md
+    document_type: manual
+    trust_level: 90
+    system: vision
+  - path: ~/scratch_github_check/dr-depal-knowhow/docs/packages/objund-pointcloud-calibration.md
+    document_type: manual
+    trust_level: 90
+    system: vision
+  - path: ~/scratch_github_check/dr-depal-knowhow/docs/packages/depal-config-logging-drift.md
+    document_type: manual
+    trust_level: 90
+    system: runtime
+
+  # ---- dr-onsite-adap-sdk (depal-al) operating docs ----
+  - path: ~/depal-al/README.md
+    document_name: dr-onsite-adap-sdk 사용설명서
+    document_type: manual
+    trust_level: 90
+    system: onsite_adaptation
+    tags: [ui, operation]
+  - path: ~/depal-al/docs/labeling_guide.md
+    document_name: 현장 라벨링 매뉴얼
+    document_type: sop
+    trust_level: 90
+    system: onsite_adaptation
+    tags: [labeling, operation]
+  - path: ~/depal-al/deploy/README.md
+    document_name: 현장(Thor) 실행 스크립트
+    document_type: sop
+    trust_level: 90
+    system: deployment
+  - path: ~/depal-al/onboarding/README.md
+    document_name: 온보딩(x86 개발기)
+    document_type: sop
+    trust_level: 90
+    system: onsite_adaptation
+  - path: ~/depal-al/examples/thor_lab/README_LAB.md
+    document_name: 핸즈온 랩(Thor)
+    document_type: sop
+    trust_level: 90
+    system: onsite_adaptation
+  - path: ~/depal-al/examples/README_session.md
+    document_name: OnsiteSession 고수준 SDK
+    document_type: manual
+    trust_level: 90
+    system: onsite_adaptation
+  - path: ~/depal-al/standalone_detect/README.md
+    document_name: depal_detect 독립 검출 모듈
+    document_type: manual
+    trust_level: 90
+    system: vision
+  - path: ~/depal-al/bench/eda/README.md
+    document_name: 학습 데이터셋 EDA
+    document_type: manual
+    trust_level: 85
+    system: training
+    tags: [measurement]
+  - path: ~/depal-al/bench/grouping/README.md
+    document_name: 서브클래스 그룹화 실측
+    document_type: manual
+    trust_level: 85
+    system: vision
+    tags: [measurement]
+  - path: ~/depal-al/bench/replay/README.md
+    document_name: 리플레이 장수·선정 방식 실측
+    document_type: manual
+    trust_level: 85
+    system: training
+    tags: [measurement]
+  - path: ~/depal-al/data/replay_fixed_v11/README.md
+    document_name: 고정 리플레이 데이터셋 replay_fixed_v11
+    document_type: manual
+    trust_level: 85
+    system: training
+
+  # ---- project-owned notes (copied into corpus/raw/notes) ----
+  - path: corpus/raw/notes/replay_kraft200_combined.md
+    document_name: 크래프트 리플레이 셋 replay_kraft200 비교
+    document_type: manual
+    trust_level: 85
+    system: training
+  - path: corpus/raw/notes/operator_general_info.md
+    document_name: 두산로보틱스 제품·디팔레타이징 일반 정보
+    document_type: faq
+    trust_level: 60
+    system: general
+  - path: corpus/raw/notes/operator_detection_troubleshooting.md
+    document_name: 검출·인식이 잘 안 될 때 확인할 것(오퍼레이터용)
+    document_type: troubleshooting
+    trust_level: 85
+    system: vision
+  - path: corpus/raw/notes/user_notes.md
+    document_name: 사용자가 직접 가르친 노트
+    document_type: engineer_note
+    trust_level: 50
+    system: general

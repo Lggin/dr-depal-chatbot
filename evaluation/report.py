@@ -22,13 +22,15 @@ def _fmt(v) -> str:
     return str(v)
 
 
-def save(mode: str, result: dict) -> Tuple[Path, Optional[dict]]:
+def save(mode: str, result: dict, tag: str = "sample", collection: Optional[str] = None) -> Tuple[Path, Optional[dict]]:
+    """Results are keyed by (mode, dataset tag) so different corpora never gate against each other."""
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
-    latest = RESULTS_DIR / f"latest_{mode}.json"
+    key = f"{mode}_{tag}"
+    latest = RESULTS_DIR / f"latest_{key}.json"
     previous = json.loads(latest.read_text(encoding="utf-8")) if latest.exists() else None
     stamp = time.strftime("%Y%m%d_%H%M%S")
-    payload = {"mode": mode, "timestamp": stamp, **result}
-    (RESULTS_DIR / f"{stamp}_{mode}.json").write_text(json.dumps(payload, ensure_ascii=False, indent=1), encoding="utf-8")
+    payload = {"mode": mode, "dataset": tag, "collection": collection, "timestamp": stamp, **result}
+    (RESULTS_DIR / f"{stamp}_{key}.json").write_text(json.dumps(payload, ensure_ascii=False, indent=1), encoding="utf-8")
     latest.write_text(json.dumps(payload, ensure_ascii=False, indent=1), encoding="utf-8")
     return latest, previous
 
@@ -37,6 +39,8 @@ def markdown(mode: str, result: dict, previous: Optional[dict]) -> str:
     s = result["summary"]
     prev = (previous or {}).get("summary", {})
     lines = [f"## {mode} evaluation — {s.get('cases')} cases", "", "| metric | now | prev | Δ |", "|---|---|---|---|"]
+    if previous and previous.get("dataset") and previous.get("collection"):
+        lines.insert(1, f"prev: {previous['dataset']} @ {previous['collection']} ({previous.get('timestamp')})")
     for k, v in s.items():
         if isinstance(v, (int, float)) and not isinstance(v, bool):
             p = prev.get(k)

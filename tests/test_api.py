@@ -32,6 +32,11 @@ class _FakePipeline:
         self.retrieval = type("R", (), {"hybrid": type("H", (), {"store": _FakeStore()})(), "reranker": object()})()
         self.calls = []
 
+    def reindex(self, config_path=None):
+        if config_path == "missing.yaml":
+            raise FileNotFoundError(config_path)
+        return {"collection": "t", "chunks": 5, "per_source": [{"source": "a"}, {"source": "b"}], "bm25_chunks": 5}
+
     def answer(self, session_id, question, filters=None, machine_state=None):
         self.calls.append((session_id, question))
         self.sessions.record(session_id, question, "답변")
@@ -113,8 +118,18 @@ def test_session_lifecycle(loaded):
     assert loaded.delete(f"/api/session/{sid}").status_code == 404
 
 
-def test_admin_documents_and_phase2_stubs(loaded):
+def test_admin_documents(loaded):
     r = loaded.get("/api/admin/documents")
     assert r.status_code == 200 and r.json()["chunks"] == 2 and r.json()["documents"] == [{"document": "M", "chunks": 2}]
-    assert loaded.post("/api/admin/ingest").status_code == 501
-    assert loaded.post("/api/admin/reindex").status_code == 501
+
+
+def test_admin_reindex_and_ingest(loaded):
+    r = loaded.post("/api/admin/reindex")
+    assert r.status_code == 200
+    assert r.json()["chunks"] == 5 and r.json()["sources"] == 2 and "per_source" not in r.json()
+    assert loaded.post("/api/admin/ingest").status_code == 200
+    assert loaded.post("/api/admin/reindex?config_path=missing.yaml").status_code == 404
+
+
+def test_admin_reindex_503_without_models(client):
+    assert client.post("/api/admin/reindex").status_code == 503

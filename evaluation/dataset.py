@@ -16,7 +16,8 @@ class EvalCase(BaseModel):
     history: List[str] = []                 # prior user questions in the same session (follow-ups)
     expected_intent: str
     expected_alarm_code: Optional[str] = None
-    expected_source: List[str] = []         # chunk_ids; empty for out-of-scope
+    # chunk_ids. [] = out-of-scope (must refuse, no sources). None = unknown (skip retrieval/citation scoring).
+    expected_source: Optional[List[str]] = []
     must_include: List[str] = []
     must_not_include: List[str] = []
     expect_refusal: bool = False

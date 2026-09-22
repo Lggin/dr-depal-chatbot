@@ -42,9 +42,11 @@ class Settings(BaseSettings):
     # Reranker
     reranker_model: str = "BAAI/bge-reranker-v2-m3"
 
-    # Auxiliary model placement: "auto" | "cuda" | "cpu"
+    # Auxiliary model placement: "auto" | "cuda" | "cpu".
+    # The 20GB rule dated from Qwen3-14B (~10GB). Qwen3.5-9B Q4 takes ~6GB, and the CPU
+    # reranker needs ~15s/query on 600-token chunks, so on 16GB the aux models go to GPU.
     aux_device: str = "auto"
-    aux_gpu_min_vram_gb: float = 20.0
+    aux_gpu_min_vram_gb: float = 12.0
 
     # Qdrant
     qdrant_url: str = "http://localhost:6333"
@@ -66,6 +68,7 @@ class Settings(BaseSettings):
     rerank_gap_cutoff: float = 3.0
     rerank_max_length: int = 1024  # model supports 8192; 1024 keeps CPU latency sane
     glossary_path: str = "corpus/glossary/glossary.json"
+    corpus_config: str = "configs/corpus.yaml"
 
     # Database
     database_url: str = "sqlite:///./data/chatbot.db"

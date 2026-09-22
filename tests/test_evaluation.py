@@ -75,12 +75,13 @@ def test_retrieval_evaluator_scores_and_contextualizes_follow_ups():
         EvalCase(id="c", question="IP 주소?", expected_intent="general", expected_source=[]),
         EvalCase(id="d", history=["VAC-203이 뭐야?"], question="그 알람 원인?", expected_intent="knowledge", expected_alarm_code="VAC-203", expected_source=["VAC_203_001"]),
     ]
+    cases.append(EvalCase(id="e", question="정답 위치 모름", expected_intent="knowledge", expected_source=None))
     res = RetrievalEvaluator(rp).run(cases)
     s = res["summary"]
-    assert s["scored"] == 3 and s["out_of_scope"] == 1
+    assert s["scored"] == 3 and s["out_of_scope"] == 1 and s["unknown_source"] == 1
     assert s["final_hit@1"] == pytest.approx(2 / 3) and s["final_hit@3"] == 1.0
     assert s["alarm_parsing_accuracy"] == 1.0            # a: parsed, b/c: None==None, d: carried
-    assert rp.hybrid.queries[-1] == "그 알람 원인? VAC-203"
+    assert rp.hybrid.queries[3] == "그 알람 원인? VAC-203"      # case "d" (follow-up)
     assert s["misses_at_5"] == []
 
 

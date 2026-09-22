@@ -292,7 +292,36 @@ grounding check ✅
 
 **Phase 1 완료.** 명세 §32 목표(질문 → Query Processor → Hybrid RAG → Reranker → Local LLM → 출처 포함 답변)와 §28 Phase 1 예시 질문 4종("VAC-203이 뭐야?", "진공압 정상 범위", "캘리브레이션 방법", "박스 흡착 실패 원인") 전부 정답.
 
-### 📋 다음: Phase 2 Corpus Pipeline — `ingestion/`(PDF/Markdown 파서, semantic chunker, metadata generator, `scripts/ingest.py`), `/api/admin/ingest|reindex` 실구현
+---
+
+## Phase 2: Corpus Pipeline (2026-09-22 ~)
+
+**결정:** 실코퍼스 = `dr-depal-knowhow`(자동 갱신 저장소, `/knowhow-update`). 574 V2 JSON을 1회 변환하는 대신 **저장소 마크다운을 직접 읽는 파이프라인**을 만들어 갱신 시 `scripts/ingest.py` 1회로 재색인. 574 V2는 `--kind v2json`으로 별도 컬렉션(`knowhow_v2`)에 넣어 새 청커와 A/B 비교.
+
+### ✅ 2.1 소스 선언 + 파서 + 청커 + 메타데이터 + 파이프라인
+
+- `configs/corpus.yaml` — 29소스(knowhow docs 14 · depal-al README 11 · 프로젝트 노트 4). 소스별 document_type/trust/system/tags. `alarm_codes: false`(이 코퍼스엔 VAC-203류 코드 없음 → `sm_89`, `cu121` 같은 오탐 방지). 노트 4개는 `corpus/raw/notes/`로 복사(프로젝트 소유)
+- `ingestion/markdown_parser.py` — `#`=문서 제목, `##`/`###`→섹션(heading path 보존), 코드펜스 안 `#` 무시, 첫 `##` 앞 텍스트=`도입부`
+- `ingestion/chunker.py` — 토큰 기준(임베딩 토크나이저 주입). 단위=섹션. **min 60 미만은 병합**: 그룹 내 어느 섹션의 자식·형제면 흡수(`도입부 → ## 서문 → ### 첫 자식` 체인이 한 청크로). **max 800 초과는 블록 분할**(문단 경계, 코드펜스·표는 원자 보존, overlap 80, `(i/n)`). chunk_id = kebab(source + heading path)[-pN], 결정론적. `search_text` = `문서 > h2 > h3\n\n본문`(임베딩·BM25 대상), `text` = 본문(LLM 컨텍스트)
+- `ingestion/metadata_generator.py` — 소스 설정 + 규칙 추출: components(키워드 33개 → 시스템 추론), 버전 `v0.0.NN`·이슈 `#NNN` → tags, 최신 날짜 → as_of_date, 수치 사양 여부. LLM 미사용
+- `ingestion/v2_import.py` — 574 V2 → 새 스키마(구 document_type 6종 → 신 7종 매핑, 소스별 trust 재부여)
+- `ingestion/pipeline.py` — yaml → 청크 JSON + **manifest**(토큰 분포·타입/시스템/trust 분포·소스별 청크/분할/병합 수) → 임베딩(search_text) → Qdrant(컬렉션 재생성). 소스 라벨은 V2·held-out과 동일(`docs/03-…md`, `depal-al/README.md`, `notes/…`)
+- `scripts/ingest.py --dry-run | [--kind v2json --collection X] [--device]` — 인제스트는 LLM 미상주라 **GPU 기본**(CPU는 16청크/분으로 너무 느렸음)
+- `app/rag/sparse_retriever.py` — BM25가 `search_text`를 색인(섹션 제목 매칭)
+- 테스트 6개 → **101 passed**
+
+**dry-run 실측 (knowhow_docs):** 621청크 / 29소스, 토큰 **p50 264 · p90 619 · max 792 · 초과 0**, 분할 70(03-grasp 12, 10-open-issues 16, user_notes 13), 병합 48. V2(574)보다 많은 건 단위가 더 작기 때문(sanity: 526 원본 섹션 → 병합/분할 후 621)
+
+### ✅ 2.2 평가셋 변환 + 결과 분리
+
+- `evaluation/build_knowhow_dataset.py` — 이전 프로젝트 held-out 40문항(dev 25 · operator 15)을 §26 스키마로. `source: "docs/x.md > h2 — h3"`를 라벨+제목 조각 매칭(`>` 분리 후 ` — `로 재분리)으로 청크 id에 해소 → **39/40 매핑**(1건은 표 제목 → `expected_source: null`=unknown). must_include는 정답문에서 버전/따옴표 용어/단위 수치 자동 시드(17건) — 수작업 보강 대상
+- 스키마: `expected_source: null`(정답 위치 미상, 지표 제외) vs `[]`(범위 밖) 구분
+- `evaluation/report.py` — 결과 파일을 `(mode, dataset)`별 `latest_<mode>_<tag>.json`으로 분리(샘플 코퍼스 결과가 knowhow 결과에 덮어써지거나 게이트가 다른 데이터셋을 비교하던 문제). `run_eval.py --collection --dataset`
+
+### ✅ 2.3 `/api/admin/reindex|ingest` 실구현
+- `ChatPipeline.reindex(config_path)` — 서빙 중인 컬렉션으로 재빌드·재색인 + **BM25 재구성**(서버 재시작 불필요). 생성 락 안에서 실행(재색인 중 생성 차단). `ingest`는 소스가 선언적(yaml)이라 reindex와 동일
+
+### 🔄 2.4 색인 + knowhow 평가 (진행 중)
 - BM25 인덱싱
 - 키워드 기반 검색
 

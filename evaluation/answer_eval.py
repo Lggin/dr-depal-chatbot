@@ -31,7 +31,9 @@ class AnswerEvaluator:
         forbidden = [s for s in case.must_not_include if _contains(r.answer, s)]
         refusal_ok = r.validation.is_refusal == case.expect_refusal
         source_ids = [s.chunk_id for s in r.sources]
-        if case.expected_source:
+        if case.expected_source is None:
+            citation_ok = None                       # unknown ground truth — excluded from the metric
+        elif case.expected_source:
             citation_ok = any(c in source_ids for c in case.expected_source)
         else:
             citation_ok = not source_ids
@@ -58,7 +60,7 @@ class AnswerEvaluator:
             "answer_correct": mean([1.0 if r["correct"] else 0.0 for r in rows]),
             "must_include_pass": mean([1.0 if not r["missing"] else 0.0 for r in answered]),
             "must_not_include_pass": mean([1.0 if not r["forbidden"] else 0.0 for r in rows]),
-            "citation_accuracy": mean([1.0 if r["citation_ok"] else 0.0 for r in rows]),
+            "citation_accuracy": mean([1.0 if r["citation_ok"] else 0.0 for r in rows if r["citation_ok"] is not None]),
             "refusal_recall": mean([1.0 if r["is_refusal"] else 0.0 for r in refusals]),        # should refuse → did
             "false_refusal_rate": mean([1.0 if r["is_refusal"] else 0.0 for r in answered]),     # shouldn't → did
             "unsupported_claim_rate": mean([0.0 if r["validation_ok"] else 1.0 for r in answered]),

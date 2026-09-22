@@ -21,16 +21,23 @@ from evaluation.dataset import load_cases
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--mode", choices=["retrieval", "full"], default="retrieval")
-    ap.add_argument("--dataset", default=None)
+    ap.add_argument("--dataset", default=None, help="eval JSON (default: evaluation/datasets/test_questions.json)")
+    ap.add_argument("--collection", default=None, help="Qdrant collection to evaluate against (default: settings)")
     ap.add_argument("--show-failures", action="store_true")
     ap.add_argument("--no-gate", action="store_true")
     args = ap.parse_args()
 
     logging.basicConfig(level=logging.WARNING)
+    from app.config import settings
+    if args.collection:
+        settings.qdrant_collection = args.collection
     cases = load_cases(Path(args.dataset)) if args.dataset else load_cases()
+    tag = Path(args.dataset).stem if args.dataset else "sample"
+    if args.collection:
+        tag = f"{tag}__{args.collection}"   # results/gates are per (dataset, collection)
+    print(f"dataset={tag} ({len(cases)} cases)  collection={settings.qdrant_collection}  mode={args.mode}")
 
     if args.mode == "retrieval":
-        from app.config import settings
         from app.dependencies import resolve_aux_device
         from app.llm.embedding_client import EmbeddingClient
         from app.rag import (DenseRetriever, GlossaryExpander, HybridRetriever, QdrantClient,
@@ -55,7 +62,7 @@ def main() -> int:
         finally:
             pipe.close()
 
-    latest, previous = report.save(args.mode, result)
+    latest, previous = report.save(args.mode, result, tag=tag, collection=settings.qdrant_collection)
     print(report.markdown(args.mode, result, previous))
     print(f"\nsaved: {latest}")
 

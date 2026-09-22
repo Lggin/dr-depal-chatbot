@@ -115,6 +115,28 @@ class ChatPipeline:
             latency_ms=round(total, 1),
         )
 
+    def reindex(self, config_path: Optional[str] = None) -> Dict[str, Any]:
+        """Rebuild the corpus from configs/corpus.yaml into the live collection and refresh BM25.
+
+        Caller must hold the generate lock: the collection is dropped and recreated.
+        """
+        from pathlib import Path
+        from app.config import settings
+        from app.rag.sparse_retriever import SparseRetriever
+        from ingestion.pipeline import PROJECT_ROOT, IngestionPipeline
+
+        hybrid = self.retrieval.hybrid
+        embedder, store = hybrid.dense.embedder, hybrid.store
+        pipe = IngestionPipeline(Path(config_path or PROJECT_ROOT / settings.corpus_config), embedder.count_tokens)
+        pipe.cfg["collection"] = store.collection_name          # index into whatever the API is serving
+        texts, metas, ids, manifest = pipe.build()
+        pipe.write(texts, metas, ids, manifest)
+        IngestionPipeline.index(texts, metas, ids, embedder, store)
+        hybrid.sparse = SparseRetriever.from_qdrant(store, top_k=hybrid.sparse_top_k)
+        manifest["bm25_chunks"] = hybrid.sparse.size
+        logger.info(f"reindex complete: {manifest['chunks']} chunks into {store.collection_name}")
+        return manifest
+
     def close(self) -> None:
         unload = getattr(self.llm, "unload", None)
         if unload:
