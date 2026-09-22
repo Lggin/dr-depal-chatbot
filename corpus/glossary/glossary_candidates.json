@@ -1,0 +1,12 @@
+{
+  "_note": "Candidate synonyms NOT yet backed by a reproduced retrieval failure. Promote an entry to glossary.json only after a query using the key fails and the expansion fixes it. Speculative entries add BM25 noise: on 2026-09-21 the '박스' entry dragged '빨판이 박스를 못 잡아' from rank 2 to rank 6 pre-rerank.",
+  "흡착": ["vacuum", "suction", "gripping"],
+  "박스": ["box", "carton", "case"],
+  "로봇": ["robot", "manipulator"],
+  "티칭": ["teaching", "robot teaching", "pose registration"],
+  "비전": ["vision", "camera", "3D camera"],
+  "진공": ["vacuum"],
+  "센서": ["sensor"],
+  "PLC": ["programmable logic controller"],
+  "알람": ["alarm", "error", "fault"]
+}

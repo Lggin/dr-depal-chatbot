@@ -1,0 +1,32 @@
+services:
+  qdrant:
+    image: qdrant/qdrant:v1.19.1  # keep in sync with qdrant-client pin in requirements.txt
+    container_name: depalletizer_qdrant
+    ports:
+      - "6333:6333"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    environment:
+      - QDRANT_API_KEY=${QDRANT_API_KEY:-}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PostgreSQL 선택사항 (초기에는 SQLite 사용)
+  # postgres:
+  #   image: postgres:15-alpine
+  #   container_name: depalletizer_db
+  #   environment:
+  #     POSTGRES_DB: chatbot
+  #     POSTGRES_USER: chatbot
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-chatbot}
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  qdrant_storage:
+  # postgres_data:
