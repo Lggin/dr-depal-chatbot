@@ -468,13 +468,49 @@ grounding check ✅
 - 청크 선정: ≥120토큰, 표 위주 제외, 소스당 최대 40개, 큰 청크 우선 → LLM이 청크당 질문 1개 + reference_answer + key_facts(JSON) → must_include 자동 시드(버전·백틱 코드·단위 수치·key_facts). `auto_generated: true, reviewed: false` — **코퍼스 문장에서 만든 질문이라 40 legacy held-out과 독립적이지 않음**(검색 recall·groundedness 측정용, 정답률의 절대 지표로 쓰지 말 것)
 - 로그 회수: `ChatLog` → 후보 케이스(답변·출처·검증 플래그·피드백 동봉, reviewer가 must_include/expected_source 채우고 `reviewed=true`)
 
-### 🔄 5.4 측정 (진행 중)
-- BM25 인덱싱
-- 키워드 기반 검색
+### ✅ 5.4 측정
 
-**Step 4: Hybrid & Reranker** (app/rag/hybrid_retriever.py, app/rag/reranker.py)
-- RRF (Reciprocal Rank Fusion)
-- BGE-Reranker-v2-m3 재정렬
+**⚠️ 운영 교훈(2회 반복):** 16GB GPU에서 모델 로드 프로세스를 병행하면 OOM — 질문 생성기(LLM 6GB)와 judge 평가 병행 → judge가 "Failed to load model"(실제론 VRAM 부족); judge 평가(**실측 10.6GB**: LLM 6 + 임베딩 fp32 2.2 + 리랭커 1.1 + KV) 와 277문항 검색 평가(4.5GB) 병행 → CUDA OOM. `grep|tail` 파이프가 종료코드까지 가림. → **GPU 작업은 한 번에 하나**, 배경 명령은 `set -o pipefail` + `PIPESTATUS` ([[feedback_one_gpu_job_at_a_time]])
+
+**생성셋 277문항 검색(knowhow_docs):** final **Hit@1 0.841 · Hit@3 0.978 · Hit@5 0.982 · MRR 0.908 · nDCG@5 0.927**, fused→final Hit@1 0.758→0.841. 미스@5 5건은 근접 중복(같은 주제를 타임라인/본문/미해결과제가 각각 다룸 — 기대 청크가 아닌 다른 정답 청크를 가져옴). 생성 질문은 청크 문장에서 나와 검색이 쉬우므로 **recall 상한/회귀 감지용**이고 절대 성능 지표는 아님. alarm_parsing 0.964: 질문 속 `#476`·버전 등이 아니라 `[A-Za-z]{1,4}\d{2,4}` 패턴에 걸린 식별자 오탐 10건 — 이 코퍼스는 `alarm_codes: false`라 색인엔 영향 없음
+
+**샘플 39문항 + judge (judge 1차 프롬프트):** answer/citation/tool_selection 1.000, **groundedness 0.966, 완전근거율 0.906, 과잉 인용 0.156(5/32), contradiction 0.031(1)**. 미지원 문장 분석:
+- Q005 "축 기계적 간섭은 로봇 축이 물리적으로 막혀서…" — 원문에 없는 **설명 덧붙임**. Step 7에서 "검증기가 못 잡는다"고 기록한 유형을 judge가 잡음 → **prompt rule 19**(원문이 말하지 않는 메커니즘·주기·결과 추가 금지)
+- Q073/Q074 "-43 kPa는 -60~-80보다 높다" — §18이 요구하는 **기준값 비교**인데 judge가 미지원·contradiction 처리(음수 비교 오해) → judge 규칙 추가: 범위 비교는 지원, 새 수치 계산("15 kPa 부족")만 미지원, 부호 있는 값은 수치로 비교. 캘리브레이션에 두 케이스 추가 → **9/9 통과**
+- Q073 검증기 `invalid_citations ['MACHINE STATE']` — 모델이 도구 블록을 출처로 표기(바람직) → 파서가 `[MACHINE STATE]`/`[MAINTENANCE HISTORY]`를 무시
+- 과잉 인용 5건: 실제로 안 쓴 3번째 문서까지 인용 — Phase 1부터 이어진 경향, 이제 **수치화됨**(0.156). rule 6 강화만으로는 부족할 수 있어 Phase 6 SFT 학습 목표에 포함
+
+**샘플 39 재측정(rule 19 + judge 수정 후): groundedness 0.966 → 1.000, 완전근거율 0.906 → 1.000, contradiction 0.031 → 0, unsupported 0.028 → 0** — Q005의 설명 덧붙임이 사라지고 Q073/Q074의 범위 비교가 근거로 인정됨. 과잉 인용 0.188(이 시점엔 아직 LLM 인용 그대로)
+
+**knowhow 40 judge(1차): groundedness 0.976 · 완전근거율 0.925 · completeness 0.971 · contradiction 0.025 · 과잉 인용 0.575(23/40)**
+- 미지원 3건: KD005(원문에 없는 "클램프 역할" 설명), KO012(절차 paraphrase에 "scp 등을 통해" 추가), **KO015 답변에 "[DOCUMENTS]에 따르면" — 프롬프트 블록 이름 누출** → **rule 20**(블록 라벨 금지, 문서명으로 지칭)
+- completeness 미달 2건: KD011(v0.0.9 이전 opt=1 하드코딩 누락), KD017(9포인트 시계열 중 3개만 — must_include까지 실패해 gate 0.975) → rule 11에 "시계열은 전 포인트 순서대로" 추가, **gate answer_correct 허용 하락 0.025**(40문항에서 1건은 temp 0.1 노이즈 — 코드 변경 없이 실행마다 뒤집히는 걸 세 번 관찰)
+- **과잉 인용 0.575 → 구조적 접근**: `sources`를 LLM의 `출처:` 이름에만 의존하지 않고 **답변 본문과 각 청크의 어휘 겹침**으로 좁힘(`select_used_sources`, Kiwi 내용어, 1등 문서는 항상 유지). 결정론적·런타임 비용 0
+
+**사용 필터 v1(앵커 공유 OR 내용어 ≥12% 겹침) 재측정:**
+- 샘플 39: answer/citation/refusal/tool 1.000, groundedness 1.000, contradiction 0, **과잉 인용 0.188 → 0.094**
+- knowhow 40: answer 0.975(KD017 노이즈, gate 통과), groundedness 0.964, completeness 0.947, contradiction 0, **과잉 인용 0.575 → 0.525** — 거의 안 줄음. 원인: knowhow 청크는 같은 릴리즈 노트·버전 문자열(`v0.0.59`, 연도 `2026`)을 여러 청크가 공유해 "앵커 공유" 조건이 거의 모든 문서를 통과시킴, 12% 내용어 겹침도 같은 주제 청크끼리는 쉽게 넘음
+- **v2(distinctive anchors)**: 앵커는 **제공 문서 중 그 문서만 갖는 것**일 때만 인정(여러 문서가 공유하는 버전/번호는 아무 문서도 인정 못 함), 연도·월일·`0.0` 같은 날짜형 숫자는 앵커 제외, 내용어 겹침 문턱 12% → 30%. 단위테스트 231 통과
+- **v2 knowhow 40 재측정: 과잉 인용 0.525 → 0.400(16/40)**, groundedness 0.964 · completeness 0.947 · contradiction 0 · answer 0.975(KD017) — gate 통과. 남은 16건은 대부분 **근접 중복 청크**(labeling-guide §1/§3/§4가 같은 키 조작을 각각 설명, timeline·digest가 같은 릴리즈를 각각 서술)라 어휘 겹침으론 구분 불가 + "1등 문서 항상 유지" 정책이 1등이 실제 근거가 아닐 때(KD004: 근거는 2번) 1건씩 추가. 결정론적 필터의 한계 → **나머지는 Phase 6 SFT 목표(출처 줄에 실제 사용 문서만)**. 샘플 39는 v1에서 이미 0.094
+
+---
+
+## Phase 6: Optimization — SFT 데이터 + QLoRA (2026-09-22 ~)
+
+**명세 §28 조건 검토:** "충분한 실사용 데이터가 쌓인 뒤" — 실사용자 없음. 따라서 범위 = §28 Phase 6에 명시된 **Synthetic QA Dataset** 기반 SFT 데이터 파이프라인 + 학습 스크립트 + 환경 검증(스모크)까지. 실사용 로그가 쌓이면 `harvest_logs.py` → 검수 → 같은 파이프라인으로 재학습. §29 원칙: 지식은 계속 RAG, 학습 목표는 **형식·용어·거절·출처·도구 판단**
+
+### 🔄 6.1 환경·자산
+- `Qwen/Qwen3.5-9B` HF 원본 **18GB(4샤드)**, `Qwen3_5ForConditionalGeneration`(text_config+vision_config, 멀티모달), config transformers 4.57.0.dev0 → 서빙 venv(4.36, 리랭커·sentence-transformers 2.7 호환)로는 불가 → **`venv-train`**: torch 2.6+cu124(드라이버 12.4 상한), transformers 5.x, peft 0.21, bitsandbytes 0.50, trl 1.13 (`training/requirements-train.txt`)
+- `models/hf/`, `venv-train/`, `training/output/`, `training/datasets/*.jsonl` gitignore
+
+### 🔄 6.2 SFT 데이터 (`training/generate_sft_data.py`)
+- 예시 = **서빙과 동일한 PromptBuilder 렌더**(system 19규칙 + `[DOCUMENTS]` 실제 검색 컨텍스트 + 질문) → target = reference_answer + 정규 `출처:` 줄(기대 청크 기준). 소스: knowhow held-out 40 + 생성 277 + 샘플 39(reference 있는 것)
+- **거절 예시**: 범위 밖 질문 12개 + 샘플 범위밖 4개 → 무관한 top 검색 컨텍스트와 함께 고정 거절 문장 target — "문서가 있어도 답이 없으면 거절"을 학습
+- 컨텍스트 2200토큰 캡, train/val 9:1, JSONL `{"messages": [...], "meta": {...}}`
+
+### 🔄 6.3 학습 (`training/train_lora.py`)
+- QLoRA: NF4 4bit + LoRA r=8/α=16 **all-linear**(이전 프로젝트 재스윕: all-linear ≫ attention-only, r 무관), vision 모듈 제외(`exclude_modules`), assistant 토큰만 loss(프롬프트·문서 마스킹 — 문서 암기 방지), gradient checkpointing, paged AdamW 8bit, bf16. `--smoke`(10 step)로 환경 검증 후 본 학습
+- 이후: 어댑터 적용 모델을 `LLMClient` 프로토콜의 HF 백엔드로 감싸 **같은 judge 평가로 A/B**(groundedness·completeness·과잉 인용·거절). GGUF 변환은 A/B가 이득을 보일 때만
 
 ---
 

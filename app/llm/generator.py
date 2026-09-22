@@ -270,7 +270,7 @@ class ChatPipeline:
 
         t = time.perf_counter()
         validation = self.validator.validate(gen.text, built.included, prompt_question, extra_evidence=_ms_text(machine_state))
-        sources = [] if validation.is_refusal else build_sources(built.included, validation.cited_documents)
+        sources = [] if validation.is_refusal else build_sources(built.included, validation.cited_documents, answer=gen.text)
         text = canonicalize_citations(gen.text, sources, validation.is_refusal)
         danger = scan_dangerous_commands(text)
         if danger:

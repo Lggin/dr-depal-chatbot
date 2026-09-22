@@ -29,7 +29,9 @@ Return exactly this object:
 
 Rules:
 - Split the answer into factual sentences. Ignore greetings, the "출처:" line, and generic advice with no factual claim.
-- A sentence is supported only if its specific facts (numbers, names, causes, steps) appear in a SOURCE or MACHINE STATE. Paraphrase is fine; new numbers, new causes, or arithmetic the sources do not state are NOT supported.
+- A sentence is supported only if its specific facts (numbers, names, causes, steps) appear in a SOURCE or MACHINE STATE. Paraphrase is fine; new numbers, new causes, new mechanisms/explanations, or arithmetic the sources do not state are NOT supported.
+- Comparing a MACHINE STATE value against a range or threshold stated in a SOURCE IS supported (e.g. "-43 kPa is outside the normal -60 ~ -80 kPa range", "the alarm matches VAC-203"). Computing a NEW number from them (e.g. "15 kPa short") is NOT.
+- Compare signed values numerically: -43 is higher than -60, so "-43 kPa is above the -60 ~ -80 kPa range / the vacuum is too weak" is a correct statement, not a contradiction.
 - Restating what the user asked is supported (evidence "question").
 - Sentences that honestly say something is not in the documents are supported (evidence "").
 - If no REFERENCE is given, set contradicts_reference=false and missing_from_reference=[].

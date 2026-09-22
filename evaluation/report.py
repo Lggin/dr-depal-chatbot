@@ -10,8 +10,11 @@ RESULTS_DIR = Path(__file__).parent / "results"
 # metric name -> max allowed drop before the gate fails
 GATES = {
     "retrieval": {"final_hit@5": 0.0, "final_recall@5": 0.0, "final_mrr": 0.02},
-    "full": {"answer_correct": 0.0, "citation_accuracy": 0.0, "refusal_recall": 0.0, "tool_selection_accuracy": 0.0,
-             "groundedness_mean": 0.03},   # judge metrics carry a little tolerance: the judge itself is sampled at temp 0 but not bit-stable
+    # answer_correct tolerates one flipped case in 40 (0.025): at temperature 0.1 a borderline answer
+    # (e.g. a 9-point series summarised to 3 points) flips between runs without any code change.
+    # Judge metrics carry a little tolerance too: the judge runs at temp 0 but is not bit-stable.
+    "full": {"answer_correct": 0.025, "citation_accuracy": 0.0, "refusal_recall": 0.0, "tool_selection_accuracy": 0.0,
+             "groundedness_mean": 0.03},
 }
 
 
@@ -23,12 +26,17 @@ def _fmt(v) -> str:
     return str(v)
 
 
-def save(mode: str, result: dict, tag: str = "sample", collection: Optional[str] = None) -> Tuple[Path, Optional[dict]]:
-    """Results are keyed by (mode, dataset tag) so different corpora never gate against each other."""
+def save(mode: str, result: dict, tag: str = "sample", collection: Optional[str] = None,
+         baseline_tag: Optional[str] = None) -> Tuple[Path, Optional[dict]]:
+    """Results are keyed by (mode, dataset tag) so different corpora never gate against each other.
+
+    `baseline_tag` (A/B variants): compare against that tag's latest result instead of our own previous run,
+    so e.g. `full_knowhow+lora` is always gated against the plain `full_knowhow` baseline."""
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
     key = f"{mode}_{tag}"
     latest = RESULTS_DIR / f"latest_{key}.json"
-    previous = json.loads(latest.read_text(encoding="utf-8")) if latest.exists() else None
+    prev_path = RESULTS_DIR / f"latest_{mode}_{baseline_tag}.json" if baseline_tag else latest
+    previous = json.loads(prev_path.read_text(encoding="utf-8")) if prev_path.exists() else None
     stamp = time.strftime("%Y%m%d_%H%M%S")
     payload = {"mode": mode, "dataset": tag, "collection": collection, "timestamp": stamp, **result}
     (RESULTS_DIR / f"{stamp}_{key}.json").write_text(json.dumps(payload, ensure_ascii=False, indent=1), encoding="utf-8")

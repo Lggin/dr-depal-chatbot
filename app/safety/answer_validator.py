@@ -81,6 +81,8 @@ def _parse_citations(text: str) -> List[str]:
     for m in _CITATION_LINE.finditer(text):
         for part in m.group(1).split(";"):
             part = re.sub(r"\[?SOURCE\s*\d+\]?", " ", part, flags=re.IGNORECASE)
+            # citing the live tool block is legitimate, not a document claim
+            part = re.sub(r"\[?(MACHINE\s*STATE|MAINTENANCE\s*HISTORY|설비\s*상태|기계\s*상태|유지보수\s*DB)\]?", " ", part, flags=re.IGNORECASE)
             name = part.split("§")[0]
             name = re.sub(r"\s*\([^()]*\)\s*$", "", name)      # trailing parenthetical (alarm code, date)
             name = name.strip(" *[]-–—:")

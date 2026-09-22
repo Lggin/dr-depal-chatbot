@@ -76,5 +76,10 @@ experiments/
 temp/
 .omc/
 models/gguf/
+models/hf/
+venv-train/
+training/output/
+training/datasets/*.jsonl
 evaluation/results/*
 !evaluation/results/latest_*.json
+third_party/

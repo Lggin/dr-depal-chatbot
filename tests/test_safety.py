@@ -63,6 +63,12 @@ def test_citation_names_with_commas_dashes_and_parentheses_are_not_fragmented():
     assert v.invalid_citations == [] and v.ok
 
 
+def test_machine_state_in_citation_line_is_not_an_invalid_citation():
+    v = AnswerValidator().validate("현재 진공압은 -43 kPa 입니다.\n출처: Vacuum System Manual §6.3; [MACHINE STATE]",
+                                  [MANUAL], "지금 진공압?", extra_evidence="vacuum_pressure: -43")
+    assert v.invalid_citations == [] and v.cited_documents == ["Vacuum System Manual"] and v.ok
+
+
 def test_validator_flags_citation_of_unprovided_document():
     v = AnswerValidator().validate("답변.\n출처: Robot Manual §1.2; Vacuum System Manual §6.3", [MANUAL], "q")
     assert v.invalid_citations == ["Robot Manual"] and not v.ok
@@ -152,6 +158,37 @@ def test_build_sources_narrows_to_cited_when_resolvable():
     srcs = build_sources([MANUAL, LOG], cited_names=["Maintenance Log"])
     assert [s.chunk_id for s in srcs] == ["MAINT_1"]
     assert build_sources([MANUAL, LOG], cited_names=["Nope"]) and len(build_sources([MANUAL, LOG], cited_names=["Nope"])) == 2
+
+
+def test_select_used_sources_drops_unrelated_docs_but_keeps_top1():
+    from app.safety.source_validator import select_used_sources
+    rob = doc("ROB_105_001", "[Alarm] ROB-105 Servo Overload. Payload 30 kg 이하. 감속기 소음 확인",
+              document_name="Robot Controller Manual", section="8.5", document_type="alarm_manual")
+    vis = doc("VIS_301_001", "[Alarm] VIS-301 Camera Communication Timeout. GigE 케이블, ping",
+              document_name="Vision System Manual", section="5.1", document_type="alarm_manual")
+    answer = "VAC-203은 진공압 저하 알람이며 정상 범위는 -60 ~ -80 kPa 입니다. 원인은 hose 누설, suction cup 손상입니다.\n출처: Vacuum System Manual §6.3"
+    kept = [d.chunk_id for d in select_used_sources(answer, [MANUAL, LOG, rob, vis])]
+    assert kept[0] == "VAC_203_001" and "ROB_105_001" not in kept and "VIS_301_001" not in kept
+    # a doc holding an anchor no other doc has (-45) counts as used; a shared year (2026) does not
+    assert "MAINT_1" in [d.chunk_id for d in select_used_sources("2026-09-10 사례에서 진공압 -45 kPa 정체", [rob, LOG])]
+    # top-ranked doc is always kept, even with no overlap
+    assert [d.chunk_id for d in select_used_sources("전혀 무관한 문장", [vis, rob])] == ["VIS_301_001"]
+
+
+def test_select_used_sources_shared_anchor_credits_neither_doc():
+    from app.safety.source_validator import select_used_sources
+    a = doc("a", "v0.0.59에서 캐시 게이트 추가. 반경 5 cm.", document_name="Digest", section="v0.0.59", document_type="manual")
+    b = doc("b", "v0.0.59 릴리즈 노트: 세그폴트 수정.", document_name="Timeline", section="8월", document_type="manual")
+    # both docs contain v0.0.59; only `a` holds "5 cm" → b is dropped despite the shared version string
+    kept = [d.chunk_id for d in select_used_sources("v0.0.59에서 캐시 히트 반경 5 cm 게이트가 추가됐습니다.", [a, b])]
+    assert kept == ["a"]
+
+
+def test_build_sources_with_answer_applies_usage_filter():
+    rob = doc("ROB_105_001", "[Alarm] ROB-105 Servo Overload. Payload 30 kg", document_name="Robot Controller Manual", section="8.5", document_type="alarm_manual")
+    srcs = build_sources([MANUAL, rob], cited_names=["Vacuum System Manual", "Robot Controller Manual"],
+                         answer="정상 진공압은 -60 ~ -80 kPa 이며 hose 누설을 확인합니다.")
+    assert [s.chunk_id for s in srcs] == ["VAC_203_001"]
 
 
 def test_format_citation_uses_metadata_only():

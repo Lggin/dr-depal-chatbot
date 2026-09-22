@@ -51,10 +51,20 @@ CASES = [
      "VAC-203은 진공압 저하 알람입니다. 정상 범위는 -60 ~ -80 kPa이며, 주요 원인은 PLC 펌웨어 버그입니다.",
      {"groundedness < 1.0": lambda j: j.groundedness is not None and j.groundedness < 1.0,
       "contradiction or flagged": lambda j: j.contradicts_reference or any("PLC" in s for s in j.unsupported)}),
+    ("machine-state range comparison (spec §18)",
+     "현재 VAC-203 알람이 발생해 있으며 진공압은 -43 kPa입니다. 매뉴얼 기준 정상 범위인 -60 ~ -80 kPa보다 진공압이 부족합니다. 비전과 로봇은 정상이므로 진공 계통을 우선 점검하는 것이 적절합니다.",
+     {"grounded (comparison counts)": lambda j: j.groundedness == 1.0}),
+    ("elaborated mechanism",
+     "VAC-203은 진공압 저하 알람입니다. 원인 중 suction cup 손상은 패드 고무가 경화되어 미세 누설이 생기는 현상으로, 보통 6개월마다 교체가 필요합니다.",
+     {"groundedness < 1.0": lambda j: j.groundedness is not None and j.groundedness < 1.0,
+      "flags the elaboration": lambda j: any("경화" in s or "6개월" in s for s in j.unsupported)}),
     ("over-citation",
      "VAC-203은 진공압 저하 알람입니다. 정상 범위는 -60 ~ -80 kPa입니다.\n출처: Vacuum System Manual §6.3; Maintenance Log",
      {"grounded": lambda j: j.groundedness == 1.0, "did not use source 2": lambda j: 2 not in j.used_sources}),
 ]
+
+
+MACHINE_STATE = {"machine_state": "HOLD", "alarm": "VAC-203", "vacuum_pressure": -43, "vision_detection": True, "robot_state": "NORMAL"}
 
 
 def main() -> int:
@@ -66,7 +76,8 @@ def main() -> int:
     judge = AnswerJudge(llm)
     failures = 0
     for name, answer, expects in CASES:
-        j = judge.judge(Q, answer, CTX, reference=REF)
+        ms = MACHINE_STATE if "machine-state" in name else None
+        j = judge.judge(Q if ms is None else "지금 박스를 왜 못 집어?", answer, CTX, reference=None if ms else REF, machine_state=ms)
         print(f"\n=== {name} === ok={j.ok} groundedness={j.groundedness} completeness={j.completeness} "
               f"contradicts={j.contradicts_reference} used={j.used_sources}")
         for s in j.unsupported:
