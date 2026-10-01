@@ -3,6 +3,12 @@
 디팔레타이징 시스템 작업자/엔지니어를 위한 **완전 로컬** 기술 지원 챗봇.
 매뉴얼·알람·SOP·유지보수 이력을 검색(RAG)하고, 로컬 LLM이 **출처를 붙여** 설명합니다. 인터넷·클라우드 LLM 불필요.
 
+> **개인 보관본 안내** — 이 저장소는 사내 프로젝트의 코드·아키텍처·평가 코드만 담은 개인 포트폴리오용 사본입니다.
+> 실제 운영 코퍼스(사내 노하우 문서 621청크, `corpus/processed/knowhow_*.json`)와 그 문서에서 만든
+> 평가셋·결과(`evaluation/datasets/knowhow_*.json`, `evaluation/results/latest_*knowhow*`)는 사내 자료라 제외했습니다.
+> 공개 샘플 코퍼스 12청크(`corpus/processed/sample_chunks.json`)와 샘플 평가셋(`test_questions.json`)으로 전 과정이 재현됩니다.
+> README/DEVELOPMENT.md의 knowhow 관련 수치는 제외된 코퍼스에서 측정한 기록입니다.
+
 ```
 질문 → Alarm 파서 / Glossary → Dense(BGE-M3) ∥ Sparse(BM25+Kiwi) → RRF → Reranker(gap 컷)
      → Prompt(토큰 예산) → Qwen3.5-9B Q4 (llama.cpp) → 검증(수치·코드·출처·위험명령) → 답변 + 출처
